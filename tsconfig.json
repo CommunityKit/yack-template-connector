@@ -1,0 +1,16 @@
+{
+    "compilerOptions": {
+        "target": "es6",
+        "lib": ["es2017", "es7", "es6", "dom"],
+        "module": "commonjs",
+        "outDir": "./dist/",
+        "removeComments": true,
+        "strict": false,
+        "allowSyntheticDefaultImports": true,
+        "sourceMap": true,
+        "forceConsistentCasingInFileNames": true,
+        "types": ["node"] /* Type declaration files to be included in compilation. */
+    },
+    "include": ["src/**/*"],
+    "exclude": ["node_modules", "dist"]
+}

@@ -1,0 +1,30 @@
+{
+    "name": "yack-hackernews-plugin",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1",
+        "buildDev": "yack-plugin-builder --buildMode=development --copyOutput",
+        "buildStaging": "yack-plugin-builder --buildMode=staging --copyOutput"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/maxgedikli/yack-reddit-plugin.git"
+    },
+    "author": "",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/maxgedikli/yack-reddit-plugin/issues"
+    },
+    "homepage": "https://github.com/maxgedikli/yack-reddit-plugin#readme",
+    "dependencies": {
+        "node-forge": "^0.8.2",
+        "yack-plugin-framework": "^1.0.60"
+    },
+    "devDependencies": {
+        "@types/node": "^11.13.2",
+        "typescript": "^3.4.2",
+        "yack-plugin-builder": "^1.0.25"
+    }
+}
