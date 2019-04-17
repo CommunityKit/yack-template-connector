@@ -1,5 +1,5 @@
 {
-    "name": "yack-hackernews-plugin",
+    "name": "yack-discourse-plugin",
     "version": "1.0.0",
     "description": "",
     "main": "index.js",
