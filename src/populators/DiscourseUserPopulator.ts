@@ -24,7 +24,7 @@ export namespace DiscourseUserPopulator {
         const photoSized = avatar.replace(regex, "120");
 
         const user: PluginUser ={
-            id: data.id,
+            id: data.id.toString(),
             username: data.username,
             fullName: data.name,
             profileImageUrl: photoSized

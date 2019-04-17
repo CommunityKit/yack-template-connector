@@ -63,7 +63,7 @@ export class DiscourseSearchProvider implements ISearchProvider {
         };
         let formattedChildTagList: Array<object> = [];
         for (const tag of tagList) {
-            formattedChildTagList.push({ id: tag.id, name: tag.text, type: Filter.Types.ListItem });
+            formattedChildTagList.push({ id: tag.id.toString(), name: tag.text, type: Filter.Types.ListItem });
         }
         tagsFilter.childFilters = formattedChildTagList;
 
@@ -186,7 +186,7 @@ export class DiscourseSearchProvider implements ISearchProvider {
                     const threadPopulated = DiscourseThreadPopulator.populateThread(thread);
                     thread.item = threadPopulated;
                     thread.itemType = SearchResultItem.Types.thread;
-                    thread.id = thread.id
+                    thread.id = thread.id.toString()
                     const searchResultItem = this.populateSearchResultItem(thread);
                     searchResults.array.push(searchResultItem);
                 }
@@ -208,7 +208,7 @@ export class DiscourseSearchProvider implements ISearchProvider {
                     const commentPopulated = DiscourseCommentPopulator.populateComment(comment, options.session.user);
                     comment.item = commentPopulated;
                     comment.itemType = SearchResultItem.Types.comment;
-                    comment.id = comment.id
+                    comment.id = comment.id.toString()
                     const searchResultItem = this.populateSearchResultItem(comment);
                     searchResults.array.push(searchResultItem);
                 }
@@ -247,7 +247,7 @@ export class DiscourseSearchProvider implements ISearchProvider {
                     const userPopulated = DiscourseUserPopulator.populateUser(user);
                     user.item = userPopulated;
                     user.itemType = SearchResultItem.Types.user;
-                    user.id = user.id
+                    user.id = user.id.toString()
                     const searchResultItem = this.populateSearchResultItem(user);
                     searchResults.array.push(searchResultItem);
                 }
@@ -354,7 +354,7 @@ export class DiscourseSearchProvider implements ISearchProvider {
 
     private populateSearchResultItem(data: any): SearchResultItem {
         const searchItem: SearchResultItem = {
-            id: data.id,
+            id: data.id.toString(),
             item: data.item,
         itemType: data.itemType
         };

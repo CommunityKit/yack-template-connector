@@ -19,7 +19,7 @@ export namespace DiscourseThreadPopulator {
     export function populateThread(data: any): Thread {
         const thread: Thread = {
         totalComments: data.reply_count,
-        id: data.id,
+        id: data.id.toString(),
         channelName: data.channelName,
         channelId: data.channelId,
         content: data.cooked,

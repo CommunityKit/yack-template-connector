@@ -140,7 +140,7 @@ export class DiscourseThreadProvider implements IThreadProvider {
             // Set Topic Creator User Info
             let creator = topic.posters.filter(poster => poster.description.split(", ").includes("Original Poster"))[0];
             let userObject = users.filter(user => user.id == creator.user_id)[0];
-            topic.creator_id = userObject.id;
+            topic.creator_id = userObject.id.toString();
             topic.creator_full_name = userObject.name;
             topic.creator_username = userObject.username;
             // this.pluginContext.logger.d(`Topic = ${JSON.stringify(topic)}`);

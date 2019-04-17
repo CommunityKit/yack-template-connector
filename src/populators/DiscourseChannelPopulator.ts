@@ -19,7 +19,7 @@ export namespace DiscourseChannelPopulator {
   export function populateChannel(data: any, sessionUser: PluginUser): Channel {
     // const channel = new Channel();
     const channel: Channel = {
-       id: data.id,
+       id: data.id.toString(),
        type: Channel.Types.default,
        name: data.name
     }

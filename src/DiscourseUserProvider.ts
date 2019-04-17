@@ -33,7 +33,7 @@ export class DiscourseUserProvider {
         metadataList.forEach(item => (metadata[item] = userData[item]));
 
         const pluginUser:PluginUser = {
-            id: userData.id,
+            id: userData.id.toString(),
             // username: 'katrina',
             username: userData.username,
             // ### Would need to fetch the specific user to retrieve these fields
