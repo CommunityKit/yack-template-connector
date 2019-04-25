@@ -2,6 +2,8 @@ import { PluginRequestOptions, PluginUser, objectUtils, PluginContext } from "ya
 import * as URLAssembler from "url-assembler";
 import DiscoursePluginConfig from "./DiscoursePluginConfig";
 import { IDiscourseConfig } from "./config/IDiscourseConfig";
+import { populateUser } from "./sessions/UserPopulator"
+import { getUserStats, getUserData } from "./sessions/UserRequests";
 
 export class DiscourseUserProvider {
     private pluginContext: PluginContext;
@@ -33,7 +35,11 @@ export class DiscourseUserProvider {
         metadataList.forEach(item => (metadata[item] = userData[item]));
 
         const pluginUser:PluginUser = {
-            id: userData.id.toString(),
+            // id: userData.id.toString(),
+             
+            // Changing id from number in API to username b/c requests have to be made with username in getUser()
+            id: userData.username,
+
             // username: 'katrina',
             username: userData.username,
             // ### Would need to fetch the specific user to retrieve these fields
@@ -61,9 +67,27 @@ export class DiscourseUserProvider {
         return pluginUser;
     }
     async getUser(options: PluginRequestOptions, userId: string): Promise<PluginUser> {
+        // userID === username
+        let allData;
+        await Promise.all(
+            [getUserStats(this.config.rootUrl, this.pluginContext.axios.get, userId),
+            getUserData(this.config.rootUrl, this.pluginContext.axios.get, userId)
+        ]).then(data => {
+            allData = {
+                summary: data[0].user_summary,
+                badges: data[1].badges,
+                userInfo: data[1].user
+            }
+        })
+
+        allData.partialUrl = this.config.partialUrl
+        allData.communityName = this.config.id.replace("_discourse","")
+        
+
+        const user = populateUser(allData)
         // let user = new PluginUser();
         //   return user;
-        return null;
+        return user;
     }
     // async saveUserAction(options: PluginRequestOptions, actionItem: ObjectAction.Item): Promise<void> {}
 }

@@ -243,12 +243,17 @@ export class DiscourseSearchProvider implements ISearchProvider {
                 for (const user of usersData) {
                     user.threadId = user.topic_id;
                     user.score = user.like_count;
-
+                    user.partialUrl = this.config.partialUrl
+                    user.communityName = this.config.id.replace("_discourse","")
                     const userPopulated = DiscourseUserPopulator.populateUser(user);
                     user.item = userPopulated;
                     user.itemType = SearchResultItem.Types.user;
-                    user.id = user.id.toString()
+                    user.id = user.username;
+                    
+
+                    // user.id = user.id.toString()
                     const searchResultItem = this.populateSearchResultItem(user);
+
                     searchResults.array.push(searchResultItem);
                 }
 

@@ -19,15 +19,24 @@ import {
 export namespace DiscourseUserPopulator {
     export function populateUser(data: any): PluginUser {
         // ADDING SIZE TO PHOTO URLS
-        const avatar = data.avatar_template;
-        const regex = /{size}/g;
-        const photoSized = avatar.replace(regex, "120");
+        let avatar;
+        if(data.avatar_template.includes("https:")){
+            avatar = data.avatar_template.replace("{size}", "240")
+            // const ava = `https://avatars.discourse.org/v2/letter/c/da6949/{size}.png`
+        }else{
+            const ava = data.avatar_template;
+            const regex = /{size}/g;
+            const photoSized = ava.replace("{size}", "240");
+            avatar = `https://discourse-cdn-sjc1.com/${data.communityName}${photoSized}`
+        }
 
         const user: PluginUser ={
-            id: data.id.toString(),
+            // id: data.id.toString(),
+            id: data.username,
+
             username: data.username,
             fullName: data.name,
-            profileImageUrl: photoSized
+            profileImageUrl: avatar
         };
         return user;
     }
