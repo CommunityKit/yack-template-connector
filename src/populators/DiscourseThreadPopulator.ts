@@ -22,7 +22,7 @@ export namespace DiscourseThreadPopulator {
         id: data.id.toString(),
         channelName: data.channelName,
         channelId: data.channelId,
-        content: data.cooked,
+        ...data.cooked && {content: data.cooked},
         detailsPrepopulated: false,
         title: data.title,
         ...data.totalScore && {totalScore: data.totalScore},

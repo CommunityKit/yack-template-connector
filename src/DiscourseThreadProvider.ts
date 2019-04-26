@@ -169,12 +169,12 @@ export class DiscourseThreadProvider implements IThreadProvider {
         firstPostInThread.creator_username = firstPostInThread.username;
         // firstPostInThread.cooked = firstPostInThread.cooked
         firstPostInThread.id = threadId;
-        firstPostInThread.title = data.fancy_title;
-        firstPostInThread.totalScore = firstPostInThread.score;
-        firstPostInThread.views = data.views;
+        firstPostInThread.title = data.fancy_title ? data.fancy_title : null;
+        firstPostInThread.totalScore = firstPostInThread.score ? firstPostInThread.score : null;
+        firstPostInThread.views = data.views ? data.views : null;
         firstPostInThread.created_at = firstPostInThread.created_at;
         firstPostInThread.last_posted_at = firstPostInThread.last_posted_at;
-        firstPostInThread.pinned = data.pinned;
+        firstPostInThread.pinned = data.pinned ? data.pinned : null;
 
         const thread = DiscourseThreadPopulator.populateThread(firstPostInThread);
         // thread.detailsPrepopulated = true;
@@ -314,7 +314,7 @@ export class DiscourseThreadProvider implements IThreadProvider {
             const thread = DiscourseThreadPopulator.populateThread(threadData)
             thread.channelName = userId
             thread.channelId = userId
-            thread.detailsPrepopulated = true;
+            // thread.detailsPrepopulated = true;
             userThreads.array.push(thread)
             // push to PagedArray
         }
