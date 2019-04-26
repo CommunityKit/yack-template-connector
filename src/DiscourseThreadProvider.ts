@@ -27,6 +27,7 @@ import { IDiscourseConfig } from "./config/IDiscourseConfig";
 import { DiscourseThreadPopulator } from "./populators/DiscourseThreadPopulator";
 import { DiscourseFilters } from "./DiscourseFilters";
 import { url } from "inspector";
+import { getUserCreatedContent } from "./threads/ThreadRequests"
 
 export class DiscourseThreadProvider implements IThreadProvider {
     private pluginContext: PluginContext;
@@ -304,7 +305,20 @@ export class DiscourseThreadProvider implements IThreadProvider {
         }
     }
     async getUserThreads(options: PluginRequestOptions, userId: string): Promise<PagedArray<Thread>> {
-        return new PagedArray();
+        // Pagination???
+        // https://community.cartalk.com/user_actions.json?offset=0&username=b.l.e&filter=5&no_results_help_key=user_activity.no_replies&_=1556298757193
+        const userThreads = new PagedArray<Thread>();
+        const userThreadsData = await getUserCreatedContent(this.pluginContext.axios.get, this.config.rootUrl, userId, options.nextPageToken);
+        for(const threadData of userThreadsData){
+            // populate thread
+            const thread = DiscourseThreadPopulator.populateThread(threadData)
+            thread.channelName = userId
+            thread.channelId = userId
+            thread.detailsPrepopulated = true;
+            userThreads.array.push(thread)
+            // push to PagedArray
+        }
+        return userThreads;
     }
 }
 
