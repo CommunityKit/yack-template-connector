@@ -8,11 +8,12 @@ import {
   AttachmentType,
   AttachmentProviderType,
   urlUtils,
-  ContentType,
+//   ContentType,
   Thumbnails,
   Thumbnail,
   Channel,
-  PostType
+  TextContent
+//   PostType
 } from "yack-plugin-framework";
 
 export namespace DiscourseChannelPopulator {
@@ -20,13 +21,13 @@ export namespace DiscourseChannelPopulator {
     // const channel = new Channel();
     const channel: Channel = {
        id: data.id.toString(),
-       type: Channel.Types.default,
+       icon: Channel.Icons.default,
        name: data.name
     }
 
     
     // channel.title = data.name;
-    channel.description = data.description;
+    channel.description = {type: TextContent.Types.plain, value: data.description};
     channel.nsfw = false;
 
     const metadataList = ["color", "slug", "topic_count", "post_count", "position", "topic_url"];

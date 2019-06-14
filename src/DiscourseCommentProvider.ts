@@ -9,11 +9,12 @@ import {
     PluginUser,
     upndown,
     stringUtils,
-    Filter
+    Filter,
+    TextContent
 } from "yack-plugin-framework";
 import * as URLAssembler from "url-assembler";
 import * as htmlEncoderDecoder from "html-encoder-decoder";
-import * as Remarkable from "remarkable";
+// import * as Remarkable from "remarkable";
 import { AxiosResponse, AxiosRequestConfig } from "axios";
 import * as querystring from "querystring";
 import { oc } from "ts-optchain";
@@ -34,7 +35,7 @@ export class DiscourseCommentProvider implements ICommentProvider {
         return [];
     }
 
-    async getComments(options: PluginRequestOptions, channelId: string, threadId: string, parentCommentId?: string): Promise<PagedArray<Comment>> {
+    async getCommentsByThreadId(options: PluginRequestOptions, threadId: string, parentCommentId?: string): Promise<PagedArray<Comment>> {
         const hasUser: boolean = !!options.session.user;
         let url: string;
         let response: any;
@@ -195,7 +196,9 @@ export class DiscourseCommentProvider implements ICommentProvider {
             ...data.parentCommentId && {parentCommentId: data.parentCommentId},
             ...data.repliesNextPageToken && {repliesNextPageToken: data.repliesNextPageToken},
             threadId: data.threadId,
-            content: data.cooked,
+            content: {
+                type: TextContent.Types.markdown,
+                value: data.cooked},
             totalScore: data.score,
             createdBy: {
                 id: data.user_id,

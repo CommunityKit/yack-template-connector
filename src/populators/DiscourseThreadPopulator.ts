@@ -1,5 +1,6 @@
 import {
     Thread,
+    TextContent,
     upndown,
     PluginUser,
     objectUtils,
@@ -8,11 +9,11 @@ import {
     AttachmentType,
     AttachmentProviderType,
     urlUtils,
-    ContentType,
+    // ContentType,
     Thumbnails,
     Thumbnail
 } from "yack-plugin-framework";
-import * as Remarkable from "remarkable";
+// import * as Remarkable from "remarkable";
 import * as htmlEncoderDecoder from "html-encoder-decoder";
 
 export namespace DiscourseThreadPopulator {
@@ -22,7 +23,9 @@ export namespace DiscourseThreadPopulator {
         id: data.id.toString(),
         channelName: data.channelName,
         channelId: data.channelId,
-        ...data.cooked && {content: data.cooked},
+        ...data.cooked && {content: {
+            type: TextContent.Types.markdown,
+            value: data.cooked}},
         detailsPrepopulated: false,
         title: data.title,
         ...data.totalScore && {totalScore: data.totalScore},

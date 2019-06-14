@@ -3,19 +3,20 @@ import {
     PagedArray,
     PluginContext,
     // IConversationProvider,
-    Conversation,
-    ConversationMessage,
+    // Conversation,
+    // ConversationMessage,
     //   ConversationMessageActions,
     PluginUser,
     objectUtils,
     ISearchProvider,
     Category,
     Filter,
-    stringUtils
+    stringUtils,
+    ObjectTypes
 } from "yack-plugin-framework";
 import * as URLAssembler from "url-assembler";
 import uuid = require("uuid");
-import * as Remarkable from "remarkable";
+// import * as Remarkable from "remarkable";
 import * as htmlEncoderDecoder from "html-encoder-decoder";
 import { SearchResultItem } from "yack-plugin-framework";
 import { DiscourseThreadPopulator } from "./populators/DiscourseThreadPopulator";
@@ -185,7 +186,7 @@ export class DiscourseSearchProvider implements ISearchProvider {
                 for (const thread of threadsData) {
                     const threadPopulated = DiscourseThreadPopulator.populateThread(thread);
                     thread.item = threadPopulated;
-                    thread.itemType = SearchResultItem.Types.thread;
+                    thread.itemType = ObjectTypes.thread;
                     thread.id = thread.id.toString()
                     const searchResultItem = this.populateSearchResultItem(thread);
                     searchResults.array.push(searchResultItem);
@@ -207,7 +208,7 @@ export class DiscourseSearchProvider implements ISearchProvider {
 
                     const commentPopulated = DiscourseCommentPopulator.populateComment(comment, options.session.user);
                     comment.item = commentPopulated;
-                    comment.itemType = SearchResultItem.Types.comment;
+                    comment.itemType = ObjectTypes.comment;
                     comment.id = comment.id.toString()
                     const searchResultItem = this.populateSearchResultItem(comment);
                     searchResults.array.push(searchResultItem);
@@ -247,7 +248,7 @@ export class DiscourseSearchProvider implements ISearchProvider {
                     user.communityName = this.config.id.replace("_discourse","")
                     const userPopulated = DiscourseUserPopulator.populateUser(user);
                     user.item = userPopulated;
-                    user.itemType = SearchResultItem.Types.user;
+                    user.itemType = ObjectTypes.user;
                     user.id = user.username;
                     
 

@@ -32,25 +32,32 @@ export class DiscoursePlugin implements IPlugin {
     // conversationProvider?: IConversationProvider;
     // conversationMessageProvider?: IConversationMessageProvider;
     searchProvider?: ISearchProvider;
+    primaryColor: string;
+    secondaryColor: string;
 
     private config: IDiscourseConfig;
     id: string;
     name: string;
     iconBase64: any;
-    accentColor: string;
+    // accentColor: string;
 
     constructor(configuration: IDiscourseConfig) {
         this.config = configuration;
         this.id = this.config.id;
         this.name = this.config.name;
         this.iconBase64 = this.config.iconBase64;
-        this.accentColor = this.config.accentColor;
+        // this.accentColor = this.config.accentColor;
+        this.primaryColor = this.config.accentColor;
+        this.secondaryColor = this.config.accentColor;
+
     }
+    // primaryColor = this.config.accentColor;
+    // secondaryColor = this.config.accentColor;
 
     async init(context: PluginContext) {
         this.oauthClient = new DiscourseOAuthClient(context, this.config);
         this.channelProvider = new DiscourseChannelProvider(context, this.config);
-        this.threadProvider = new DiscourseThreadProvider(context, this.config);
+        this.threadProvider = new DiscourseThreadProvider(context, this.config, this.channelProvider);
         this.userProvider = new DiscourseUserProvider(context, this.config);
         this.commentProvider = new DiscourseCommentProvider(context, this.config);
         // this.notificationProvider = new DiscourseNotificationProvider(context);

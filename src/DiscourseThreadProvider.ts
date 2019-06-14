@@ -12,16 +12,17 @@ import {
     AttachmentType,
     AttachmentProviderType,
     urlUtils,
-    ContentType,
+    // ContentType,
     upndown,
     Thumbnail,
     PluginUser,
     Filter,
+    IChannelProvider,
     arrayUtils
 } from "yack-plugin-framework";
 import * as htmlEncoderDecoder from "html-encoder-decoder";
 import DiscoursePluginConfig from "./DiscoursePluginConfig";
-import * as Remarkable from "remarkable";
+// import * as Remarkable from "remarkable";
 import * as URLAssembler from "url-assembler";
 import { IDiscourseConfig } from "./config/IDiscourseConfig";
 import { DiscourseThreadPopulator } from "./populators/DiscourseThreadPopulator";
@@ -32,10 +33,14 @@ import { getUserCreatedContent } from "./threads/ThreadRequests"
 export class DiscourseThreadProvider implements IThreadProvider {
     private pluginContext: PluginContext;
     private config: IDiscourseConfig;
+    private channelProvider: IChannelProvider;
 
-    constructor(context: PluginContext, config: IDiscourseConfig) {
+
+    constructor(context: PluginContext, config: IDiscourseConfig, channelProvider: IChannelProvider) {
         this.pluginContext = context;
         this.config = config;
+        this.channelProvider = channelProvider;
+
     }
 
     async getFilters(options: PluginRequestOptions): Promise<Filter[]> {
@@ -43,7 +48,7 @@ export class DiscourseThreadProvider implements IThreadProvider {
         return DiscourseFilters.DEFAULT_CHANNELS_THREADS_FILTERS;
     }
 
-    async getThreads(options: PluginRequestOptions, channelId: any): Promise<PagedArray<Thread>> {
+    async getThreadsByChannelId(options: PluginRequestOptions, channelId: any): Promise<PagedArray<Thread>> {
         // SetHeaders
         const hasUser = !!options.session.user;
 
@@ -153,15 +158,15 @@ export class DiscourseThreadProvider implements IThreadProvider {
         return threads;
     }
 
-    async getThreadById(options: PluginRequestOptions, channelId: string, threadId: string): Promise<Thread> {
+    async getThreadById(options: PluginRequestOptions, threadId: string): Promise<Thread> {
         const hasUser = !!options.session.user;
         let url = `${this.config.rootUrl}/t/${threadId}.json`; // only using first element so don't need pagination
         const data = await this.setUrlToken(hasUser, url, options.session.user ? options.session.accessToken.token : null);
         const posts = data.post_stream.posts;
 
         const firstPostInThread = posts[0];
-        firstPostInThread.channelId = channelId;
-        firstPostInThread.channelName = channelId;
+        // firstPostInThread.channelId = channelId;
+        // firstPostInThread.channelName = channelId;
 
         // Set Topic Creator User Info
         firstPostInThread.creator_id = firstPostInThread.user_id;

@@ -5,9 +5,10 @@ import {
     PagedArray,
     PluginContext,
     objectUtils,
-    PostType,
+    // PostType,
     Category,
     Filter,
+    TextContent,
     // ObjectAction
 } from "yack-plugin-framework";
 import * as URLAssembler from "url-assembler";
@@ -39,16 +40,16 @@ export class DiscourseChannelProvider implements IChannelProvider {
             fixedChannels = [
                 {
                     id: "fixed:latest",
-                    type: Channel.Types.home,
+                    icon: Channel.Icons.home,
                     name: "latest",
-                    description: "The latest topics",
+                    description: {type: TextContent.Types.plain, value: "The latest topics"},
                     threadsFilters: this.getLatestChannelSortFilters(options)
                 },
                 {
                     id: "top:popular",
-                    type: Channel.Types.popular,
+                    icon: Channel.Icons.popular,
                     name: "top",
-                    description: "All top trending topics",
+                    description: {type: TextContent.Types.plain, value: "All top trending topics"},
                     threadsFilters: this.getTopChannelFilters(options)
                 }
             ];
@@ -56,19 +57,19 @@ export class DiscourseChannelProvider implements IChannelProvider {
             fixedChannels = [
                 {
                     id: "fixed:latest",
-                    type: Channel.Types.home,
+                    icon: Channel.Icons.home,
                     name: "latest",
-                    description: "The latest topics",
+                    description: {type: TextContent.Types.plain, value: "The latest topics"},
                     threadsFilters: this.getLatestChannelSortFilters(options)
                 },
                 {
                     id: "top:popular",
-                    type: Channel.Types.popular,
+                    icon: Channel.Icons.popular,
                     name: "top",
-                    description: "All top trending topics",
+                    description: {type: TextContent.Types.plain, value: "All top trending topics"},
                     threadsFilters: this.getTopChannelFilters(options)
                 },
-                { id: "unread", type: Channel.Types.default, name: "unread", description: "Your unread topics", threadsFilters: [] }
+                { id: "unread", icon: Channel.Icons.default, name: "unread", description: {type: TextContent.Types.plain, value: "Your unread topics"}, threadsFilters: [] }
             ];
         }
         return fixedChannels;
@@ -112,19 +113,59 @@ export class DiscourseChannelProvider implements IChannelProvider {
         return latestFilters;
     }
 
-    async getDefaultChannels(options: PluginRequestOptions): Promise<PagedArray<Channel>> {
-        const url = `${this.config.rootUrl}/categories.json`;
+    // async getDefaultChannels(options: PluginRequestOptions): Promise<PagedArray<Channel>> {
+    //     const url = `${this.config.rootUrl}/categories.json`;
+    //     const response = await this.pluginContext.axios.get(url);
+
+    //     const categoriesList = response.data.category_list.categories;
+
+    //     const channels = new PagedArray<Channel>();
+
+    //     for (const channelItem of categoriesList) {
+    //         const channel = DiscourseChannelPopulator.populateChannel(channelItem, options.session.user);
+    //         channels.array.push(channel);
+    //     }
+
+    //     return channels;
+    // }
+
+    async getChannelsByUserId(options: PluginRequestOptions, userId: string): Promise<PagedArray<Channel>> {
+        const channels = new PagedArray<Channel>();
+
+        if (options.session.user) {
+            let url: string;
+            url = `${this.config.rootUrl}/site.json`;
+    
+            const channelsResponse = await this.pluginContext.axios.get(url, {
+                responseType: "json",
+                headers: {
+                    "user-api-key": options.session.accessToken.token
+                }
+            });
+            const categoryList = channelsResponse.data.categories;
+    
+            for (const channelItem of categoryList) {
+                // HIDE channels if they don't have any topics
+                // if(channelItem.topic_count > 0){
+                const channel = DiscourseChannelPopulator.populateChannel(channelItem, options.session.user);
+                channels.array.push(channel);
+                // }
+            }
+
+        }else{
+
+            const url = `${this.config.rootUrl}/categories.json`;
         const response = await this.pluginContext.axios.get(url);
 
         const categoriesList = response.data.category_list.categories;
 
-        const channels = new PagedArray<Channel>();
 
         for (const channelItem of categoriesList) {
             const channel = DiscourseChannelPopulator.populateChannel(channelItem, options.session.user);
             channels.array.push(channel);
         }
 
+        }
         return channels;
     }
 
@@ -132,28 +173,28 @@ export class DiscourseChannelProvider implements IChannelProvider {
         return null;
     }
 
-    async getUserChannels(options: PluginRequestOptions): Promise<PagedArray<Channel>> {
-        let url: string;
-        url = `${this.config.rootUrl}/site.json`;
+    // async getUserChannels(options: PluginRequestOptions): Promise<PagedArray<Channel>> {
+    //     let url: string;
+    //     url = `${this.config.rootUrl}/site.json`;
 
-        const channelsResponse = await this.pluginContext.axios.get(url, {
-            responseType: "json",
-            headers: {
-                "user-api-key": options.session.accessToken.token
-            }
-        });
-        const channels = new PagedArray<Channel>();
-        const categoryList = channelsResponse.data.categories;
+    //     const channelsResponse = await this.pluginContext.axios.get(url, {
+    //         responseType: "json",
+    //         headers: {
+    //             "user-api-key": options.session.accessToken.token
+    //         }
+    //     });
+    //     const channels = new PagedArray<Channel>();
+    //     const categoryList = channelsResponse.data.categories;
 
-        for (const channelItem of categoryList) {
-            // HIDE channels if they don't have any topics
-            // if(channelItem.topic_count > 0){
-            const channel = DiscourseChannelPopulator.populateChannel(channelItem, options.session.user);
-            channels.array.push(channel);
-            // }
-        }
-        return channels;
-    }
+    //     for (const channelItem of categoryList) {
+    //         // HIDE channels if they don't have any topics
+    //         // if(channelItem.topic_count > 0){
+    //         const channel = DiscourseChannelPopulator.populateChannel(channelItem, options.session.user);
+    //         channels.array.push(channel);
+    //         // }
+    //     }
+    //     return channels;
+    // }
     async getChannelByThreadId(options: PluginRequestOptions, threadId: string): Promise<Channel> {
         return null;
     }

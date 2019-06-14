@@ -8,12 +8,12 @@ import {
     AttachmentType,
     AttachmentProviderType,
     urlUtils,
-    ContentType,
+    // ContentType,
     Thumbnails,
     Thumbnail,
     Channel,
     Comment,
-    PostType
+    // PostType
 } from "yack-plugin-framework";
 
 export namespace DiscourseUserPopulator {

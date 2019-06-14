@@ -8,12 +8,13 @@ import {
     AttachmentType,
     AttachmentProviderType,
     urlUtils,
-    ContentType,
+    // ContentType,
     Thumbnails,
     Thumbnail,
     Channel,
     Comment,
-    PostType
+    TextContent
+    // PostType
 } from "yack-plugin-framework";
 
 export namespace DiscourseCommentPopulator {
@@ -23,7 +24,9 @@ export namespace DiscourseCommentPopulator {
             ...data.parentCommentId && {parentCommentId: data.parentCommentId},
             ...data.repliesNextPageToken && {repliesNextPageToken: data.repliesNextPageToken},
             threadId: data.threadId,
-            content: data.cooked,
+            content: {
+                type: TextContent.Types.markdown,
+                value: data.cooked},
             totalScore: data.score,
             createdBy: {
                 id: data.user_id,
