@@ -161,6 +161,10 @@ export class DiscourseSearchProvider implements ISearchProvider {
         // Format search query
         const regex = /\s/g;
         const serializeQueryStr = query.replace(regex, "+");
+        let nextPageNumber; 
+        const hasNextPage = !!options.nextPageToken ? true : false;
+        nextPageNumber
+        hasNextPage ? nextPageNumber = `&page=${options.nextPageToken}` : nextPageNumber = `&page=1`
         let allFiltersForQuery, activeFiltersStr;
         // Turn Filters into Object
         if(categoryId != "users"){
@@ -179,8 +183,8 @@ export class DiscourseSearchProvider implements ISearchProvider {
             case "threads": {
                 // Set URL based on Query
                 hasFilters
-                    ? (url = `${this.config.rootUrl}/search.json?q=${serializeQueryStr}${activeFiltersStr}`)
-                    : (url = `${this.config.rootUrl}/search.json?q=${serializeQueryStr}`);
+                    ? (url = `${this.config.rootUrl}/search.json?q=${serializeQueryStr}${activeFiltersStr}${nextPageNumber}`)
+                    : (url = `${this.config.rootUrl}/search.json?q=${serializeQueryStr}${nextPageNumber}`);
                 response = await this.setUrlToken(hasUser, url, options.session.user ? options.session.accessToken.token : null);
                 const threadsData = response.topics;
                 // const thread = DiscourseThreadPopulator.populateThread(data);
@@ -201,8 +205,8 @@ export class DiscourseSearchProvider implements ISearchProvider {
             case "comments": {
                 // Set URL based on Query
                 hasFilters
-                    ? (url = `${this.config.rootUrl}/search.json?q=${serializeQueryStr}${activeFiltersStr}`)
-                    : (url = `${this.config.rootUrl}/search.json?q=${serializeQueryStr}`);
+                    ? (url = `${this.config.rootUrl}/search.json?q=${serializeQueryStr}${activeFiltersStr}${nextPageNumber}`)
+                    : (url = `${this.config.rootUrl}/search.json?q=${serializeQueryStr}${nextPageNumber}`);
                 response = await this.setUrlToken(hasUser, url, options.session.user ? options.session.accessToken.token : null);
                 const commentsData = response.posts;
                 if(commentsData){
@@ -243,7 +247,7 @@ export class DiscourseSearchProvider implements ISearchProvider {
             case "users": {
                 // https://community.cartalk.com/search/query?term=repair&include_blurbs=true&type_filter=user&_=1553019648877
                 // USE THIS ENDPOINT TO SEARCH USERS
-                userUrl = `${this.config.rootUrl}/search/query.json?term=${serializeQueryStr}&include_blurbs=true&type_filter=user`;
+                userUrl = `${this.config.rootUrl}/search/query.json?term=${serializeQueryStr}&include_blurbs=true&type_filter=user${nextPageNumber}`;
                 response = await this.setUrlToken(hasUser, userUrl, options.session.user ? options.session.accessToken.token : null);
 
                 const usersData = response.users;
@@ -269,7 +273,7 @@ export class DiscourseSearchProvider implements ISearchProvider {
                 break;
             }
         }
-
+        hasNextPage ? searchResults.nextPageToken = `${parseInt(options.nextPageToken) + 1}` : searchResults.nextPageToken = "2";
         return searchResults;
     }
 
