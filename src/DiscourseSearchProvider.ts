@@ -182,7 +182,7 @@ export class DiscourseSearchProvider implements ISearchProvider {
                 // const thread = DiscourseThreadPopulator.populateThread(data);
                 // searchItem.item = thread;
                 // searchItem.itemType = SearchResultItemType.Thread;
-
+                if(threadsData){
                 for (const thread of threadsData) {
                     const threadPopulated = DiscourseThreadPopulator.populateThread(thread);
                     thread.item = threadPopulated;
@@ -190,7 +190,7 @@ export class DiscourseSearchProvider implements ISearchProvider {
                     thread.id = thread.id.toString()
                     const searchResultItem = this.populateSearchResultItem(thread);
                     searchResults.array.push(searchResultItem);
-                }
+                }}
 
                 break;
             }
@@ -201,17 +201,19 @@ export class DiscourseSearchProvider implements ISearchProvider {
                     : (url = `${this.config.rootUrl}/search.json?q=${serializeQueryStr}`);
                 response = await this.setUrlToken(hasUser, url, options.session.user ? options.session.accessToken.token : null);
                 const commentsData = response.posts;
+                if(commentsData){
 
-                for (const comment of commentsData) {
-                    comment.threadId = comment.topic_id;
-                    comment.score = comment.like_count;
+                    for (const comment of commentsData) {
+                        comment.threadId = comment.topic_id;
+                        comment.score = comment.like_count;
 
-                    const commentPopulated = DiscourseCommentPopulator.populateComment(comment, options.session.user);
-                    comment.item = commentPopulated;
-                    comment.itemType = ObjectTypes.comment;
-                    comment.id = comment.id.toString()
-                    const searchResultItem = this.populateSearchResultItem(comment);
-                    searchResults.array.push(searchResultItem);
+                        const commentPopulated = DiscourseCommentPopulator.populateComment(comment, options.session.user);
+                        comment.item = commentPopulated;
+                        comment.itemType = ObjectTypes.comment;
+                        comment.id = comment.id.toString()
+                        const searchResultItem = this.populateSearchResultItem(comment);
+                        searchResults.array.push(searchResultItem);
+                    }
                 }
                 break;
             }
@@ -241,22 +243,24 @@ export class DiscourseSearchProvider implements ISearchProvider {
                 response = await this.setUrlToken(hasUser, userUrl, options.session.user ? options.session.accessToken.token : null);
 
                 const usersData = response.users;
-                for (const user of usersData) {
-                    user.threadId = user.topic_id;
-                    user.score = user.like_count;
-                    user.partialUrl = this.config.partialUrl
-                    user.communityName = this.config.id.replace("_discourse","")
-                    const userPopulated = DiscourseUserPopulator.populateUser(user);
-                    user.item = userPopulated;
-                    user.itemType = ObjectTypes.user;
-                    user.id = user.username;
-                    
+                if(usersData){
+                    for (const user of usersData) {
+                        user.threadId = user.topic_id;
+                        user.score = user.like_count;
+                        user.partialUrl = this.config.partialUrl
+                        user.communityName = this.config.id.replace("_discourse","")
+                        const userPopulated = DiscourseUserPopulator.populateUser(user);
+                        user.item = userPopulated;
+                        user.itemType = ObjectTypes.user;
+                        user.id = user.username;
+                        
 
-                    // user.id = user.id.toString()
-                    const searchResultItem = this.populateSearchResultItem(user);
+                        // user.id = user.id.toString()
+                        const searchResultItem = this.populateSearchResultItem(user);
 
-                    searchResults.array.push(searchResultItem);
-                }
+                        searchResults.array.push(searchResultItem);
+                    }
+            }
 
                 break;
             }
