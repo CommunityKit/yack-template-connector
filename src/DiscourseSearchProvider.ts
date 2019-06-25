@@ -148,8 +148,8 @@ export class DiscourseSearchProvider implements ISearchProvider {
             // TBD PENDING FRAMEWORK UPDATE - SHOULDN'T HAVE ANY FILTERS
             {
                 id: "users",
-                title: "Users",
-                filters: combined
+                title: "Users"
+                // filters: combined
             }
         ];
     }
@@ -160,14 +160,17 @@ export class DiscourseSearchProvider implements ISearchProvider {
         // Format search query
         const regex = /\s/g;
         const serializeQueryStr = query.replace(regex, "+");
-
+        let allFiltersForQuery, activeFiltersStr;
         // Turn Filters into Object
-        const allFiltersForQuery = this.populateFilterObject(options);
-        const hasFilters: boolean = !!Object.keys(allFiltersForQuery);
+        if(categoryId != "users"){
+        allFiltersForQuery = this.populateFilterObject(options);
+    }
+    const hasFilters = typeof allFiltersForQuery == "object";
 
         // Format filters for Querying
-        const activeFiltersStr = this.formatQueryString(options, allFiltersForQuery);
-
+        if(hasFilters){
+        activeFiltersStr = this.formatQueryString(options, allFiltersForQuery);
+}
         // Creating SearchResults
         const searchResults = new PagedArray<SearchResultItem>();
 
