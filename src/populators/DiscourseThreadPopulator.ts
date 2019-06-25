@@ -23,6 +23,11 @@ export namespace DiscourseThreadPopulator {
         id: data.id.toString(),
         channelName: data.channelName,
         channelId: data.channelId,
+
+        ...data.category_id &&{channelId: data.category_id.toString()},
+        // ...data.slug && {channelId: data.slug},
+        
+        // channelId: "top:popular",
         ...data.cooked && {content: {
             type: TextContent.Types.markdown,
             value: data.cooked}},

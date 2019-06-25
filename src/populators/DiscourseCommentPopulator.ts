@@ -24,17 +24,21 @@ export namespace DiscourseCommentPopulator {
             ...data.parentCommentId && {parentCommentId: data.parentCommentId},
             ...data.repliesNextPageToken && {repliesNextPageToken: data.repliesNextPageToken},
             threadId: data.threadId,
-            content: {
+            ...data.topic_id && {threadId: data.topic_id.toString()},
+                        content: {
                 type: TextContent.Types.markdown,
-                value: data.cooked},
+                ...data.blurb && {value: data.blurb},
+                ...data.cooked && {value: data.cooked}
+            },
             totalScore: data.score,
             createdBy: {
-                id: data.user_id,
+                id: data.username,
+                ...data.user_id && {id: data.user_id},
                 fullName: data.name,
                 username: data.username
             },
             utcCreateDate: Date.parse(data.created_at),
-            utcLastUpdateDate: Date.parse(data.updated_at)
+            ...data.updated_at && {utcLastUpdateDate: Date.parse(data.updated_at)}
         };
         // newComment.id = data.id.toString();
         // !!data.parentCommentId ? (newComment.parentCommentId = data.parentCommentId) : (newComment.parentCommentId = null);

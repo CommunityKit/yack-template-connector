@@ -66,7 +66,7 @@ export class DiscourseUserProvider {
 
         return pluginUser;
     }
-    async getUser(options: PluginRequestOptions, userId: string): Promise<PluginUser> {
+    async getUserById(options: PluginRequestOptions, userId: string): Promise<PluginUser> {
         // userID === username
         let allData;
         await Promise.all(

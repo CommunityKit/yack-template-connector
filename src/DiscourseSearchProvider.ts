@@ -26,6 +26,7 @@ import { DiscourseCommentPopulator } from "./populators/DiscourseCommentPopulato
 import { DiscourseUserPopulator } from "./populators/DiscourseUserPopulator";
 import { IDiscourseConfig } from "./config/IDiscourseConfig";
 import { DiscourseFilters } from "./DiscourseFilters";
+// import {populateUser} from "./sessions/UserPopulator"
 
 export class DiscourseSearchProvider implements ISearchProvider {
     private pluginContext: PluginContext;

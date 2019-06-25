@@ -170,7 +170,25 @@ export class DiscourseChannelProvider implements IChannelProvider {
     }
 
     async getChannelById(options: PluginRequestOptions, channelId: string): Promise<Channel> {
-        return null;
+        let url: string;
+        let resp;
+            url = `${this.config.rootUrl}/categories.json`;
+            if(options.session.user){
+            resp = await this.pluginContext.axios.get(url, {
+                responseType: "json",
+                headers: {
+                    "user-api-key": options.session.accessToken.token
+                }
+            });
+        }else{
+            resp = await this.pluginContext.axios.get(url)
+        }
+
+        const channelsList = resp.data.category_list.categories
+        const channelItem = channelsList.filter(elem => elem.id === parseInt(channelId))[0]
+        const channel = DiscourseChannelPopulator.populateChannel(channelItem, options.session.user);
+
+        return channel;
     }
 
     // async getUserChannels(options: PluginRequestOptions): Promise<PagedArray<Channel>> {

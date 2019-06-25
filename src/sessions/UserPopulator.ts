@@ -7,21 +7,21 @@ export function populateUser(data:any): PluginUser{
     const summary = data.summary
     let badges = []
     data.badges ? data.badges.forEach(element => {
-        badges.push(element.name)
+        badges.push({id: element.name, title: element.name})
     }) : null;
 
     let stats = []
     // for(const summary of data.summary){
-        summary.days_visited > 0 ? stats.push(`${summary.days_visited} days visited`): null;
-            format(summary.time_read) != 0 ? stats.push(`${format(summary.time_read)} read time`): null;
-            format(summary.recent_time_read) != 0 ? stats.push(`${format(summary.recent_time_read)} recent read time`): null;
-            parseInt(kFormatter(summary.topics_entered)) > 0 ? stats.push(`${kFormatter(summary.topics_entered)} topics viewed`): null;
-            parseInt(kFormatter(summary.posts_read_count)) > 0 ? stats.push(`${kFormatter(summary.posts_read_count)} posts read`): null;
-            parseInt(kFormatter(summary.likes_given)) > 0 ? stats.push(`${kFormatter(summary.likes_given)} ❤️ given`): null;
-            parseInt(kFormatter(summary.topic_count)) > 0 ? stats.push(`${kFormatter(summary.topic_count)} topics created`)   : null   ;      
-            parseInt(kFormatter(summary.post_count)) > 0 ? stats.push(`${kFormatter(summary.post_count)} posts created`) : null;
-            parseInt(kFormatter(summary.likes_received)) > 0 ? stats.push(`${kFormatter(summary.likes_received)} ❤️ received`): null;
-            parseInt(kFormatter(summary.solved_count)) > 0 ? stats.push(`${kFormatter(summary.solved_count)} solutions`): null;
+        summary.days_visited > 0 ? stats.push({id: "days_visited", title: `${summary.days_visited} days visited`}): null;
+            format(summary.time_read) != 0 ? stats.push({id: "read-time", title: `${format(summary.time_read)} read time`}): null;
+            format(summary.recent_time_read) != 0 ? stats.push({id: "recent_read_time", title: `${format(summary.recent_time_read)} recent read time`}): null;
+            parseInt(kFormatter(summary.topics_entered)) > 0 ? stats.push({id: "topics_viewed", title: `${kFormatter(summary.topics_entered)} topics viewed`}): null;
+            parseInt(kFormatter(summary.posts_read_count)) > 0 ? stats.push({id: "posts_read", title: `${kFormatter(summary.posts_read_count)} posts read`}): null;
+            parseInt(kFormatter(summary.likes_given)) > 0 ? stats.push({id: "hearts_given", title: `${kFormatter(summary.likes_given)} ❤️ given`}): null;
+            parseInt(kFormatter(summary.topic_count)) > 0 ? stats.push({id: "topics_created", title: `${kFormatter(summary.topic_count)} topics created`})   : null   ;      
+            parseInt(kFormatter(summary.post_count)) > 0 ? stats.push({id: "posts_created", title: `${kFormatter(summary.post_count)} posts created`}) : null;
+            parseInt(kFormatter(summary.likes_received)) > 0 ? stats.push({id: "hearts_received", title: `${kFormatter(summary.likes_received)} ❤️ received`}): null;
+            parseInt(kFormatter(summary.solved_count)) > 0 ? stats.push({id: "solutions", title: `${kFormatter(summary.solved_count)} solutions`}): null;
     // }
     let tags = stats
     for(const item of badges){

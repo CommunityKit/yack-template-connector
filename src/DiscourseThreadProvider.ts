@@ -180,6 +180,7 @@ export class DiscourseThreadProvider implements IThreadProvider {
         firstPostInThread.created_at = firstPostInThread.created_at;
         firstPostInThread.last_posted_at = firstPostInThread.last_posted_at;
         firstPostInThread.pinned = data.pinned ? data.pinned : null;
+        firstPostInThread.channelId = data.category_id.toString();
 
         const thread = DiscourseThreadPopulator.populateThread(firstPostInThread);
         // thread.detailsPrepopulated = true;
