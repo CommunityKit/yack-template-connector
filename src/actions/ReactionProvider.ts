@@ -58,12 +58,15 @@ export class ReactionProvider implements IReactionProvider {
             switch(objectType){
                 case "thread": {
                   this.reactionConfigByObjectType[ObjectTypes.thread].reactions = []
+                  return false;
                 }
                 case "comment": {
                   this.reactionConfigByObjectType[ObjectTypes.comment].reactions = []
+                  return false;
                 }
             }
         }
+        return true;
     }
 
     // When different types of reactions that the different reaction counts
@@ -94,7 +97,9 @@ export class ReactionProvider implements IReactionProvider {
         const parsedThreadId = objectId.split(" ")[0]
         const postId = objectId.split(" ")[1]
 
-        if (options.session.user) {
+        const canUndo = await this.setReactionConfig(options, objectId, objectType)
+
+        if (options.session.user && canUndo) {
                     // Need to make threadId `${threadId} ${resp.data.post_stream[0].id}`
                     
                     // const userLovesIt = resp.data.actions_summary[0].acted

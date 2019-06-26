@@ -10,7 +10,7 @@ import {
     upndown,
     stringUtils,
     Filter,
-    TextContent
+    TextContent, Form, SaveFormResult
 } from "yack-plugin-framework";
 import * as URLAssembler from "url-assembler";
 import * as htmlEncoderDecoder from "html-encoder-decoder";
@@ -20,6 +20,8 @@ import * as querystring from "querystring";
 import { oc } from "ts-optchain";
 import DiscoursePluginConfig from "./DiscoursePluginConfig";
 import { IDiscourseConfig } from "./config/IDiscourseConfig";
+import uuid = require("uuid");
+
 
 export class DiscourseCommentProvider implements ICommentProvider {
     private static readonly COMMENTS_PAGE_SIZE = 20;
@@ -229,10 +231,90 @@ export class DiscourseCommentProvider implements ICommentProvider {
         return newComment;
     }
     // TBD
-    async saveComment(options: PluginRequestOptions, comment: Comment, parentComment?: Comment): Promise<Comment> {
-        return null;
+    // async saveComment(options: PluginRequestOptions, comment: Comment, parentComment?: Comment): Promise<Comment> {
+    //     return null;
+    // }
+
+
+    async getSaveCommentForm?(options: PluginRequestOptions, threadId: string, parentComment: Comment, comment: Comment): Promise<Form> {
+        console.log(threadId, parentComment, comment);
+        // Discourse has strikethrough and heading options but they are only accessible through Markdown/Html
+        // Not sure if Discourse preformatted text is related to codeblock (dont think it is)
+        // Add later: "heading", "strikethrough", "codeblock"
+        const bodyField: Form.RichTextField = {
+            type: Form.Field.Types.richText,
+            options: [Form.RichTextField.Options.bold,
+                Form.RichTextField.Options.italic,
+            Form.RichTextField.Options.link,
+           Form.RichTextField.Options.imageupload,
+            Form.RichTextField.Options.bulletedlist,
+            Form.RichTextField.Options.numberedlist,
+            Form.RichTextField.Options.quoteblock,
+            Form.RichTextField.Options.emoji],
+            valueType: comment && comment.content ? comment.content.type : null,
+            value: comment && comment.content ? comment.content.value : null
+        };
+        const form: Form = {
+            id: uuid.v4(),
+            fieldById: {
+                body: bodyField
+            }
+        };
+        return form;
     }
 
+    async saveCommentForm?(
+        options: PluginRequestOptions,
+        threadId: string,
+        parentComment: Comment,
+        comment: Comment,
+        formValue: Form.Value
+    ): Promise<SaveFormResult<Comment>> {
+        console.log(threadId, parentComment, comment);
+        const body = formValue.valueByFieldId["body"];
+        let formData
+        let url: string;
+        url = `${this.config.rootUrl}/posts.json`;
+
+        // if (comment) {
+            formData = {
+                "topic_id": parseInt(threadId.split(" ")[0]),
+                "raw": body,
+                // "created_at": "2017-01-31"
+            };
+            
+            // formData["thing_id"] = `${Kinds.comment}_${comment.id}`;
+        // } 
+        // else {
+        //     formData = {
+        //         "title": "string",
+        //         "topic_id": 0,
+        //         "raw": "string",
+        //         "category": 0,
+        //         "target_usernames": "discourse1,discourse2",
+        //         "archetype": "private_message",
+        //         "created_at": "2017-01-31"
+        //         }
+        //     // formData["thing_id"] = parentComment ? `${Kinds.comment}_${parentComment.id}` : `${Kinds.link}_${threadId}`;
+        // }
+
+        const response = await this.pluginContext.axios.post(url, querystring.stringify(formData), {responseType: "json",
+        headers: {
+                // "Api-Key": `${options.session.accessToken.token}`,
+                // Authorization: `Bearer ${options.session.accessToken.token}`,
+                "content-type": "application/x-www-form-urlencoded",
+                // "Access-Control-Allow-Origin": "*"
+                // "Accept": "application/json"
+                "user-api-key": options.session.accessToken.token           
+                }});
+        const data = response.data;
+
+       
+        const newComment = this.populateComment(data);
+        return {
+            resultObject: newComment
+        };
+    }
     async deleteComment(options: PluginRequestOptions, commentId: string): Promise<void> {}
 
     // async saveCommentAction(options: PluginRequestOptions, commentId: string, actionItem: ObjectAction.Item): Promise<void> {}
