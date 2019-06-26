@@ -159,6 +159,9 @@ export class DiscourseThreadProvider implements IThreadProvider {
     }
 
     async getThreadById(options: PluginRequestOptions, threadId: string): Promise<Thread> {
+        // const tId = threadId.split(" ")[0]
+        // const postId = threadId.split(" ")[1]
+
         const hasUser = !!options.session.user;
         let url = `${this.config.rootUrl}/t/${threadId}.json`; // only using first element so don't need pagination
         const data = await this.setUrlToken(hasUser, url, options.session.user ? options.session.accessToken.token : null);
@@ -173,7 +176,8 @@ export class DiscourseThreadProvider implements IThreadProvider {
         firstPostInThread.creator_full_name = firstPostInThread.name;
         firstPostInThread.creator_username = firstPostInThread.username;
         // firstPostInThread.cooked = firstPostInThread.cooked
-        firstPostInThread.id = threadId;
+        firstPostInThread.id = `${threadId} ${firstPostInThread.id}`;
+        console.warn(`TESTING NEW THREAD ID: ${firstPostInThread.id}`)
         firstPostInThread.title = data.fancy_title ? data.fancy_title : null;
         firstPostInThread.totalScore = firstPostInThread.score ? firstPostInThread.score : null;
         firstPostInThread.views = data.views ? data.views : null;

@@ -32,6 +32,7 @@ export class ReactionProvider implements IReactionProvider {
 
     // When different types of reactions that the different reaction counts
     async getReactionsSummary(options: PluginRequestOptions, objectType: Reaction.ObjectTypes, objectId: string): Promise<Reaction.Summary> {
+        console.warn(`getReactionsSummmary() ObjectId: ${objectId}`)
         return null;
     }
 
@@ -44,6 +45,8 @@ export class ReactionProvider implements IReactionProvider {
         reaction: Reaction
     ): Promise<PagedArray<Reaction.UserReaction>> {
         const reactions = new PagedArray<Reaction.UserReaction>();
+        console.warn(`getReactions() ObjectId: ${objectId}`)
+
         return reactions;
     }
 
@@ -51,7 +54,7 @@ export class ReactionProvider implements IReactionProvider {
     async saveReaction(options: PluginRequestOptions, objectType: Reaction.ObjectTypes, objectId: string, reaction: Reaction): Promise<void> {
 
         let url, formData, resp;
-
+        console.warn(`saveReaction() ObjectId ${objectId}`)
         const parseActionId = objectId.split(" ")[1]
 
         if (options.session.user) {

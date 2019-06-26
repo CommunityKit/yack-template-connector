@@ -26,11 +26,15 @@ import { DiscourseCommentPopulator } from "./populators/DiscourseCommentPopulato
 import { DiscourseUserPopulator } from "./populators/DiscourseUserPopulator";
 import { IDiscourseConfig } from "./config/IDiscourseConfig";
 import { DiscourseFilters } from "./DiscourseFilters";
+import { threadId } from "worker_threads";
 // import {populateUser} from "./sessions/UserPopulator"
 
 export class DiscourseSearchProvider implements ISearchProvider {
     private pluginContext: PluginContext;
     private config: IDiscourseConfig;
+    private allThreadIds: Array<any>;
+    private allCommentIds: Array<any>;
+    private allUserIds: Array<any>;
 
     //   private timeFilter: Filter = {
     //       id: "timefilter",
@@ -50,6 +54,9 @@ export class DiscourseSearchProvider implements ISearchProvider {
     constructor(context: PluginContext, config: IDiscourseConfig) {
         this.pluginContext = context;
         this.config = config;
+        this.allCommentIds = [];
+        this.allThreadIds = [];
+        this.allUserIds = []
     }
 
     private async getCombinedFilters() {
@@ -195,7 +202,12 @@ export class DiscourseSearchProvider implements ISearchProvider {
                     const threadPopulated = DiscourseThreadPopulator.populateThread(thread);
                     thread.item = threadPopulated;
                     thread.itemType = ObjectTypes.thread;
-                    thread.id = thread.id.toString()
+                    thread.id = thread.id.toString();
+                    if(this.allThreadIds.includes(thread.id)){
+                        return searchResults;
+                    }else{
+                        this.allThreadIds.push(thread.id)
+                    }
                     const searchResultItem = this.populateSearchResultItem(thread);
                     searchResults.array.push(searchResultItem);
                 }}
@@ -219,6 +231,12 @@ export class DiscourseSearchProvider implements ISearchProvider {
                         comment.item = commentPopulated;
                         comment.itemType = ObjectTypes.comment;
                         comment.id = comment.id.toString()
+
+                        if(this.allCommentIds.includes(comment.id)){
+                            return searchResults;
+                        }else{
+                            this.allCommentIds.push(comment.id)
+                        }
                         const searchResultItem = this.populateSearchResultItem(comment);
                         searchResults.array.push(searchResultItem);
                     }
@@ -261,7 +279,11 @@ export class DiscourseSearchProvider implements ISearchProvider {
                         user.item = userPopulated;
                         user.itemType = ObjectTypes.user;
                         user.id = user.username;
-                        
+                        if(this.allUserIds.includes(user.id)){
+                            return searchResults;
+                        }else{
+                            this.allUserIds.push(user.id)
+                        }
 
                         // user.id = user.id.toString()
                         const searchResultItem = this.populateSearchResultItem(user);

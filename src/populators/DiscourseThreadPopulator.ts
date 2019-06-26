@@ -18,6 +18,7 @@ import * as htmlEncoderDecoder from "html-encoder-decoder";
 
 export namespace DiscourseThreadPopulator {
     export function populateThread(data: any): Thread {
+        console.warn(`ThreadPopulator() id: ${data.id}`)
         const thread: Thread = {
         totalComments: data.reply_count,
         id: data.id.toString(),
