@@ -27,7 +27,43 @@ export class ReactionProvider implements IReactionProvider {
     constructor(context: PluginContext, config: IDiscourseConfig) {
         this.pluginContext = context;
         this.config = config;
+        // this.reactionConfigByObjectType
+    }
 
+    private async setReactionConfig(options: PluginRequestOptions, objectId:string, objectType: Reaction.ObjectTypes){
+        const parsedThreadId = objectId.split(" ")[0]
+        const postId = objectId.split(" ")[1]
+        const url = `${this.config.rootUrl}/t/${parsedThreadId}/posts.json?posts_ids[]=${postId}.json`
+
+        const resp = await this.pluginContext.axios.get(url, {
+            responseType: "json",
+            headers: {
+                "user-api-key": options.session.accessToken.token
+            }
+        });
+        const selectPostAction = resp.data.post_stream.posts.filter(elem => elem.id.toString() === postId)[0].actions_summary[0];
+        const acted = selectPostAction.acted;
+        let allowedToUndo, updateConfigObj;
+        if(acted){
+            if("can_undo" in selectPostAction){
+                selectPostAction.can_undo ? allowedToUndo = true : allowedToUndo = false;
+            }else{
+                allowedToUndo = false;
+            }
+        }
+
+        
+
+        if(allowedToUndo === false){
+            switch(objectType){
+                case "thread": {
+                  this.reactionConfigByObjectType[ObjectTypes.thread].reactions = []
+                }
+                case "comment": {
+                  this.reactionConfigByObjectType[ObjectTypes.comment].reactions = []
+                }
+            }
+        }
     }
 
     // When different types of reactions that the different reaction counts
@@ -55,16 +91,22 @@ export class ReactionProvider implements IReactionProvider {
 
         let url, formData, resp;
         console.warn(`saveReaction() ObjectId ${objectId}`)
-        const parseActionId = objectId.split(" ")[1]
+        const parsedThreadId = objectId.split(" ")[0]
+        const postId = objectId.split(" ")[1]
 
         if (options.session.user) {
                     // Need to make threadId `${threadId} ${resp.data.post_stream[0].id}`
                     
                     // const userLovesIt = resp.data.actions_summary[0].acted
+                
+                // Need to update switch statement
+                // IF user already likes the post and clicks like again then we need to fetch the post and check if the user can still undo their like
+                // IF they can't undo their like then do nothing
+                // IF they can undo their action DELETE request
                  switch (reaction) {
                         case Reaction.like: {
                             url = `${this.config.rootUrl}/post_actions.json`
-                            formData = `id=${parseActionId}&post_action_type_id=2&flag_topic=false`;
+                            formData = `id=${postId}&post_action_type_id=2&flag_topic=false`;
 
                             resp = await this.pluginContext.axios.post(url, formData, {
                                 responseType: "json",
@@ -79,7 +121,7 @@ export class ReactionProvider implements IReactionProvider {
                        
                         case Reaction.none: {
 
-                            url = `${this.config.rootUrl}/post_actions/${parseActionId}.json`
+                            url = `${this.config.rootUrl}/post_actions/${postId}.json`
                             formData = `post_action_type_id=2`;
 
 
