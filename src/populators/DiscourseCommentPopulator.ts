@@ -13,7 +13,7 @@ import {
     Thumbnail,
     Channel,
     Comment,
-    TextContent
+    TextContent, Reaction
     // PostType
 } from "yack-plugin-framework";
 
@@ -30,6 +30,10 @@ export namespace DiscourseCommentPopulator {
                 ...data.blurb && {value: data.blurb},
                 ...data.cooked && {value: data.cooked}
             },
+            // ...data.actions_summary && {}, 
+            ...data.actions_summary && {countByReaction: {
+                [Reaction.love]: objectUtils.parseNumber(data.actions_summary[0].count),
+            }},
             totalScore: data.score,
             createdBy: {
                 id: data.username,

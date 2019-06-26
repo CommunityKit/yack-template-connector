@@ -18,6 +18,8 @@ import { DiscourseCommentProvider } from "./DiscourseCommentProvider";
 import { DiscourseUserProvider } from "./DiscourseUserProvider";
 import { IDiscourseConfig } from "./config/IDiscourseConfig";
 import { DiscourseSearchProvider } from "./DiscourseSearchProvider";
+import { ReactionProvider } from "./actions/ReactionProvider";
+
 // import { DiscourseNotificationProvider } from "./DiscourseNotificationProvider";
 // import { DiscourseConversationProvider } from "./DiscourseConversationProvider";
 
@@ -28,6 +30,8 @@ export class DiscoursePlugin implements IPlugin {
     threadProvider?: IThreadProvider;
     commentProvider?: ICommentProvider;
     userProvider?: IUserProvider;
+    reactionProvider: ReactionProvider;
+
     // notificationProvider?: INotificationProvider;
     // conversationProvider?: IConversationProvider;
     // conversationMessageProvider?: IConversationMessageProvider;
@@ -64,5 +68,7 @@ export class DiscoursePlugin implements IPlugin {
         // this.conversationProvider = new DiscourseConversationProvider(context);
         // this.conversationMessageProvider = new RedditConversationMessageProvider(context);
         this.searchProvider = new DiscourseSearchProvider(context, this.config);
+        this.reactionProvider = new ReactionProvider(context, this.config);
+
     }
 }
