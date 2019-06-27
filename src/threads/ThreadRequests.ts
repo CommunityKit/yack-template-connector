@@ -78,3 +78,36 @@ function filterUserComments(data:any){
         elem.reply_to_post_number !== null
     })
 }
+
+
+export async function getThreadPostId(rootUrl, get, options, threadId: string) {
+    // const tId = threadId.split(" ")[0]
+    // const postId = threadId.split(" ")[1]
+
+    const hasUser = !!options.session.user;
+    let url = `${rootUrl}/t/${threadId}.json`; // only using first element so don't need pagination
+    const data = await setUrlToken(get, hasUser, url, options.session.user ? options.session.accessToken.token : null);
+
+    
+    const posts = data.post_stream.posts;
+
+    const firstPostInThread = posts[0];
+   
+        return firstPostInThread.id;
+
+}
+
+async function setUrlToken(get, hasUser: boolean, url: string, key?: string) {
+    let response: any;
+    if (hasUser) {
+        response = await get(url, {
+            responseType: "json",
+            headers: {
+                "user-api-key": key
+            }
+        });
+    } else {
+        response = await get(url);
+    }
+    return response.data;
+}

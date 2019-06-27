@@ -1,6 +1,7 @@
 import { IReactionProvider, Reaction, PluginRequestOptions, PagedArray, PluginContext, ObjectTypes, cookieUtils } from "yack-plugin-framework";
 
 import { IDiscourseConfig } from "../config/IDiscourseConfig";
+import {getThreadPostId} from "../threads/ThreadRequests"
 
 import * as URLAssembler from "url-assembler";
 // import { fetchVideo } from "../threads/ThreadRequests";
@@ -30,10 +31,10 @@ export class ReactionProvider implements IReactionProvider {
         // this.reactionConfigByObjectType
     }
 
-    private async setReactionConfig(options: PluginRequestOptions, objectId:string, objectType: Reaction.ObjectTypes){
-        const parsedThreadId = objectId.split(" ")[0]
-        const postId = objectId.split(" ")[1]
-        const url = `${this.config.rootUrl}/t/${parsedThreadId}/posts.json?posts_ids[]=${postId}.json`
+    private async setReactionConfig(options: PluginRequestOptions, threadId:string, postId:number, objectType: Reaction.ObjectTypes){
+        // const parsedThreadId = objectId.split(" ")[0]
+        // const postId = objectId.split(" ")[1]
+        const url = `${this.config.rootUrl}/t/${threadId}/posts.json?posts_ids[]=${postId}.json`
 
         const resp = await this.pluginContext.axios.get(url, {
             responseType: "json",
@@ -94,12 +95,13 @@ export class ReactionProvider implements IReactionProvider {
 
         let url, formData, resp;
         console.warn(`saveReaction() ObjectId ${objectId}`)
-        const parsedThreadId = objectId.split(" ")[0]
-        const postId = objectId.split(" ")[1]
+        // const parsedThreadId = objectId.split(" ")[0]
+        // const postId = objectId.split(" ")[1]
+        const postId = await getThreadPostId(this.config.rootUrl, this.pluginContext.axios.get, options, objectId)
+        // const canUndo = await this.setReactionConfig(options, objectId, postId, objectType)
+        if (options.session.user) {
 
-        const canUndo = await this.setReactionConfig(options, objectId, objectType)
-
-        if (options.session.user && canUndo) {
+        // if (options.session.user && canUndo) {
                     // Need to make threadId `${threadId} ${resp.data.post_stream[0].id}`
                     
                     // const userLovesIt = resp.data.actions_summary[0].acted
@@ -130,7 +132,7 @@ export class ReactionProvider implements IReactionProvider {
                             formData = `post_action_type_id=2`;
 
 
-                            resp = await this.pluginContext.axios.delete(url, { data: formData, 
+                            resp = await this.pluginContext.axios.delete(url, { data: {post_action_type_id: 2}, 
                                 responseType: "json",
                                 headers: {
                                     "user-api-key": options.session.accessToken.token
