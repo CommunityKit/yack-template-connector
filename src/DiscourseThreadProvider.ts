@@ -473,7 +473,6 @@ export class DiscourseThreadProvider implements IThreadProvider {
             "title": title,
             "raw": body,
             "category": this.createCategoryDictionary,
-            "created_at": "2017-01-31"
             }
 
         const url = `${this.config.rootUrl}/posts.json`;
@@ -488,7 +487,7 @@ export class DiscourseThreadProvider implements IThreadProvider {
         const data = response.data;
        
 
-        const newThreadId = data.id;
+        const newThreadId = data.topic_id;
         const thread = await this.getThreadById(options, newThreadId);
         return {
             resultObject: thread
