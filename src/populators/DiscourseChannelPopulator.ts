@@ -22,7 +22,8 @@ export namespace DiscourseChannelPopulator {
     const channel: Channel = {
        id: data.id.toString(),
        icon: Channel.Icons.default,
-       name: data.name
+       name: data.name,
+       ...sessionUser && {canSessionUserPostNewThread: true}
     }
 
     
