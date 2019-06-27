@@ -13,12 +13,17 @@ import {
     AttachmentProviderType,
     urlUtils,
     // ContentType,
+    File as YackFile,
     upndown,
     Thumbnail,
     PluginUser,
     Filter,
     IChannelProvider,
-    arrayUtils
+    arrayUtils,
+    Form,
+    Channel,
+    UploadFileResult,
+    SaveFormResult
 } from "yack-plugin-framework";
 import * as htmlEncoderDecoder from "html-encoder-decoder";
 import DiscoursePluginConfig from "./DiscoursePluginConfig";
@@ -29,6 +34,10 @@ import { DiscourseThreadPopulator } from "./populators/DiscourseThreadPopulator"
 import { DiscourseFilters } from "./DiscourseFilters";
 import { url } from "inspector";
 import { getUserCreatedContent } from "./threads/ThreadRequests"
+import uuid = require("uuid");
+import * as querystring from "querystring";
+
+
 
 export class DiscourseThreadProvider implements IThreadProvider {
     private pluginContext: PluginContext;
@@ -329,6 +338,185 @@ export class DiscourseThreadProvider implements IThreadProvider {
             // push to PagedArray
         }
         return userThreads;
+    }
+
+    async getSaveThreadForm(options: PluginRequestOptions, channelId: string, threadId: string): Promise<Form> {
+        let thread: Thread = null;
+        let channel: Channel = null;
+        if (!stringUtils.isNullOrEmpty(threadId)) {
+            thread = await this.getThreadById(options, threadId);
+            channel = await this.channelProvider.getChannelById(options, thread.channelId);
+        } else {
+            channel = await this.channelProvider.getChannelById(options, channelId);
+        }
+
+        const titleField: Form.TextField = {
+            title: "Title",
+            type: Form.Field.Types.text,
+            value: thread ? thread.title : null,
+            disabled: thread ? true : false
+        };
+
+        const bodyField: Form.RichTextField = {
+            title: "Text",
+            type: Form.Field.Types.richText,
+            options: [],
+            valueType: thread && thread.content ? thread.content.type : null,
+            value: thread && thread.content ? thread.content.value : null
+        };
+
+        const uploadField: Form.UploadField = {
+            type: Form.Field.Types.upload,
+            title: "Upload Images & Videos",
+            maxItems: 50,
+            supportedTypes: [Form.UploadField.Types.image, Form.UploadField.Types.video],
+            maxImageFileSizeInMB: 10,
+            maxVideoFileSizeInMB: 200,
+            maxAnyFileSizeInMB: 0,
+            disabled: thread != null
+        };
+
+        const categories = await this.getCategories(this.pluginContext.axios.get, options);
+        let categoryIds: number[] = [];
+         categories.forEach(element => categoryIds.push(element.id));
+
+         let categoryNames: string[] = [];
+         categories.forEach(element => categoryNames.push(element.name));
+
+        const categoriesField: Form.SelectField = {
+            title: "Category",
+            multiSelect: false,
+            type: Form.Field.Types.select,
+            itemsById: {},
+            value: null,
+            compact: true
+        };
+
+        for (const category of categories) {
+            categoriesField.itemsById[category.id] = {
+                title: category.name
+            };
+        }
+
+        // const flairs = await this.getFlairs(options, channelId);
+
+        const postFieldsById: Form.ChildrenById = {
+            title: titleField,
+            body: bodyField
+        };
+
+        const imageVideoFieldsById: Form.ChildrenById = {
+            title: titleField,
+            upload: uploadField
+        };
+
+
+        postFieldsById["postProps"] = {
+            type: Form.Field.Types.group,
+            childrenById: {}
+        };
+
+        imageVideoFieldsById["postProps"] = {
+            type: Form.Field.Types.group,
+            childrenById: {}
+        };
+
+
+
+        const postTypesField: Form.TabsField = {
+            type: Form.Field.Types.tabs,
+            itemsById: {
+                post: {
+                    title: "Post",
+                    childrenById: postFieldsById
+                },
+                image_video: {
+                    title: "Image & Video",
+                    childrenById: imageVideoFieldsById
+                }
+            },
+            defaultValue: "post"
+        };
+
+        if (thread) {
+            postTypesField.disabled = true;
+            
+                postTypesField.value = "post";
+        }
+
+        return {
+            id: uuid.v4(),
+            fieldById: {
+                postTypes: postTypesField
+            }
+        };
+    }
+
+    async saveThreadForm(options: PluginRequestOptions, channelId: string, threadId: string, formValue: Form.Value): Promise<SaveFormResult<Thread>> {
+        const valueByFieldId = formValue.valueByFieldId;
+        const title = valueByFieldId["title"] as string;
+        const body = valueByFieldId["body"] as string;
+        // const url = valueByFieldId["url"] as string;
+        const files = valueByFieldId["upload"] as YackFile[];
+        // const postType = valueByFieldId["postTypes"] as string;
+        // const spoiler = valueByFieldId["spoiler"] ? (valueByFieldId["spoiler"] as boolean) : false;
+
+        const formData = {
+            "title": title,
+            "raw": body,
+            "category": this.createCategoryDictionary,
+            "created_at": "2017-01-31"
+            }
+
+        const url = `${this.config.rootUrl}/posts.json`;
+        
+
+        const response = await this.pluginContext.axios.post(url, querystring.stringify(formData), {responseType: "json",
+        headers: {
+                "content-type": "application/x-www-form-urlencoded",
+                "user-api-key": options.session.accessToken.token           
+                }});
+
+        const data = response.data;
+       
+
+        const newThreadId = data.id;
+        const thread = await this.getThreadById(options, newThreadId);
+        return {
+            resultObject: thread
+        };
+    }
+
+    // async uploadSaveThreadFormFile(
+    //     options: PluginRequestOptions,
+    //     channelId: string,
+    //     threadId: string,
+    //     file: YackFile,
+    //     requestCancelToken: CancelToken
+    // ): Promise<UploadFileResult> {
+    //     return;
+
+    // }
+
+    private async getCategories(get, options){
+        let url: string;
+        url = `${this.config.rootUrl}/site.json`;
+
+        const channelsResponse = await this.pluginContext.axios.get(url, {
+            responseType: "json",
+            headers: {
+                "user-api-key": options.session.accessToken.token
+            }
+        });
+        const categoryList = channelsResponse.data.categories;
+        
+        let selectableCategories = []
+
+        for (const category of categoryList) {
+            selectableCategories.push({id: category.id, name: category.name})
+        
+        }
+        return selectableCategories;
     }
 }
 

@@ -301,7 +301,6 @@ export class DiscourseCommentProvider implements ICommentProvider {
         const response = await this.pluginContext.axios.post(url, querystring.stringify(formData), {responseType: "json",
         headers: {
                 // "Api-Key": `${options.session.accessToken.token}`,
-                // Authorization: `Bearer ${options.session.accessToken.token}`,
                 "content-type": "application/x-www-form-urlencoded",
                 // "Access-Control-Allow-Origin": "*"
                 // "Accept": "application/json"
