@@ -23,7 +23,8 @@ import {
     Form,
     Channel,
     UploadFileResult,
-    SaveFormResult
+    SaveFormResult,
+    Action
 } from "yack-plugin-framework";
 import * as htmlEncoderDecoder from "html-encoder-decoder";
 import DiscoursePluginConfig from "./DiscoursePluginConfig";
@@ -43,6 +44,7 @@ export class DiscourseThreadProvider implements IThreadProvider {
     private pluginContext: PluginContext;
     private config: IDiscourseConfig;
     private channelProvider: IChannelProvider;
+    actions = [Action.save, Action.hide, Action.report];
 
 
     constructor(context: PluginContext, config: IDiscourseConfig, channelProvider: IChannelProvider) {
@@ -331,7 +333,7 @@ export class DiscourseThreadProvider implements IThreadProvider {
             return nextPageNumber;
         }
     }
-    async getUserThreads(options: PluginRequestOptions, userId: string): Promise<PagedArray<Thread>> {
+    async getThreadsByUserId(options: PluginRequestOptions, userId: string): Promise<PagedArray<Thread>> {
         // Pagination???
         // https://community.cartalk.com/user_actions.json?offset=0&username=b.l.e&filter=5&no_results_help_key=user_activity.no_replies&_=1556298757193
         const userThreads = new PagedArray<Thread>();

@@ -5,4 +5,5 @@ export interface IDiscourseConfig {
     name: string;
     accentColor: string;
     iconBase64: any;
+    communityGuidelines?: string;
 }

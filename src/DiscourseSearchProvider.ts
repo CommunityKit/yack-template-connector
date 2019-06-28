@@ -60,7 +60,9 @@ export class DiscourseSearchProvider implements ISearchProvider {
     }
 
     private async getCombinedFilters() {
-        // GET Tags List
+        const baseFilter: Filter[] = objectUtils.clone(DiscourseFilters.SEARCH_THREAD_FILTERS);
+
+        try{// GET Tags List
         const tagUrl = `${this.config.rootUrl}/tags.json`;
         const resp = await this.pluginContext.axios.get(tagUrl);
         const tagList = resp.data.tags;
@@ -83,7 +85,15 @@ export class DiscourseSearchProvider implements ISearchProvider {
             type: Filter.Types.SingleSelect,
             childFilters: [{ id: "all", name: "Include All Tags", type: Filter.Types.ListItem }]
         };
+    
+        baseFilter.push(tagsFilter);
+        baseFilter.push(parentTagFilter);
 
+        }catch(err){
+            this.pluginContext.logger.d("Community doesn't have any tags")
+        }
+
+        try{
         // GET channels List
         let categoriesFilter = {
             id: "categories_filter",
@@ -99,6 +109,11 @@ export class DiscourseSearchProvider implements ISearchProvider {
             formattedChildCategoryList.push({ id: category.slug, name: category.name, type: Filter.Types.ListItem });
         }
         categoriesFilter.childFilters = formattedChildCategoryList;
+        baseFilter.push(categoriesFilter);
+
+    }catch(err){
+this.pluginContext.logger.d("Community doesn't have any categories")
+        }
 
         // Create Date BEFORE/AFTER Toggle Option
         let parentDateFilter = {
@@ -118,10 +133,6 @@ export class DiscourseSearchProvider implements ISearchProvider {
         };
 
         // const combined: Filter[] =  [tagsFilter]
-        const baseFilter: Filter[] = objectUtils.clone(DiscourseFilters.SEARCH_THREAD_FILTERS);
-        baseFilter.push(parentTagFilter);
-        baseFilter.push(tagsFilter);
-        baseFilter.push(categoriesFilter);
         baseFilter.push(parentDateFilter);
         baseFilter.push(dateFilter);
 
@@ -295,7 +306,11 @@ export class DiscourseSearchProvider implements ISearchProvider {
                 break;
             }
         }
-        hasNextPage ? searchResults.nextPageToken = `${parseInt(options.nextPageToken) + 1}` : searchResults.nextPageToken = "2";
+        if(hasNextPage && searchResults.array.length > 49){
+            searchResults.nextPageToken = `${parseInt(options.nextPageToken) + 1}`
+        }else if(!hasNextPage && searchResults.array.length > 49){
+            searchResults.nextPageToken = "2"
+        }
         return searchResults;
     }
 
@@ -332,14 +347,18 @@ export class DiscourseSearchProvider implements ISearchProvider {
         // TOPIC SORTS (status:) id: "status"
         const statusFilter = Filter.findFilter(options.filters, "status");
         getVal("status", statusFilter);
-
+        let tagsFilter, categoriesFilter
+        try{
         // TAG FILTERS (tags:) id: "tag_filter"
-        const tagsFilter = Filter.findFilter(options.filters, "tag_filter");
+        tagsFilter = Filter.findFilter(options.filters, "tag_filter");
         tagsFilter.value !== undefined && tagsFilter.value !== "" ? (allFiltersForQuery["tags"] = tagsFilter.value) : null;
+    }catch(err){}
 
+        try{
         // CATEGORIES FILTERS id: "categories_filter"
-        const categoriesFilter = Filter.findFilter(options.filters, "categories_filter");
+        categoriesFilter = Filter.findFilter(options.filters, "categories_filter");
         getVal("#", categoriesFilter);
+        }catch(err){}
 
         // DATE FILTERS OPTION id: "before_after" + DATE FILTER id: "date"
         const beforeFilter = Filter.findFilter(options.filters, "before_after");

@@ -7,5 +7,6 @@ export const CartalkConfig: IDiscourseConfig = {
     id: "cartalk_discourse",
     name: "Cartalk",
     iconBase64: icon,
-    accentColor: "#b90b26"
+    accentColor: "#b90b26",
+    communityGuidelines: "https://community.cartalk.com/faq"
 };
