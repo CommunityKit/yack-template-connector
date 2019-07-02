@@ -24,7 +24,8 @@ import {
     Channel,
     UploadFileResult,
     SaveFormResult,
-    Action
+    Action,
+    ThreadDisplayProperties
 } from "yack-plugin-framework";
 import * as htmlEncoderDecoder from "html-encoder-decoder";
 import DiscoursePluginConfig from "./DiscoursePluginConfig";
@@ -53,6 +54,12 @@ export class DiscourseThreadProvider implements IThreadProvider {
         this.channelProvider = channelProvider;
 
     }
+
+    threadDisplayProperties: ThreadDisplayProperties[] = [
+        ThreadDisplayProperties.title,
+        ThreadDisplayProperties.attachments,
+        ThreadDisplayProperties.description
+    ];
 
     async getFilters(options: PluginRequestOptions): Promise<Filter[]> {
         // return DiscourseFilters.TOP_THREADS_FILTERS;
@@ -162,7 +169,7 @@ export class DiscourseThreadProvider implements IThreadProvider {
             topic.creator_username = userObject.username;
             // this.pluginContext.logger.d(`Topic = ${JSON.stringify(topic)}`);
 
-            const thread = await DiscourseThreadPopulator.populateThread(topic);
+            const thread = await DiscourseThreadPopulator.populateThread(topic, options);
             // this.populateTestAttachments(thread);
             threads.array.push(thread);
         }
@@ -205,7 +212,7 @@ export class DiscourseThreadProvider implements IThreadProvider {
         firstPostInThread.pinned = data.pinned ? data.pinned : null;
         firstPostInThread.channelId = data.category_id.toString();
 
-        const thread = DiscourseThreadPopulator.populateThread(firstPostInThread);
+        const thread = await DiscourseThreadPopulator.populateThread(firstPostInThread, options);
         // thread.detailsPrepopulated = true;
         return thread;
     }
@@ -340,7 +347,7 @@ export class DiscourseThreadProvider implements IThreadProvider {
         const userThreadsData = await getUserCreatedContent(this.pluginContext.axios.get, this.config.rootUrl, userId, options.nextPageToken);
         for(const threadData of userThreadsData){
             // populate thread
-            const thread = DiscourseThreadPopulator.populateThread(threadData)
+            const thread = await DiscourseThreadPopulator.populateThread(threadData, options)
             thread.channelName = userId
             thread.channelId = userId
             // thread.detailsPrepopulated = true;

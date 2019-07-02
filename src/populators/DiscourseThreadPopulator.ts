@@ -11,13 +11,26 @@ import {
     urlUtils,
     // ContentType,
     Thumbnails,
-    Thumbnail
+    Thumbnail, 
+    Reaction,
+    ObjectTypes
 } from "yack-plugin-framework";
 // import * as Remarkable from "remarkable";
 import * as htmlEncoderDecoder from "html-encoder-decoder";
+import {populateAttachments} from "../threads/AttachmentPopulator"
 
 export namespace DiscourseThreadPopulator {
-    export function populateThread(data: any): Thread {
+    export async function populateThread(data: any, options): Promise<Thread> {
+        let reactionsConfig;
+        if(data.creator_username === options.session.user.username){
+            reactionsConfig =  
+            {
+                concept: Reaction.Concepts.like,
+                reactions: [Reaction.none],
+                canBrowseUserReactions: true
+            }
+        } 
+    
         console.warn(`ThreadPopulator() id: ${data.id}`)
         const thread: Thread = {
         totalComments: data.reply_count,
@@ -25,12 +38,17 @@ export namespace DiscourseThreadPopulator {
         channelName: data.channelName,
         channelId: data.channelId,
 
+        ...reactionsConfig && 
+        { commentsReactionConfig: 
+            reactionsConfig
+        },
+
         ...data.category_id &&{channelId: data.category_id.toString()},
         // ...data.slug && {channelId: data.slug},
         
         // channelId: "top:popular",
         ...data.cooked && {content: {
-            type: TextContent.Types.markdown,
+            type: TextContent.Types.html,
             value: data.cooked}},
         detailsPrepopulated: false,
         title: data.title,
@@ -46,7 +64,8 @@ export namespace DiscourseThreadPopulator {
             id: data.creator_id,
             username: data.creator_username,
             fullName: data.creator_full_name
-        }
+        },
+        ...data.link_counts && {attachments: await populateAttachments(data.link_counts)}
         };
            // createdBy: PluginUser;
         // commentsSorts?: ObjectsSort[];
@@ -100,3 +119,4 @@ export namespace DiscourseThreadPopulator {
         return thread;
     }
 }
+

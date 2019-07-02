@@ -210,7 +210,7 @@ this.pluginContext.logger.d("Community doesn't have any categories")
                 // searchItem.itemType = SearchResultItemType.Thread;
                 if(threadsData){
                 for (const thread of threadsData) {
-                    const threadPopulated = DiscourseThreadPopulator.populateThread(thread);
+                    const threadPopulated = await DiscourseThreadPopulator.populateThread(thread, options);
                     thread.item = threadPopulated;
                     thread.itemType = ObjectTypes.thread;
                     thread.id = thread.id.toString();
