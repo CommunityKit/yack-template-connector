@@ -199,7 +199,7 @@ export class DiscourseCommentProvider implements ICommentProvider {
             ...data.repliesNextPageToken && {repliesNextPageToken: data.repliesNextPageToken},
             threadId: data.threadId,
             content: {
-                type: TextContent.Types.markdown,
+                type: TextContent.Types.html,
                 value: data.cooked},
             totalScore: data.score,
             createdBy: {

@@ -26,7 +26,7 @@ export namespace DiscourseCommentPopulator {
             threadId: data.threadId,
             ...data.topic_id && {threadId: data.topic_id.toString()},
                         content: {
-                type: TextContent.Types.markdown,
+                type: TextContent.Types.html,
                 ...data.blurb && {value: data.blurb},
                 ...data.cooked && {value: data.cooked}
             },

@@ -22,6 +22,7 @@ import {populateAttachments} from "../threads/AttachmentPopulator"
 export namespace DiscourseThreadPopulator {
     export async function populateThread(data: any, options): Promise<Thread> {
         let reactionsConfig;
+        if(options.session.user){
         if(data.creator_username === options.session.user.username){
             reactionsConfig =  
             {
@@ -30,7 +31,7 @@ export namespace DiscourseThreadPopulator {
                 canBrowseUserReactions: true
             }
         } 
-    
+    }
         console.warn(`ThreadPopulator() id: ${data.id}`)
         const thread: Thread = {
         totalComments: data.reply_count,
