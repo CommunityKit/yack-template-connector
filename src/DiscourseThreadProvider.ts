@@ -45,7 +45,7 @@ export class DiscourseThreadProvider implements IThreadProvider {
     private pluginContext: PluginContext;
     private config: IDiscourseConfig;
     private channelProvider: IChannelProvider;
-    actions = [Action.save, Action.hide, Action.report];
+    actions = [Action.save, Action.report];
 
 
     constructor(context: PluginContext, config: IDiscourseConfig, channelProvider: IChannelProvider) {
@@ -224,6 +224,31 @@ export class DiscourseThreadProvider implements IThreadProvider {
     async deleteThread(options: PluginRequestOptions, channelId: string, threadId: string): Promise<void> {}
 
     // async saveThreadAction(options: PluginRequestOptions, threadId: string, actionItem: ObjectAction.Item): Promise<void> {}
+    async saveAction(options: PluginRequestOptions, threadId: string, action: Action, actionType: Action.Types): Promise<void> {
+        let url, response, data, formData;
+        if (action == Action.report) {
+            url = `${this.config.rootUrl}/post_actions.json`
+            formData = `id=${threadId}&post_action_type_id=${8}&flag_topic=true`
+            await this.pluginContext.axios.post(url, formData, {
+                responseType: "json",
+                headers: {
+                    "user-api-key": options.session.accessToken.token
+                }
+            }); 
+        } else if (action == Action.save) {
+            url = `${this.config.rootUrl}/t/${threadId}/bookmark.json`
+            await this.pluginContext.axios.put(url,'', {
+                // responseType: "json",
+                headers: {
+                    "user-api-key": options.session.accessToken.token
+                }
+            }); 
+        } else {
+            throw new Error(`Not implemented`);
+        }
+
+       
+    }
 
     private async getTopicStream() {
         return null;
@@ -357,6 +382,8 @@ export class DiscourseThreadProvider implements IThreadProvider {
         return userThreads;
     }
 
+
+    // IF threadId: user is trying to edit a thread
     async getSaveThreadForm(options: PluginRequestOptions, channelId: string, threadId: string): Promise<Form> {
         let thread: Thread = null;
         let channel: Channel = null;

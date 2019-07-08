@@ -236,6 +236,11 @@ export class DiscourseCommentProvider implements ICommentProvider {
     // }
 
 
+
+    // IF there's a parentComment => reply to comment
+    // IF no parentComment => reply to thread
+    // IF comment => you're editing that comment
+        // To access comment data => comment.id
     async getSaveCommentForm?(options: PluginRequestOptions, threadId: string, parentComment: Comment, comment: Comment): Promise<Form> {
         console.log(threadId, parentComment, comment);
         // Discourse has strikethrough and heading options but they are only accessible through Markdown/Html
