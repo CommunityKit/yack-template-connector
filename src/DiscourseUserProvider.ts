@@ -89,5 +89,29 @@ export class DiscourseUserProvider {
         //   return user;
         return user;
     }
+
+    async getUserByUserName(options: PluginRequestOptions, userName: string): Promise<PluginUser> {
+        // userID === username
+        let allData;
+        await Promise.all(
+            [getUserStats(this.config.rootUrl, this.pluginContext.axios.get, userName),
+            getUserData(this.config.rootUrl, this.pluginContext.axios.get, userName)
+        ]).then(data => {
+            allData = {
+                summary: data[0].user_summary,
+                badges: data[1].badges,
+                userInfo: data[1].user
+            }
+        })
+
+        allData.partialUrl = this.config.partialUrl
+        allData.communityName = this.config.id.replace("_discourse","")
+        
+
+        const user = populateUser(allData)
+        // let user = new PluginUser();
+        //   return user;
+        return user;
+    }
     // async saveUserAction(options: PluginRequestOptions, actionItem: ObjectAction.Item): Promise<void> {}
 }
