@@ -177,8 +177,13 @@ this.pluginContext.logger.d("Community doesn't have any categories")
         let url: string, data: any, userUrl: string, response: any;
         const hasUser = !!options.session.user; // SetHeaders
         // Format search query
-        const regex = /\s/g;
-        const serializeQueryStr = query.replace(regex, "+");
+        // const regex = /\s/g;
+        // const serializeQueryStr = query.replace(regex, "+");
+
+        const searchSearlizer = new URLSearchParams();
+        searchSearlizer.set("q", query);
+        const serializeQueryStr = searchSearlizer.toString();
+
         let nextPageNumber; 
         const hasNextPage = !!options.nextPageToken ? true : false;
         nextPageNumber
@@ -201,8 +206,8 @@ this.pluginContext.logger.d("Community doesn't have any categories")
             case "threads": {
                 // Set URL based on Query
                 hasFilters
-                    ? (url = `${this.config.rootUrl}/search.json?q=${serializeQueryStr}${activeFiltersStr}${nextPageNumber}`)
-                    : (url = `${this.config.rootUrl}/search.json?q=${serializeQueryStr}${nextPageNumber}`);
+                    ? (url = `${this.config.rootUrl}/search.json?${serializeQueryStr}${activeFiltersStr}${nextPageNumber}`)
+                    : (url = `${this.config.rootUrl}/search.json?${serializeQueryStr}${nextPageNumber}`);
                 response = await this.setUrlToken(hasUser, url, options.session.user ? options.session.accessToken.token : null);
                 const threadsData = response.topics;
                 // const thread = DiscourseThreadPopulator.populateThread(data);
@@ -228,8 +233,8 @@ this.pluginContext.logger.d("Community doesn't have any categories")
             case "comments": {
                 // Set URL based on Query
                 hasFilters
-                    ? (url = `${this.config.rootUrl}/search.json?q=${serializeQueryStr}${activeFiltersStr}${nextPageNumber}`)
-                    : (url = `${this.config.rootUrl}/search.json?q=${serializeQueryStr}${nextPageNumber}`);
+                    ? (url = `${this.config.rootUrl}/search.json?${serializeQueryStr}${activeFiltersStr}${nextPageNumber}`)
+                    : (url = `${this.config.rootUrl}/search.json?${serializeQueryStr}${nextPageNumber}`);
                 response = await this.setUrlToken(hasUser, url, options.session.user ? options.session.accessToken.token : null);
                 const commentsData = response.posts;
                 if(commentsData){
@@ -406,7 +411,7 @@ this.pluginContext.logger.d("Community doesn't have any categories")
             }
         });
         this.pluginContext.logger.d(`activeFiltersStr = ${activeFiltersStr}`);
-        // url = `${this.config.rootUrl}/search?q=${encodeURI(serializeQueryStr)}${encodeURI(activeFiltersStr)}`;
+        // url = `${this.config.rootUrl}/search?${encodeURI(serializeQueryStr)}${encodeURI(activeFiltersStr)}`;
         // Fetches More Post Results: /search/query.json?term=bugatti
         return activeFiltersStr;
     }
