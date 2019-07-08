@@ -10,7 +10,7 @@ import {
     upndown,
     stringUtils,
     Filter,
-    TextContent, Form, SaveFormResult
+    TextContent, Form, SaveFormResult, Action
 } from "yack-plugin-framework";
 import * as URLAssembler from "url-assembler";
 import * as htmlEncoderDecoder from "html-encoder-decoder";
@@ -27,6 +27,8 @@ export class DiscourseCommentProvider implements ICommentProvider {
     private static readonly COMMENTS_PAGE_SIZE = 20;
     private pluginContext: PluginContext;
     private config: IDiscourseConfig;
+    actions = [Action.save, Action.report];
+
 
     constructor(context: PluginContext, config: IDiscourseConfig) {
         this.pluginContext = context;
@@ -322,6 +324,32 @@ export class DiscourseCommentProvider implements ICommentProvider {
     async deleteComment(options: PluginRequestOptions, commentId: string): Promise<void> {}
 
     // async saveCommentAction(options: PluginRequestOptions, commentId: string, actionItem: ObjectAction.Item): Promise<void> {}
+    async saveAction(options: PluginRequestOptions, commentId: string, action: Action, actionType: Action.Types): Promise<void> {
+        let url, response, data, formData;
+        if (action == Action.report) {
+            url = `${this.config.rootUrl}/post_actions.json`
+            formData = `id=${commentId}&post_action_type_id=${8}&flag_topic=true`
+            await this.pluginContext.axios.post(url, formData, {
+                responseType: "json",
+                headers: {
+                    "user-api-key": options.session.accessToken.token
+                }
+            }); 
+        } else if (action == Action.save) {
+            url = `${this.config.rootUrl}/t/${commentId}/bookmark.json`
+            await this.pluginContext.axios.put(url,'', {
+                // responseType: "json",
+                headers: {
+                    "user-api-key": options.session.accessToken.token
+                }
+            }); 
+        } else {
+            throw new Error(`Not implemented`);
+        }
+
+       
+    }
+
     async getUserComments(options: PluginRequestOptions, userId: string): Promise<PagedArray<Comment>> {
         return new PagedArray();
     }
