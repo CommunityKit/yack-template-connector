@@ -115,7 +115,7 @@ export class DiscourseCommentProvider implements ICommentProvider {
                     }
                 }
                 comment.threadId = threadId;
-                let newComment = this.populateComment(comment);
+                let newComment = this.populateComment(comment, options);
                 comments.array.push(newComment);
             }
         }
@@ -194,7 +194,10 @@ export class DiscourseCommentProvider implements ICommentProvider {
         }
     }
 
-    private populateComment(data: any) {
+    private populateComment(data: any, options: PluginRequestOptions) {
+        let canUpdate;
+        data.username === options.session.user.username ? canUpdate = true :canUpdate = false;
+
         const newComment: Comment = {
             id: data.id.toString(),
             ...data.parentCommentId && {parentCommentId: data.parentCommentId},
@@ -204,6 +207,7 @@ export class DiscourseCommentProvider implements ICommentProvider {
                 type: TextContent.Types.html,
                 value: data.cooked},
             totalScore: data.score,
+            canSessionUserUpdate: canUpdate,
             createdBy: {
                 id: data.user_id,
                 fullName: data.name,
@@ -316,7 +320,7 @@ export class DiscourseCommentProvider implements ICommentProvider {
         const data = response.data;
 
        
-        const newComment = this.populateComment(data);
+        const newComment = this.populateComment(data, options);
         return {
             resultObject: newComment
         };

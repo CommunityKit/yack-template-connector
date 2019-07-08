@@ -398,7 +398,7 @@ export class DiscourseThreadProvider implements IThreadProvider {
             title: "Title",
             type: Form.Field.Types.text,
             value: thread ? thread.title : null,
-            disabled: thread ? true : false
+            disabled: false
         };
 
         const bodyField: Form.RichTextField = {

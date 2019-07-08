@@ -13,15 +13,18 @@ import {
     Thumbnails,
     Thumbnail, 
     Reaction,
-    ObjectTypes
+    ObjectTypes,
+    PluginRequestOptions
 } from "yack-plugin-framework";
 // import * as Remarkable from "remarkable";
 import * as htmlEncoderDecoder from "html-encoder-decoder";
 import {populateAttachments} from "../threads/AttachmentPopulator"
 
 export namespace DiscourseThreadPopulator {
-    export async function populateThread(data: any, options): Promise<Thread> {
-        let reactionsConfig;
+    export async function populateThread(data: any, options: PluginRequestOptions): Promise<Thread> {
+        let reactionsConfig, canUpdate;
+
+        data.creator_username === options.session.user.username ? canUpdate = true :canUpdate = false;
         if(options.session.user){
         if(data.creator_username === options.session.user.username){
             reactionsConfig =  
@@ -43,6 +46,8 @@ export namespace DiscourseThreadPopulator {
         { commentsReactionConfig: 
             reactionsConfig
         },
+
+        canSessionUserUpdate: canUpdate,
 
         ...data.category_id &&{channelId: data.category_id.toString()},
         // ...data.slug && {channelId: data.slug},
