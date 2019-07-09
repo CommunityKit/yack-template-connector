@@ -67,7 +67,7 @@ export namespace DiscourseThreadPopulator {
         nsfw: false,
         createdBy: {
            
-            id: data.creator_id,
+            id: data.creator_username,
             username: data.creator_username,
             fullName: data.creator_full_name
         },

@@ -281,7 +281,12 @@ this.pluginContext.logger.d("Community doesn't have any categories")
             case "users": {
                 // https://community.cartalk.com/search/query?term=repair&include_blurbs=true&type_filter=user&_=1553019648877
                 // USE THIS ENDPOINT TO SEARCH USERS
-                userUrl = `${this.config.rootUrl}/search/query.json?term=${serializeQueryStr}&include_blurbs=true&type_filter=user${nextPageNumber}`;
+
+                const searchUserSearlizer = new URLSearchParams();
+                searchUserSearlizer.set("term", query);
+                const serializeUserQueryStr = searchUserSearlizer.toString();
+
+                userUrl = `${this.config.rootUrl}/search/query.json?${serializeUserQueryStr}&include_blurbs=true&type_filter=user${nextPageNumber}`;
                 response = await this.setUrlToken(hasUser, userUrl, options.session.user ? options.session.accessToken.token : null);
 
                 const usersData = response.users;
