@@ -221,7 +221,21 @@ export class DiscourseThreadProvider implements IThreadProvider {
         return null;
     }
 
-    async deleteThread(options: PluginRequestOptions, channelId: string, threadId: string): Promise<void> {}
+    async deleteThreadById(options: PluginRequestOptions, threadId: string): Promise<void> {
+        // const thread = await this.getThreadById(options,threadId);
+        // if(thread.createdBy.username === options.session.user.username){
+            let url = `${this.config.rootUrl}/t/${threadId}.json`; // only using first element so don't need pagination
+            await this.pluginContext.axios.delete(url, {
+                responseType: "json",
+                headers: {
+                    "user-api-key": options.session.accessToken.token
+                }
+            }); 
+        // }else{
+        //     return null;
+        // }
+
+    }
 
     // async saveThreadAction(options: PluginRequestOptions, threadId: string, actionItem: ObjectAction.Item): Promise<void> {}
     async saveAction(options: PluginRequestOptions, threadId: string, action: Action, actionType: Action.Types): Promise<void> {

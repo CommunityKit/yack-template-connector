@@ -48,6 +48,8 @@ export namespace DiscourseThreadPopulator {
         },
 
         canSessionUserUpdate: canUpdate,
+        canSessionUserDelete: canUpdate,
+
 
         ...data.category_id &&{channelId: data.category_id.toString()},
         // ...data.slug && {channelId: data.slug},

@@ -208,6 +208,8 @@ export class DiscourseCommentProvider implements ICommentProvider {
                 value: data.cooked},
             totalScore: data.score,
             canSessionUserUpdate: canUpdate,
+            canSessionUserDelete: canUpdate,
+
             createdBy: {
                 id: data.user_id,
                 fullName: data.name,
@@ -326,6 +328,22 @@ export class DiscourseCommentProvider implements ICommentProvider {
         };
     }
     async deleteComment(options: PluginRequestOptions, commentId: string): Promise<void> {}
+
+    async deleteCommentById(options: PluginRequestOptions, commentId: string): Promise<void> {
+        // const thread = await this.getCommentById(options,commentId);
+        // if(thread.createdBy.username === options.session.user.username){
+            let url = `${this.config.rootUrl}/posts/${commentId}.json`; // only using first element so don't need pagination
+            await this.pluginContext.axios.delete(url, {
+                responseType: "json",
+                headers: {
+                    "user-api-key": options.session.accessToken.token
+                }
+            }); 
+        // }else{
+        //     return null;
+        // }
+
+    }
 
     // async saveCommentAction(options: PluginRequestOptions, commentId: string, actionItem: ObjectAction.Item): Promise<void> {}
     async saveAction(options: PluginRequestOptions, commentId: string, action: Action, actionType: Action.Types): Promise<void> {
