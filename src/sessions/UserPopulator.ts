@@ -28,8 +28,6 @@ export function populateUser(data:any): PluginUser{
         tags.push(item)
     }
 
-    console.log(`YOUR UGLY FACE ${`https://discourse-cdn-sjc1.com/${data.communityName}/user_avatar/${data.partialUrl}/${data.userInfo.username.toLowerCase()}/240/${data.userInfo.custom_avatar_upload_id}_2.png`}`)
-
     const user: PluginUser = {
         // summary badges userInfo
         id: data.userInfo.username,
@@ -61,6 +59,29 @@ export function populateUser(data:any): PluginUser{
     return user;
 }
 
+
+export function populateSearchUser(data: any): PluginUser {
+    // ADDING SIZE TO PHOTO URLS
+    let avatar;
+    if(data.avatar_template.includes("https:")){
+        avatar = data.avatar_template.replace("{size}", "240")
+        // const ava = `https://avatars.discourse.org/v2/letter/c/da6949/{size}.png`
+    }else{
+        const ava = data.avatar_template;
+        const regex = /{size}/g;
+        const photoSized = ava.replace("{size}", "240");
+        avatar = `https://discourse-cdn-sjc1.com/${data.communityName}${photoSized}`
+    }
+
+    const user: PluginUser ={
+        id: data.username,
+
+        username: data.username,
+        fullName: data.name,
+        profileImageUrl: avatar
+    };
+    return user;
+}
 
 export function badgeToTag(data:any){
 

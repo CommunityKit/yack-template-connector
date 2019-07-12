@@ -1,6 +1,5 @@
 import { Filter } from "yack-plugin-framework";
 
-export namespace DiscourseFilters {
     // https://meta.discourse.org/t/filter-topic-with-specific-tag-inside-single-category/21916
     // IF site has thread_filters enabled then we need to use tags as filters on threads/topics
 
@@ -187,7 +186,6 @@ export namespace DiscourseFilters {
 
         // Need to fetch all Tags and Create filter options from tags
     ];
-}
 
 /*
 /////////SEARCH/////////

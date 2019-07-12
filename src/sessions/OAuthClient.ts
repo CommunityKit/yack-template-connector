@@ -1,7 +1,7 @@
 import { IPluginOAuthClient, OAuthConfig, AccessToken, PluginContext, stringUtils } from "yack-plugin-framework";
 import axios, { AxiosInstance, AxiosResponse, AxiosRequestConfig } from "axios";
 import * as querystring from "querystring";
-import DiscoursePluginConfig from "./DiscoursePluginConfig";
+import DiscoursePluginConfig from "../PluginConfig";
 import * as uuid from "uuid";
 // import * as forge from 'node-forge'
 import { generateKeyPair, generateKeyPairSync, privateDecrypt, publicDecrypt } from "crypto";
@@ -10,8 +10,8 @@ import * as nodeUrl from "url";
 // import * as crypto from 'crypto'
 // import { Dictionary } from "typescript-collections";
 import * as forge from "node-forge";
-import { IDiscourseConfig } from "./config/IDiscourseConfig";
-import { YackBetaConfig } from "./config/YackBetaConfig";
+import { IDiscourseConfig } from "../config/IDiscourseConfig";
+import { YackBetaConfig } from "../config/YackBetaConfig";
 
 export class DiscourseOAuthClient implements IPluginOAuthClient {
     oauthConfig: OAuthConfig = {

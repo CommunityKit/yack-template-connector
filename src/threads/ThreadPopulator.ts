@@ -1,28 +1,18 @@
 import {
     Thread,
     TextContent,
-    upndown,
-    PluginUser,
-    objectUtils,
-    stringUtils,
-    Attachment,
-    AttachmentType,
-    AttachmentProviderType,
-    urlUtils,
-    // ContentType,
-    Thumbnails,
-    Thumbnail, 
     Reaction,
-    ObjectTypes,
     PluginRequestOptions
 } from "yack-plugin-framework";
 // import * as Remarkable from "remarkable";
 import * as htmlEncoderDecoder from "html-encoder-decoder";
 import {populateAttachments} from "../threads/AttachmentPopulator"
 
-export namespace DiscourseThreadPopulator {
-    export async function populateThread(data: any, options: PluginRequestOptions): Promise<Thread> {
+    export async function populateThread(data: any, options: PluginRequestOptions, rootUrl: string): Promise<Thread> {
         let reactionsConfig, canUpdate;
+
+        console.warn(`Thread Share Urls: ${rootUrl}/t/${data.id.toString()}`)
+
 
         data.creator_username === options.session.user.username ? canUpdate = true :canUpdate = false;
         if(options.session.user){
@@ -35,10 +25,10 @@ export namespace DiscourseThreadPopulator {
             }
         } 
     }
-        console.warn(`ThreadPopulator() id: ${data.id}`)
         const thread: Thread = {
         totalComments: data.reply_count,
         id: data.id.toString(),
+        shareUrl: `${rootUrl}/t/${data.id.toString()}`,
         channelName: data.channelName,
         channelId: data.channelId,
 
@@ -126,5 +116,5 @@ export namespace DiscourseThreadPopulator {
 
         return thread;
     }
-}
+
 

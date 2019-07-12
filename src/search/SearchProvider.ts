@@ -2,32 +2,18 @@ import {
     PluginRequestOptions,
     PagedArray,
     PluginContext,
-    // IConversationProvider,
-    // Conversation,
-    // ConversationMessage,
-    //   ConversationMessageActions,
-    PluginUser,
     objectUtils,
     ISearchProvider,
     Category,
     Filter,
-    stringUtils,
     ObjectTypes
 } from "yack-plugin-framework";
-import * as URLAssembler from "url-assembler";
-import uuid = require("uuid");
-// import * as Remarkable from "remarkable";
-import * as htmlEncoderDecoder from "html-encoder-decoder";
 import { SearchResultItem } from "yack-plugin-framework";
-import { DiscourseThreadPopulator } from "./populators/DiscourseThreadPopulator";
-// import { SearchResultItemType } from "yack-plugin-framework";
-import { DiscourseChannelPopulator } from "./populators/DiscourseChannelPopulator";
-import { DiscourseCommentPopulator } from "./populators/DiscourseCommentPopulator";
-import { DiscourseUserPopulator } from "./populators/DiscourseUserPopulator";
-import { IDiscourseConfig } from "./config/IDiscourseConfig";
-import { DiscourseFilters } from "./DiscourseFilters";
-import { threadId } from "worker_threads";
-// import {populateUser} from "./sessions/UserPopulator"
+import { populateThread } from "../threads/ThreadPopulator";
+import { populateComment } from "../comments/CommentPopulator";
+import { populateSearchUser } from "../sessions/UserPopulator";
+import { IDiscourseConfig } from "../config/IDiscourseConfig";
+import * as filter from "./Filters";
 
 export class DiscourseSearchProvider implements ISearchProvider {
     private pluginContext: PluginContext;
@@ -35,22 +21,7 @@ export class DiscourseSearchProvider implements ISearchProvider {
     private allThreadIds: Array<any>;
     private allCommentIds: Array<any>;
     private allUserIds: Array<any>;
-
-    //   private timeFilter: Filter = {
-    //       id: "timefilter",
-    //       name: "From",
-    //       type: Filter.Types.SingleSelect,
-    //       defaultValue: "all",
-    //       childFilters: [
-    //           { id: "hour", name: "Past Hour", type: Filter.Types.ListItem },
-    //           { id: "day", name: "Past 24 Hours", type: Filter.Types.ListItem },
-    //           { id: "week", name: "Past Week", type: Filter.Types.ListItem },
-    //           { id: "month", name: "Past Month", type: Filter.Types.ListItem },
-    //           { id: "year", name: "Past Year", type: Filter.Types.ListItem },
-    //           { id: "all", name: "All Time", type: Filter.Types.ListItem }
-    //       ]
-    //   };
-
+    
     constructor(context: PluginContext, config: IDiscourseConfig) {
         this.pluginContext = context;
         this.config = config;
@@ -60,7 +31,7 @@ export class DiscourseSearchProvider implements ISearchProvider {
     }
 
     private async getCombinedFilters() {
-        const baseFilter: Filter[] = objectUtils.clone(DiscourseFilters.SEARCH_THREAD_FILTERS);
+        const baseFilter: Filter[] = objectUtils.clone(filter.SEARCH_THREAD_FILTERS);
 
         try{// GET Tags List
         const tagUrl = `${this.config.rootUrl}/tags.json`;
@@ -215,7 +186,7 @@ this.pluginContext.logger.d("Community doesn't have any categories")
                 // searchItem.itemType = SearchResultItemType.Thread;
                 if(threadsData){
                 for (const thread of threadsData) {
-                    const threadPopulated = await DiscourseThreadPopulator.populateThread(thread, options);
+                    const threadPopulated = await populateThread(thread, options, this.config.rootUrl);
                     thread.item = threadPopulated;
                     thread.itemType = ObjectTypes.thread;
                     thread.id = thread.id.toString();
@@ -243,7 +214,7 @@ this.pluginContext.logger.d("Community doesn't have any categories")
                         comment.threadId = comment.topic_id;
                         comment.score = comment.like_count;
 
-                        const commentPopulated = DiscourseCommentPopulator.populateComment(comment, options.session.user);
+                        const commentPopulated = populateComment(comment, options, this.config.rootUrl);
                         comment.item = commentPopulated;
                         comment.itemType = ObjectTypes.comment;
                         comment.id = comment.id.toString()
@@ -296,7 +267,7 @@ this.pluginContext.logger.d("Community doesn't have any categories")
                         user.score = user.like_count;
                         user.partialUrl = this.config.partialUrl
                         user.communityName = this.config.id.replace("_discourse","")
-                        const userPopulated = DiscourseUserPopulator.populateUser(user);
+                        const userPopulated = populateSearchUser(user);
                         user.item = userPopulated;
                         user.itemType = ObjectTypes.user;
                         user.id = user.username;

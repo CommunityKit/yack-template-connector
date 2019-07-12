@@ -11,13 +11,13 @@ import {
     // IConversationProvider,
     ISearchProvider
 } from "yack-plugin-framework";
-import { DiscourseOAuthClient } from "./DiscourseOAuthClient";
-import { DiscourseChannelProvider } from "./DiscourseChannelProvider";
-import { DiscourseThreadProvider } from "./DiscourseThreadProvider";
-import { DiscourseCommentProvider } from "./DiscourseCommentProvider";
-import { DiscourseUserProvider } from "./DiscourseUserProvider";
+import { DiscourseOAuthClient } from "./sessions/OAuthClient";
+import { DiscourseChannelProvider } from "./channels/ChannelProvider";
+import { DiscourseThreadProvider } from "./threads/ThreadProvider";
+import { DiscourseCommentProvider } from "./comments/CommentProvider";
+import { DiscourseUserProvider } from "./sessions/UserProvider";
 import { IDiscourseConfig } from "./config/IDiscourseConfig";
-import { DiscourseSearchProvider } from "./DiscourseSearchProvider";
+import { DiscourseSearchProvider } from "./search/SearchProvider";
 import { ReactionProvider } from "./actions/ReactionProvider";
 
 // import { DiscourseNotificationProvider } from "./DiscourseNotificationProvider";

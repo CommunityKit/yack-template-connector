@@ -2,40 +2,22 @@ import {
     PluginRequestOptions,
     PagedArray,
     PluginContext,
-    objectUtils,
     IThreadProvider,
     Thread,
-    // ObjectAction,
     stringUtils,
-    Attachment,
-    Thumbnails,
-    AttachmentType,
-    AttachmentProviderType,
-    urlUtils,
-    // ContentType,
     File as YackFile,
-    upndown,
-    Thumbnail,
-    PluginUser,
     Filter,
     IChannelProvider,
-    arrayUtils,
     Form,
     Channel,
-    UploadFileResult,
     SaveFormResult,
     Action,
     ThreadDisplayProperties
 } from "yack-plugin-framework";
-import * as htmlEncoderDecoder from "html-encoder-decoder";
-import DiscoursePluginConfig from "./DiscoursePluginConfig";
-// import * as Remarkable from "remarkable";
-import * as URLAssembler from "url-assembler";
-import { IDiscourseConfig } from "./config/IDiscourseConfig";
-import { DiscourseThreadPopulator } from "./populators/DiscourseThreadPopulator";
-import { DiscourseFilters } from "./DiscourseFilters";
-import { url } from "inspector";
-import { getUserCreatedContent } from "./threads/ThreadRequests"
+import { IDiscourseConfig } from "../config/IDiscourseConfig";
+import { populateThread } from "./ThreadPopulator";
+import * as filter from "../search/Filters";
+import { getUserCreatedContent } from "./ThreadRequests"
 import uuid = require("uuid");
 import * as querystring from "querystring";
 
@@ -63,7 +45,7 @@ export class DiscourseThreadProvider implements IThreadProvider {
 
     async getFilters(options: PluginRequestOptions): Promise<Filter[]> {
         // return DiscourseFilters.TOP_THREADS_FILTERS;
-        return DiscourseFilters.DEFAULT_CHANNELS_THREADS_FILTERS;
+        return filter.DEFAULT_CHANNELS_THREADS_FILTERS;
     }
 
     async getThreadsByChannelId(options: PluginRequestOptions, channelId: any): Promise<PagedArray<Thread>> {
@@ -169,7 +151,7 @@ export class DiscourseThreadProvider implements IThreadProvider {
             topic.creator_username = userObject.username;
             // this.pluginContext.logger.d(`Topic = ${JSON.stringify(topic)}`);
 
-            const thread = await DiscourseThreadPopulator.populateThread(topic, options);
+            const thread = await populateThread(topic, options, this.config.rootUrl);
             // this.populateTestAttachments(thread);
             threads.array.push(thread);
         }
@@ -212,7 +194,7 @@ export class DiscourseThreadProvider implements IThreadProvider {
         firstPostInThread.pinned = data.pinned ? data.pinned : null;
         firstPostInThread.channelId = data.category_id.toString();
 
-        const thread = await DiscourseThreadPopulator.populateThread(firstPostInThread, options);
+        const thread = await populateThread(firstPostInThread, options, this.config.rootUrl);
         // thread.detailsPrepopulated = true;
         return thread;
     }
@@ -259,9 +241,7 @@ export class DiscourseThreadProvider implements IThreadProvider {
             }); 
         } else {
             throw new Error(`Not implemented`);
-        }
-
-       
+        }       
     }
 
     private async getTopicStream() {
@@ -386,7 +366,7 @@ export class DiscourseThreadProvider implements IThreadProvider {
         const userThreadsData = await getUserCreatedContent(this.pluginContext.axios.get, this.config.rootUrl, userId, options.nextPageToken);
         for(const threadData of userThreadsData){
             // populate thread
-            const thread = await DiscourseThreadPopulator.populateThread(threadData, options)
+            const thread = await populateThread(threadData, options, this.config.rootUrl)
             thread.channelName = userId
             thread.channelId = userId
             // thread.detailsPrepopulated = true;

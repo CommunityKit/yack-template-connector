@@ -3,10 +3,6 @@ import { IReactionProvider, Reaction, PluginRequestOptions, PagedArray, PluginCo
 import { IDiscourseConfig } from "../config/IDiscourseConfig";
 import {getThreadPostId} from "../threads/ThreadRequests"
 
-import * as URLAssembler from "url-assembler";
-// import { fetchVideo } from "../threads/ThreadRequests";
-// import { getCommentById } from "../comments/CommentRequests";
-
 export class ReactionProvider implements IReactionProvider {
     reactionConfigByObjectType = {
         [ObjectTypes.thread]: {

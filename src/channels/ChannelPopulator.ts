@@ -1,19 +1,7 @@
 import {
-  Thread,
-  upndown,
   PluginUser,
-  objectUtils,
-  stringUtils,
-  Attachment,
-  AttachmentType,
-  AttachmentProviderType,
-  urlUtils,
-//   ContentType,
-  Thumbnails,
-  Thumbnail,
   Channel,
   TextContent
-//   PostType
 } from "yack-plugin-framework";
 
 export namespace DiscourseChannelPopulator {
@@ -35,20 +23,6 @@ export namespace DiscourseChannelPopulator {
     const metaHsh = {};
     metadataList.forEach(item => (metaHsh[item] = data[item]));
     channel.metadata = metaHsh;
-
-    // ??? In most cases this is null
-    // channel.bannerBackgroundImageUrl = data.uploaded_background;
-
-    // channel.bannerBackgroundColor = data.color;
-
-    // ??? Not sure how this applies to Discourse's model...
-    // ... it seems like allowedPostTypes should apply to Topics rather than channel categories
-    // channel.allowedPostTypes = [];
-    //  *** Need to check on this
-
-    // channel.primaryColor = data["primary_color"];
-
-    // channel.iconUrl = data.uploaded_logo
 
     // ??? Categories don't have activeUserCount OR Subscribers but we could use either post_count OR topic_count instead
     // ... categories do have engaged Users list but we'd have to fetch that separately

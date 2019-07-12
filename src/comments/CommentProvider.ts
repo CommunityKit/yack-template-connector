@@ -2,25 +2,16 @@ import {
     PluginRequestOptions,
     PagedArray,
     PluginContext,
-    objectUtils,
     ICommentProvider,
     Comment,
-    // ObjectAction,
-    PluginUser,
-    upndown,
-    stringUtils,
     Filter,
-    TextContent, Form, SaveFormResult, Action
+    Form, SaveFormResult, Action
 } from "yack-plugin-framework";
-import * as URLAssembler from "url-assembler";
-import * as htmlEncoderDecoder from "html-encoder-decoder";
-// import * as Remarkable from "remarkable";
-import { AxiosResponse, AxiosRequestConfig } from "axios";
 import * as querystring from "querystring";
-import { oc } from "ts-optchain";
-import DiscoursePluginConfig from "./DiscoursePluginConfig";
-import { IDiscourseConfig } from "./config/IDiscourseConfig";
+import { IDiscourseConfig } from "../config/IDiscourseConfig";
 import uuid = require("uuid");
+import { populateComment } from "./CommentPopulator";
+
 
 
 export class DiscourseCommentProvider implements ICommentProvider {
@@ -115,7 +106,7 @@ export class DiscourseCommentProvider implements ICommentProvider {
                     }
                 }
                 comment.threadId = threadId;
-                let newComment = this.populateComment(comment, options);
+                let newComment = populateComment(comment, options, this.config.rootUrl);
                 comments.array.push(newComment);
             }
         }
@@ -194,50 +185,50 @@ export class DiscourseCommentProvider implements ICommentProvider {
         }
     }
 
-    private populateComment(data: any, options: PluginRequestOptions) {
-        let canUpdate;
-        data.username === options.session.user.username ? canUpdate = true :canUpdate = false;
+    // private populateComment(data: any, options: PluginRequestOptions) {
+    //     let canUpdate;
+    //     data.username === options.session.user.username ? canUpdate = true :canUpdate = false;
 
-        const newComment: Comment = {
-            id: data.id.toString(),
-            ...data.parentCommentId && {parentCommentId: data.parentCommentId},
-            ...data.repliesNextPageToken && {repliesNextPageToken: data.repliesNextPageToken},
-            threadId: data.threadId,
-            content: {
-                type: TextContent.Types.html,
-                value: data.cooked},
-            totalScore: data.score,
-            canSessionUserUpdate: canUpdate,
-            canSessionUserDelete: canUpdate,
+    //     const newComment: Comment = {
+    //         id: data.id.toString(),
+    //         ...data.parentCommentId && {parentCommentId: data.parentCommentId},
+    //         ...data.repliesNextPageToken && {repliesNextPageToken: data.repliesNextPageToken},
+    //         threadId: data.threadId,
+    //         content: {
+    //             type: TextContent.Types.html,
+    //             value: data.cooked},
+    //         totalScore: data.score,
+    //         canSessionUserUpdate: canUpdate,
+    //         canSessionUserDelete: canUpdate,
 
-            createdBy: {
-                id: data.user_id,
-                fullName: data.name,
-                username: data.username
-            },
-            utcCreateDate: Date.parse(data.created_at),
-            utcLastUpdateDate: Date.parse(data.updated_at),
+    //         createdBy: {
+    //             id: data.user_id,
+    //             fullName: data.name,
+    //             username: data.username
+    //         },
+    //         utcCreateDate: Date.parse(data.created_at),
+    //         utcLastUpdateDate: Date.parse(data.updated_at),
 
-        };
-        // !!data.parentCommentId ? (newComment.parentCommentId = data.parentCommentId) : (newComment.parentCommentId = null);
-        // newComment.repliesNextPageLength = data.reply_count;
-        // data.repliesNextPageToken ? (newComment.repliesNextPageToken = data.repliesNextPageToken) : (newComment.repliesNextPageToken = null);
-        // newComment.threadId = data.threadId;
-        // newComment.content = newComment.id + "-" + data.cooked;
-        // newComment.totalLikes = "";
-        // newComment.totalDislikes = "";
-        // newComment.totalScore = data.score;
-        // newComment.createdBy = new PluginUser({
-        //     id: data.user_id,
-        //     fullName: data.name,
-        //     username: data.username
-        // });
-        // newComment.utcCreateDate = Date.parse(data.created_at);
-        // newComment.utcLastUpdateDate = Date.parse(data.updated_at);
-        // newComment.repliesNextPageToken = "";
-        // newComment.repliesNextPageLength = "";
-        return newComment;
-    }
+    //     };
+    //     // !!data.parentCommentId ? (newComment.parentCommentId = data.parentCommentId) : (newComment.parentCommentId = null);
+    //     // newComment.repliesNextPageLength = data.reply_count;
+    //     // data.repliesNextPageToken ? (newComment.repliesNextPageToken = data.repliesNextPageToken) : (newComment.repliesNextPageToken = null);
+    //     // newComment.threadId = data.threadId;
+    //     // newComment.content = newComment.id + "-" + data.cooked;
+    //     // newComment.totalLikes = "";
+    //     // newComment.totalDislikes = "";
+    //     // newComment.totalScore = data.score;
+    //     // newComment.createdBy = new PluginUser({
+    //     //     id: data.user_id,
+    //     //     fullName: data.name,
+    //     //     username: data.username
+    //     // });
+    //     // newComment.utcCreateDate = Date.parse(data.created_at);
+    //     // newComment.utcLastUpdateDate = Date.parse(data.updated_at);
+    //     // newComment.repliesNextPageToken = "";
+    //     // newComment.repliesNextPageLength = "";
+    //     return newComment;
+    // }
     // TBD
     // async saveComment(options: PluginRequestOptions, comment: Comment, parentComment?: Comment): Promise<Comment> {
     //     return null;
@@ -322,7 +313,7 @@ export class DiscourseCommentProvider implements ICommentProvider {
         const data = response.data;
 
        
-        const newComment = this.populateComment(data, options);
+        const newComment = populateComment(data, options, this.config.rootUrl);
         return {
             resultObject: newComment
         };
