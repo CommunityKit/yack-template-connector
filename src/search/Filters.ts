@@ -95,13 +95,14 @@ import { Filter } from "yack-plugin-framework";
             name: "Sort interval",
             type: Filter.Types.Sort,
             childFilters: [
+                { id: "default", name: "Default", type: Filter.Types.ListItem },
                 { id: "daily", name: "Daily", type: Filter.Types.ListItem },
                 { id: "weekly", name: "Weekly", type: Filter.Types.ListItem },
                 { id: "monthly", name: "Monthly", type: Filter.Types.ListItem },
                 { id: "quarterly", name: "Quarterly", type: Filter.Types.ListItem },
                 { id: "yearly", name: "Yearly", type: Filter.Types.ListItem }
             ],
-            defaultValue: "weekly"
+            defaultValue: "default"
         }
     ];
 
@@ -145,10 +146,11 @@ import { Filter } from "yack-plugin-framework";
             id: "search_sorts",
             name: "Sort",
             type: Filter.Types.Sort,
+            defaultValue: "latest",
             childFilters: [
                 { id: "latest", name: "Latest", type: Filter.Types.ListItem },
                 { id: "likes", name: "Likes", type: Filter.Types.ListItem },
-                { id: "views", name: "Views", type: Filter.Types.ListItem }
+                { id: "views", name: "Views", type: Filter.Types.ListItem },
                 // { id: "latest_topic", name: "Latest Topic", type: Filter.Types.ListItem }
             ]
         },

@@ -276,9 +276,13 @@ export class DiscourseThreadProvider implements IThreadProvider {
     private getTopChannelFilters(options: PluginRequestOptions): string {
         const sortByFilter = Filter.findFilter(options.filters, "sort_interval");
         const sortId = sortByFilter.value.toString();
+        if(sortId === "default"){
+            return '';
+        }else{
         const partialUrl = `/${sortId}`;
         // const topThreadsFilters = objectUtils.clone(DiscourseFilters.TOP_THREADS_FILTERS);
         return partialUrl;
+    }
     }
 
     private getSolvedFilters(options: PluginRequestOptions): string {

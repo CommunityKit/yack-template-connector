@@ -190,11 +190,11 @@ this.pluginContext.logger.d("Community doesn't have any categories")
                     thread.item = threadPopulated;
                     thread.itemType = ObjectTypes.thread;
                     thread.id = thread.id.toString();
-                    if(this.allThreadIds.includes(thread.id)){
-                        return searchResults;
-                    }else{
+                    // if(this.allThreadIds.includes(thread.id)){
+                    //     return searchResults;
+                    // }else{
                         this.allThreadIds.push(thread.id)
-                    }
+                    // }
                     const searchResultItem = this.populateSearchResultItem(thread);
                     searchResults.array.push(searchResultItem);
                 }}
@@ -219,11 +219,11 @@ this.pluginContext.logger.d("Community doesn't have any categories")
                         comment.itemType = ObjectTypes.comment;
                         comment.id = comment.id.toString()
 
-                        if(this.allCommentIds.includes(comment.id)){
-                            return searchResults;
-                        }else{
+                        // if(this.allCommentIds.includes(comment.id)){
+                        //     return searchResults;
+                        // }else{
                             this.allCommentIds.push(comment.id)
-                        }
+                        // }
                         const searchResultItem = this.populateSearchResultItem(comment);
                         searchResults.array.push(searchResultItem);
                     }
@@ -394,7 +394,7 @@ this.pluginContext.logger.d("Community doesn't have any categories")
 
     private populateSearchResultItem(data: any): SearchResultItem {
         const searchItem: SearchResultItem = {
-            id: data.id.toString(),
+            id: `${data.threadId}-${data.id.toString()}`,
             item: data.item,
         itemType: data.itemType
         };
