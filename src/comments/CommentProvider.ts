@@ -5,7 +5,7 @@ import {
     ICommentProvider,
     Comment,
     Filter,
-    Form, SaveFormResult, Action
+    Form, Action, Result, Thread, PluginUser
 } from "yack-plugin-framework";
 import * as querystring from "querystring";
 import { IDiscourseConfig } from "../config/IDiscourseConfig";
@@ -14,7 +14,7 @@ import { populateComment } from "./CommentPopulator";
 
 
 
-export class DiscourseCommentProvider implements ICommentProvider {
+export class CommentProvider implements ICommentProvider {
     private static readonly COMMENTS_PAGE_SIZE = 20;
     private pluginContext: PluginContext;
     private config: IDiscourseConfig;
@@ -26,11 +26,13 @@ export class DiscourseCommentProvider implements ICommentProvider {
         this.config = config;
     }
 
-    async getFilters(): Promise<Filter[]> {
-        return [];
+    async getFilters(): Promise<Result<Filter[]>> {
+        return Result.success([]);
     }
 
-    async getCommentsByThreadId(options: PluginRequestOptions, threadId: string, parentCommentId?: string): Promise<PagedArray<Comment>> {
+    async getCommentsByThread(options: PluginRequestOptions, threadQuery: Thread.Query, parentCommentQuery: Comment.Query): Promise<Result<PagedArray<Comment>>> {
+        const threadId = threadQuery.id;
+        const parentCommentId = !!parentCommentQuery ? parentCommentQuery.id : false;
         const hasUser: boolean = !!options.session.user;
         let url: string;
         let response: any;
@@ -110,8 +112,16 @@ export class DiscourseCommentProvider implements ICommentProvider {
                 comments.array.push(newComment);
             }
         }
+        return Result.success(comments);
+        // return comments;
+    }
 
-        return comments;
+    async getCommentsByUser(
+        options: PluginRequestOptions,
+        userQuery: PluginUser.Query,
+        parentCommentQuery: Comment.Query
+    ): Promise<Result<PagedArray<Comment>>> {
+        return Result.success(new PagedArray());
     }
 
     private async setUrlToken(hasUser: boolean, url: string, key?: string) {
@@ -240,8 +250,12 @@ export class DiscourseCommentProvider implements ICommentProvider {
     // IF no parentComment => reply to thread
     // IF comment => you're editing that comment
         // To access comment data => comment.id
-    async getSaveCommentForm?(options: PluginRequestOptions, threadId: string, parentComment: Comment, comment: Comment): Promise<Form> {
+    async getSaveCommentForm?(options: PluginRequestOptions, threadQuery: Thread.Query, parentCommentQuery: Comment.Query, commentQuery: Comment.Query): Promise<Result<Form>> {
+        const threadId = threadQuery.id;
+        const parentComment = parentCommentQuery;
+        const comment = commentQuery;
         console.log(threadId, parentComment, comment);
+    
         // Discourse has strikethrough and heading options but they are only accessible through Markdown/Html
         // Not sure if Discourse preformatted text is related to codeblock (dont think it is)
         // Add later: "heading", "strikethrough", "codeblock"
@@ -264,16 +278,21 @@ export class DiscourseCommentProvider implements ICommentProvider {
                 body: bodyField
             }
         };
-        return form;
+
+        return Result.success(form);
+        // return form;
     }
 
     async saveCommentForm?(
         options: PluginRequestOptions,
-        threadId: string,
-        parentComment: Comment,
-        comment: Comment,
+        threadQuery: Thread.Query,
+        parentCommentQuery: Comment.Query,
+        commentQuery: Comment.Query,
         formValue: Form.Value
-    ): Promise<SaveFormResult<Comment>> {
+    ): Promise<Result<Comment>> {
+        const threadId = threadQuery.id;
+        const parentComment = parentCommentQuery;
+        const comment = commentQuery;
         console.log(threadId, parentComment, comment);
         const body = formValue.valueByFieldId["body"];
         let formData
@@ -314,11 +333,14 @@ export class DiscourseCommentProvider implements ICommentProvider {
 
        
         const newComment = populateComment(data, options, this.config.rootUrl);
-        return {
-            resultObject: newComment
-        };
+        // return {
+        //     resultObject: newComment
+        // };
+        return Result.success(newComment);
     }
-    async deleteComment(options: PluginRequestOptions, commentId: string): Promise<void> {}
+    async deleteComment(options: PluginRequestOptions, commentQuery: Comment.Query): Promise<Result<void>> {
+        return Result.success(null)
+    }
 
     async deleteCommentById(options: PluginRequestOptions, commentId: string): Promise<void> {
         // const thread = await this.getCommentById(options,commentId);
@@ -337,7 +359,8 @@ export class DiscourseCommentProvider implements ICommentProvider {
     }
 
     // async saveCommentAction(options: PluginRequestOptions, commentId: string, actionItem: ObjectAction.Item): Promise<void> {}
-    async saveAction(options: PluginRequestOptions, commentId: string, action: Action, actionType: Action.Types): Promise<void> {
+    async saveAction(options: PluginRequestOptions, commentQuery: Comment.Query, action: Action, actionType: Action.Types): Promise<Result<void>> {
+        const commentId = commentQuery.id
         let url, response, data, formData;
         if (action == Action.report) {
             url = `${this.config.rootUrl}/post_actions.json`
@@ -360,7 +383,7 @@ export class DiscourseCommentProvider implements ICommentProvider {
             throw new Error(`Not implemented`);
         }
 
-       
+        return Result.success(null)
     }
 
     async getUserComments(options: PluginRequestOptions, userId: string): Promise<PagedArray<Comment>> {

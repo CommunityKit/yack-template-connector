@@ -1,4 +1,4 @@
-import { IPluginOAuthClient, OAuthConfig, AccessToken, PluginContext, stringUtils } from "yack-plugin-framework";
+import { IPluginOAuthClient, OAuthConfig, AccessToken, PluginContext, stringUtils, Result } from "yack-plugin-framework";
 import axios, { AxiosInstance, AxiosResponse, AxiosRequestConfig } from "axios";
 import * as querystring from "querystring";
 import DiscoursePluginConfig from "../PluginConfig";
@@ -13,7 +13,7 @@ import * as forge from "node-forge";
 import { IDiscourseConfig } from "../config/IDiscourseConfig";
 import { YackBetaConfig } from "../config/YackBetaConfig";
 
-export class DiscourseOAuthClient implements IPluginOAuthClient {
+export class OAuthClient implements IPluginOAuthClient {
     oauthConfig: OAuthConfig = {
         clientId: "discourPlugin",
         userScopeClientId: "anotherRandomString",
@@ -29,7 +29,7 @@ export class DiscourseOAuthClient implements IPluginOAuthClient {
         this.config = config;
     }
 
-    async getUserOAuthLoginUrl(state: string): Promise<string> {
+    async getUserOAuthLoginUrl(state: string): Promise<Result<string>> {
         const nonce = uuid.v4();
 
         // Remove dashes from uuid for properly formatted SecureRandom Hex
@@ -41,36 +41,37 @@ export class DiscourseOAuthClient implements IPluginOAuthClient {
 
         let url = `${this.config.rootUrl}/user-api-key/new?scopes=read%2Cwrite%2Cmessage_bus%2Cpush%2Cnotifications%2Csession_info&client_id=${client}&nonce=${nonce}&auth_redirect=${this.oauthConfig.redirectUri}&application_name=Discourse&public_key=${DiscoursePluginConfig.yackDiscoursePublicKey}&discourse_app=1`;
 
-        return url;
+        // return url;
+        return Result.success(url)
     }
 
-    async getUserAccessTokenFromCode(redirectCallbackUri: string): Promise<AccessToken> {
+    async getUserAccessTokenFromCode(redirectCallbackUri: string): Promise<Result<AccessToken>> {
         this.pluginContext.logger.d(`user authenticated, redirectUri = ${redirectCallbackUri}`);
         const privateKey = DiscoursePluginConfig.yackDiscoursePrivateKey;
 
         const decoded = decodeURI(redirectCallbackUri);
-        this.pluginContext.logger.d(`decoded = ${decoded}`);
+        // this.pluginContext.logger.d(`decoded = ${decoded}`);
 
         const firstParse = nodeUrl.parse(decoded);
-        this.pluginContext.logger.d(`firstParse = ${firstParse}`);
+        // this.pluginContext.logger.d(`firstParse = ${firstParse}`);
 
         const secondParse = querystring.parse(firstParse.query);
-        this.pluginContext.logger.d(`secondParse = ${JSON.stringify(secondParse)}`);
+        // this.pluginContext.logger.d(`secondParse = ${JSON.stringify(secondParse)}`);
 
         const encryptedPayload = secondParse.payload;
-        this.pluginContext.logger.d(`encryptedPayload = ${encryptedPayload}`);
+        // this.pluginContext.logger.d(`encryptedPayload = ${encryptedPayload}`);
 
         let forgePrivateKey = forge.pki.privateKeyFromPem(privateKey);
-        this.pluginContext.logger.d(`forgePrivateKey = ${forgePrivateKey}`);
+        // this.pluginContext.logger.d(`forgePrivateKey = ${forgePrivateKey}`);
 
         const decodedPayload = forge.util.decode64(encryptedPayload);
-        this.pluginContext.logger.d(`decodedPayload = ${decodedPayload}`);
+        // this.pluginContext.logger.d(`decodedPayload = ${decodedPayload}`);
 
         const decryptedPayload = forgePrivateKey.decrypt(decodedPayload);
-        this.pluginContext.logger.d(`decryptedPayload = ${decryptedPayload}`);
+        // this.pluginContext.logger.d(`decryptedPayload = ${decryptedPayload}`);
 
         const accessCode = JSON.parse(decryptedPayload).key;
-        this.pluginContext.logger.d(`accessCode = ${accessCode}`);
+        // this.pluginContext.logger.d(`accessCode = ${accessCode}`);
 
         // IMPLEMENT IN NODE BACKEND LATER
         /*
@@ -95,37 +96,40 @@ export class DiscourseOAuthClient implements IPluginOAuthClient {
 
         const accessToken = this.populateAccessToken(accessCode);
 
-        return accessToken;
+        // return accessToken;
+        return Result.success(accessToken);
     }
 
     // For anonymous requests
-    async getClientAccessToken(): Promise<AccessToken> {
+    async getClientAccessToken(): Promise<Result<AccessToken>> {
         return null;
     }
 
     // ???
-    async refreshAccessToken(accessToken: AccessToken): Promise<AccessToken> {
-        const basicAuthCredentials = `${this.oauthConfig.clientId}:password`;
-        const config: AxiosRequestConfig = {
-            baseURL: "https://www.reddit.com/api/v1",
-            headers: {
-                Authorization: `Basic ${btoa(basicAuthCredentials)}`
-            }
-        };
+    async refreshAccessToken(accessToken: AccessToken): Promise<Result<AccessToken>> {
+        // const basicAuthCredentials = `${this.oauthConfig.clientId}:password`;
+        // const config: AxiosRequestConfig = {
+        //     baseURL: "https://www.reddit.com/api/v1",
+        //     headers: {
+        //         Authorization: `Basic ${btoa(basicAuthCredentials)}`
+        //     }
+        // };
 
-        const postData = {
-            grant_type: "refresh_token",
-            refresh_token: accessToken.refreshToken
-        };
+        // const postData = {
+        //     grant_type: "refresh_token",
+        //     refresh_token: accessToken.refreshToken
+        // };
 
-        const response = await this.pluginContext.axios.post("/access_token/", querystring.stringify(postData), config);
-        this.ensureSuccess(response);
-        const newAccessToken = this.populateAccessToken(response.data);
-        //renewing with access token doesn't return the refresh token again.
-        if (!newAccessToken.refreshToken && accessToken.refreshToken) {
-            newAccessToken.refreshToken = accessToken.refreshToken;
-        }
-        return newAccessToken;
+        // const response = await this.pluginContext.axios.post("/access_token/", querystring.stringify(postData), config);
+        // this.ensureSuccess(response);
+        // const newAccessToken = this.populateAccessToken(response.data);
+        // //renewing with access token doesn't return the refresh token again.
+        // if (!newAccessToken.refreshToken && accessToken.refreshToken) {
+        //     newAccessToken.refreshToken = accessToken.refreshToken;
+        // }
+        return null;
+        // return Result.success(newAccessToken)
+        // return newAccessToken;
     }
 
     private populateAccessToken(data: any): AccessToken {

@@ -11,13 +11,13 @@ import {
     // IConversationProvider,
     ISearchProvider
 } from "yack-plugin-framework";
-import { DiscourseOAuthClient } from "./sessions/OAuthClient";
-import { DiscourseChannelProvider } from "./channels/ChannelProvider";
-import { DiscourseThreadProvider } from "./threads/ThreadProvider";
-import { DiscourseCommentProvider } from "./comments/CommentProvider";
-import { DiscourseUserProvider } from "./sessions/UserProvider";
+import { OAuthClient } from "./sessions/OAuthClient";
+import { ChannelProvider } from "./channels/ChannelProvider";
+import { ThreadProvider } from "./threads/ThreadProvider";
+import { CommentProvider } from "./comments/CommentProvider";
+import { UserProvider } from "./sessions/UserProvider";
 import { IDiscourseConfig } from "./config/IDiscourseConfig";
-import { DiscourseSearchProvider } from "./search/SearchProvider";
+import { SearchProvider } from "./search/SearchProvider";
 import { ReactionProvider } from "./actions/ReactionProvider";
 
 // import { DiscourseNotificationProvider } from "./DiscourseNotificationProvider";
@@ -30,7 +30,7 @@ export class DiscoursePlugin implements IPlugin {
     threadProvider?: IThreadProvider;
     commentProvider?: ICommentProvider;
     userProvider?: IUserProvider;
-    reactionProvider: ReactionProvider;
+    reactionProvider?: ReactionProvider;
 
     // notificationProvider?: INotificationProvider;
     // conversationProvider?: IConversationProvider;
@@ -59,15 +59,15 @@ export class DiscoursePlugin implements IPlugin {
     // secondaryColor = this.config.accentColor;
 
     async init(context: PluginContext) {
-        this.oauthClient = new DiscourseOAuthClient(context, this.config);
-        this.channelProvider = new DiscourseChannelProvider(context, this.config);
-        this.threadProvider = new DiscourseThreadProvider(context, this.config, this.channelProvider);
-        this.userProvider = new DiscourseUserProvider(context, this.config);
-        this.commentProvider = new DiscourseCommentProvider(context, this.config);
+        this.oauthClient = new OAuthClient(context, this.config);
+        this.channelProvider = new ChannelProvider(context, this.config);
+        this.threadProvider = new ThreadProvider(context, this.config, this.channelProvider);
+        this.userProvider = new UserProvider(context, this.config);
+        this.commentProvider = new CommentProvider(context, this.config);
         // this.notificationProvider = new DiscourseNotificationProvider(context);
         // this.conversationProvider = new DiscourseConversationProvider(context);
         // this.conversationMessageProvider = new RedditConversationMessageProvider(context);
-        this.searchProvider = new DiscourseSearchProvider(context, this.config);
+        this.searchProvider = new SearchProvider(context, this.config);
         this.reactionProvider = new ReactionProvider(context, this.config);
 
     }

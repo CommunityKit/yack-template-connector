@@ -1,11 +1,11 @@
-import { PluginRequestOptions, PluginUser, objectUtils, PluginContext } from "yack-plugin-framework";
+import { PluginRequestOptions, PluginUser, objectUtils, PluginContext, Result } from "yack-plugin-framework";
 import * as URLAssembler from "url-assembler";
 import DiscoursePluginConfig from "../PluginConfig";
 import { IDiscourseConfig } from "../config/IDiscourseConfig";
 import { populateUser } from "./UserPopulator"
 import { getUserStats, getUserData } from "./UserRequests";
 
-export class DiscourseUserProvider {
+export class UserProvider {
     private pluginContext: PluginContext;
     private config: IDiscourseConfig;
 
@@ -13,7 +13,7 @@ export class DiscourseUserProvider {
         this.pluginContext = context;
         this.config = config;
     }
-    async getSelf(options: PluginRequestOptions): Promise<PluginUser> {
+    async getSelf(options: PluginRequestOptions): Promise<Result<PluginUser>> {
         // ??? In Discourse you fetch the user by username... How are we retrieving this?
         let sessionURL = `${this.config.rootUrl}/session/current.json`;
 
@@ -64,9 +64,11 @@ export class DiscourseUserProvider {
             // "link_posting_access": "full",
         };
 
-        return pluginUser;
+        // return pluginUser;
+        return Result.success(pluginUser);
     }
-    async getUserById(options: PluginRequestOptions, userId: string): Promise<PluginUser> {
+    async getUser(options: PluginRequestOptions, userQuery: PluginUser.Query): Promise<Result<PluginUser>> {
+        const userId = userQuery.id
         // userID === username
         let allData;
         await Promise.all(
@@ -87,15 +89,15 @@ export class DiscourseUserProvider {
         const user = populateUser(allData)
         // let user = new PluginUser();
         //   return user;
-        return user;
+        return Result.success(user);
     }
 
-    async getUserByUserName(options: PluginRequestOptions, userName: string): Promise<PluginUser> {
+    async getUserByUserName(options: PluginRequestOptions, username: string): Promise<Result<PluginUser>> {
         // userID === username
         let allData;
         await Promise.all(
-            [getUserStats(this.config.rootUrl, this.pluginContext.axios.get, userName),
-            getUserData(this.config.rootUrl, this.pluginContext.axios.get, userName)
+            [getUserStats(this.config.rootUrl, this.pluginContext.axios.get, username),
+            getUserData(this.config.rootUrl, this.pluginContext.axios.get, username)
         ]).then(data => {
             allData = {
                 summary: data[0].user_summary,
@@ -111,7 +113,7 @@ export class DiscourseUserProvider {
         const user = populateUser(allData)
         // let user = new PluginUser();
         //   return user;
-        return user;
+        return Result.success(user);
     }
     // async saveUserAction(options: PluginRequestOptions, actionItem: ObjectAction.Item): Promise<void> {}
 }

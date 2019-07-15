@@ -10,9 +10,10 @@ import {
     IChannelProvider,
     Form,
     Channel,
-    SaveFormResult,
+    Result,
     Action,
-    ThreadDisplayProperties
+    ThreadDisplayProperties,
+    PluginUser
 } from "yack-plugin-framework";
 import { IDiscourseConfig } from "../config/IDiscourseConfig";
 import { populateThread } from "./ThreadPopulator";
@@ -23,7 +24,7 @@ import * as querystring from "querystring";
 
 
 
-export class DiscourseThreadProvider implements IThreadProvider {
+export class ThreadProvider implements IThreadProvider {
     private pluginContext: PluginContext;
     private config: IDiscourseConfig;
     private channelProvider: IChannelProvider;
@@ -43,13 +44,15 @@ export class DiscourseThreadProvider implements IThreadProvider {
         ThreadDisplayProperties.description
     ];
 
-    async getFilters(options: PluginRequestOptions): Promise<Filter[]> {
+    async getFilters(options: PluginRequestOptions): Promise<Result<Filter[]>> {
         // return DiscourseFilters.TOP_THREADS_FILTERS;
-        return filter.DEFAULT_CHANNELS_THREADS_FILTERS;
+        // return filter.DEFAULT_CHANNELS_THREADS_FILTERS;
+        return Result.success(filter.DEFAULT_CHANNELS_THREADS_FILTERS)
     }
 
-    async getThreadsByChannelId(options: PluginRequestOptions, channelId: any): Promise<PagedArray<Thread>> {
+    async getThreadsByChannel(options: PluginRequestOptions, channelQuery: Channel.Query): Promise<Result<PagedArray<Thread>>> {
         // SetHeaders
+        const channelId = channelQuery.id
         const hasUser = !!options.session.user;
 
         // Axios Request
@@ -155,12 +158,14 @@ export class DiscourseThreadProvider implements IThreadProvider {
             // this.populateTestAttachments(thread);
             threads.array.push(thread);
         }
-        return threads;
+        return Result.success(threads)
+        // return threads;
     }
 
-    async getThreadById(options: PluginRequestOptions, threadId: string, postId?: boolean): Promise<Thread> {
+    async getThread(options: PluginRequestOptions, threadQuery: Thread.Query, postId?: boolean): Promise<Result<Thread>> {
         // const tId = threadId.split(" ")[0]
         // const postId = threadId.split(" ")[1]
+        const threadId = threadQuery.id;
 
         const hasUser = !!options.session.user;
         let url = `${this.config.rootUrl}/t/${threadId}.json`; // only using first element so don't need pagination
@@ -196,7 +201,8 @@ export class DiscourseThreadProvider implements IThreadProvider {
 
         const thread = await populateThread(firstPostInThread, options, this.config.rootUrl);
         // thread.detailsPrepopulated = true;
-        return thread;
+        // return thread;
+        return Result.success(thread)
     }
 
     async saveThread(options: PluginRequestOptions, channelId: string, thread: Thread): Promise<Thread> {
@@ -220,7 +226,8 @@ export class DiscourseThreadProvider implements IThreadProvider {
     }
 
     // async saveThreadAction(options: PluginRequestOptions, threadId: string, actionItem: ObjectAction.Item): Promise<void> {}
-    async saveAction(options: PluginRequestOptions, threadId: string, action: Action, actionType: Action.Types): Promise<void> {
+    async saveAction(options: PluginRequestOptions, threadQuery: Thread.Query, action: Action, actionType: Action.Types): Promise<Result<void>> {
+        const threadId = threadQuery.id
         let url, response, data, formData;
         if (action == Action.report) {
             url = `${this.config.rootUrl}/post_actions.json`
@@ -241,7 +248,8 @@ export class DiscourseThreadProvider implements IThreadProvider {
             }); 
         } else {
             throw new Error(`Not implemented`);
-        }       
+        }  
+        return Result.success(null)     
     }
 
     private async getTopicStream() {
@@ -253,10 +261,10 @@ export class DiscourseThreadProvider implements IThreadProvider {
         const hasUser = !!options.session.user;
         let url = `${this.config.rootUrl}/site.json`;
         const allData = await this.setUrlToken(hasUser, url, options.session.user ? options.session.accessToken.token : null);
-        this.pluginContext.logger.d(`createCategoryDictionary Response = ${JSON.stringify(allData.categories)}`);
+        // this.pluginContext.logger.d(`createCategoryDictionary Response = ${JSON.stringify(allData.categories)}`);
         const categories = allData.categories;
         categories.forEach(category => (categoryDictionary[category.id.toString()] = category.name));
-        this.pluginContext.logger.d(`Completed Dictionary: ${JSON.stringify(categoryDictionary)}`);
+        // this.pluginContext.logger.d(`Completed Dictionary: ${JSON.stringify(categoryDictionary)}`);
         return categoryDictionary;
     }
 
@@ -363,7 +371,8 @@ export class DiscourseThreadProvider implements IThreadProvider {
             return nextPageNumber;
         }
     }
-    async getThreadsByUserId(options: PluginRequestOptions, userId: string): Promise<PagedArray<Thread>> {
+    async getThreadsByUser(options: PluginRequestOptions, userQuery: PluginUser.Query): Promise<Result<PagedArray<Thread>>> {
+        const userId = userQuery.id;
         // Pagination???
         // https://community.cartalk.com/user_actions.json?offset=0&username=b.l.e&filter=5&no_results_help_key=user_activity.no_replies&_=1556298757193
         const userThreads = new PagedArray<Thread>();
@@ -377,19 +386,21 @@ export class DiscourseThreadProvider implements IThreadProvider {
             userThreads.array.push(thread)
             // push to PagedArray
         }
-        return userThreads;
+        return Result.success(userThreads);
+        // return userThreads;
     }
 
 
     // IF threadId: user is trying to edit a thread
-    async getSaveThreadForm(options: PluginRequestOptions, channelId: string, threadId: string): Promise<Form> {
-        let thread: Thread = null;
-        let channel: Channel = null;
+    async getSaveThreadForm(options: PluginRequestOptions, channelQuery: Channel.Query, threadQuery: Thread.Query): Promise<Result<Form>> {
+        const threadId = threadQuery.id;
+        const channelId = channelQuery.id;
+        let thread, channel;
         if (!stringUtils.isNullOrEmpty(threadId)) {
-            thread = await this.getThreadById(options, threadId);
-            channel = await this.channelProvider.getChannelById(options, thread.channelId);
+            thread = await this.getThread(options, threadQuery);
+            channel = await this.channelProvider.getChannel(options, channelQuery);
         } else {
-            channel = await this.channelProvider.getChannelById(options, channelId);
+            channel = await this.channelProvider.getChannel(options, channelQuery);
         }
 
         const titleField: Form.TextField = {
@@ -486,15 +497,19 @@ export class DiscourseThreadProvider implements IThreadProvider {
                 postTypesField.value = "post";
         }
 
-        return {
+        const form: Form = {
             id: uuid.v4(),
             fieldById: {
                 postTypes: postTypesField
             }
         };
+
+        return Result.success(form);
     }
 
-    async saveThreadForm(options: PluginRequestOptions, channelId: string, threadId: string, formValue: Form.Value): Promise<SaveFormResult<Thread>> {
+    async saveThreadForm(options: PluginRequestOptions, channelQuery: Channel.Query, threadQuery: Thread.Query, formValue: Form.Value): Promise<Result<Thread>> {
+        const channelId = channelQuery.id;
+        const threadId = threadQuery.id;
         const valueByFieldId = formValue.valueByFieldId;
         const title = valueByFieldId["title"] as string;
         const body = valueByFieldId["body"] as string;
@@ -522,10 +537,11 @@ export class DiscourseThreadProvider implements IThreadProvider {
        
 
         const newThreadId = data.topic_id;
-        const thread = await this.getThreadById(options, newThreadId);
-        return {
-            resultObject: thread
-        };
+        const thread = await this.getThread(options, {id: newThreadId});
+        // return {
+        //     resultObject: thread
+        // };
+        return thread;
     }
 
     // async uploadSaveThreadFormFile(

@@ -4,7 +4,7 @@ import {
   TextContent
 } from "yack-plugin-framework";
 
-export namespace DiscourseChannelPopulator {
+export namespace ChannelPopulator {
   export function populateChannel(data: any, sessionUser: PluginUser): Channel {
     // const channel = new Channel();
     const channel: Channel = {

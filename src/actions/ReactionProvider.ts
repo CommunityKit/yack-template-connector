@@ -1,4 +1,4 @@
-import { IReactionProvider, Reaction, PluginRequestOptions, PagedArray, PluginContext, ObjectTypes, cookieUtils } from "yack-plugin-framework";
+import { IReactionProvider, Reaction, PluginRequestOptions, PagedArray, PluginContext, ObjectTypes, cookieUtils, Result } from "yack-plugin-framework";
 
 import { IDiscourseConfig } from "../config/IDiscourseConfig";
 import {getThreadPostId} from "../threads/ThreadRequests"
@@ -67,9 +67,10 @@ export class ReactionProvider implements IReactionProvider {
     }
 
     // When different types of reactions that the different reaction counts
-    async getReactionsSummary(options: PluginRequestOptions, objectType: Reaction.ObjectTypes, objectId: string): Promise<Reaction.Summary> {
+    async getReactionsSummary(options: PluginRequestOptions, objectType: Reaction.ObjectTypes, objectQuery: Reaction.ObjectQueryTypes): Promise<Result<Reaction.Summary>> {
+        const objectId = objectQuery.id;
         console.warn(`getReactionsSummmary() ObjectId: ${objectId}`)
-        return null;
+        return Result.success(null);
     }
 
     // Only for ReactionsSummary()
@@ -77,18 +78,19 @@ export class ReactionProvider implements IReactionProvider {
     async getReactions(
         options: PluginRequestOptions,
         objectType: Reaction.ObjectTypes,
-        objectId: string,
+        objectQuery: Reaction.ObjectQueryTypes,
         reaction: Reaction
-    ): Promise<PagedArray<Reaction.UserReaction>> {
+    ): Promise<Result<PagedArray<Reaction.UserReaction>>> {
+        const objectId = objectQuery.id;
         const reactions = new PagedArray<Reaction.UserReaction>();
         console.warn(`getReactions() ObjectId: ${objectId}`)
 
-        return reactions;
+        return Result.success(reactions);
     }
 
     // objectId is one of [channelId, threadId, commentId]
-    async saveReaction(options: PluginRequestOptions, objectType: Reaction.ObjectTypes, objectId: string, reaction: Reaction): Promise<void> {
-
+    async saveReaction(options: PluginRequestOptions, objectType: Reaction.ObjectTypes, objectQuery: Reaction.ObjectQueryTypes, reaction: Reaction): Promise<Result<void>> {
+        const objectId = objectQuery.id
         let url, formData, resp;
         console.warn(`saveReaction() ObjectId ${objectId}`)
         // const parsedThreadId = objectId.split(" ")[0]
@@ -143,6 +145,7 @@ export class ReactionProvider implements IReactionProvider {
 
                     }
                 }
+                return Result.success(null)
             }
 
 

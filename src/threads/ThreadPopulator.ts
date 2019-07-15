@@ -11,7 +11,7 @@ import {populateAttachments} from "../threads/AttachmentPopulator"
     export async function populateThread(data: any, options: PluginRequestOptions, rootUrl: string): Promise<Thread> {
         let reactionsConfig, canUpdate;
 
-        console.warn(`Thread Share Urls: ${rootUrl}/t/${data.id.toString()}`)
+        // console.warn(`Thread Share Urls: ${rootUrl}/t/${data.id.toString()}`)
 
 
         data.creator_username === options.session.user.username ? canUpdate = true :canUpdate = false;
@@ -28,7 +28,7 @@ import {populateAttachments} from "../threads/AttachmentPopulator"
         const thread: Thread = {
         totalComments: data.reply_count,
         id: data.id.toString(),
-        shareUrl: `${rootUrl}/t/${data.id.toString()}`,
+        
         channelName: data.channelName,
         channelId: data.channelId,
 
@@ -63,7 +63,13 @@ import {populateAttachments} from "../threads/AttachmentPopulator"
             username: data.creator_username,
             fullName: data.creator_full_name
         },
-        ...data.link_counts && {attachments: await populateAttachments(data.link_counts)}
+        ...data.link_counts && {attachments: await populateAttachments(data.link_counts)},
+
+        shareProps: {
+            ...data.cooked && {title: data.cooked},
+            // previewImageUrl?: string;
+            url: `${rootUrl}/t/${data.id.toString()}`
+        },
         };
            // createdBy: PluginUser;
         // commentsSorts?: ObjectsSort[];

@@ -6,7 +6,8 @@ import {
     ISearchProvider,
     Category,
     Filter,
-    ObjectTypes
+    ObjectTypes,
+    Result
 } from "yack-plugin-framework";
 import { SearchResultItem } from "yack-plugin-framework";
 import { populateThread } from "../threads/ThreadPopulator";
@@ -15,7 +16,7 @@ import { populateSearchUser } from "../sessions/UserPopulator";
 import { IDiscourseConfig } from "../config/IDiscourseConfig";
 import * as filter from "./Filters";
 
-export class DiscourseSearchProvider implements ISearchProvider {
+export class SearchProvider implements ISearchProvider {
     private pluginContext: PluginContext;
     private config: IDiscourseConfig;
     private allThreadIds: Array<any>;
@@ -110,10 +111,10 @@ this.pluginContext.logger.d("Community doesn't have any categories")
         return baseFilter;
     }
 
-    async getCategories(options: PluginRequestOptions): Promise<Category[]> {
+    async getCategories(options: PluginRequestOptions): Promise<Result<Category[]>> {
         let combined = await this.getCombinedFilters();
 
-        return [
+        const categories = [
             // {
             //     id: "all",
             //     title: "All",
@@ -142,9 +143,11 @@ this.pluginContext.logger.d("Community doesn't have any categories")
                 // filters: combined
             }
         ];
+        return Result.success(categories);
     }
 
-    async search(options: PluginRequestOptions, query: string, categoryId?: string): Promise<PagedArray<SearchResultItem>> {
+    async search(options: PluginRequestOptions, query: string, categoryQuery?: Category.Query): Promise<Result<PagedArray<SearchResultItem>>> {
+        const categoryId = categoryQuery ? categoryQuery.id : false;
         let url: string, data: any, userUrl: string, response: any;
         const hasUser = !!options.session.user; // SetHeaders
         // Format search query
@@ -187,15 +190,19 @@ this.pluginContext.logger.d("Community doesn't have any categories")
                 if(threadsData){
                 for (const thread of threadsData) {
                     const threadPopulated = await populateThread(thread, options, this.config.rootUrl);
-                    thread.item = threadPopulated;
+                    const threadItem: SearchResultItem.ThreadItem = {thread: threadPopulated, channelQuery: {id: thread.channelId}}
+
+                    thread.item = threadItem;
                     thread.itemType = ObjectTypes.thread;
                     thread.id = thread.id.toString();
                     // if(this.allThreadIds.includes(thread.id)){
                     //     return searchResults;
                     // }else{
-                        this.allThreadIds.push(thread.id)
+                        // this.allThreadIds.push(thread.id)
                     // }
-                    const searchResultItem = this.populateSearchResultItem(thread);
+                    const searchResultItem = this.populateSearchResultItem(thread, categoryId);
+                    // searchResultItem.channelQuery = {id: thread.channelId}
+                    // searchResultItem.thread = threadPopulated
                     searchResults.array.push(searchResultItem);
                 }}
 
@@ -215,7 +222,10 @@ this.pluginContext.logger.d("Community doesn't have any categories")
                         comment.score = comment.like_count;
 
                         const commentPopulated = populateComment(comment, options, this.config.rootUrl);
-                        comment.item = commentPopulated;
+
+
+                        const commentItem: SearchResultItem.CommentItem = {comment: commentPopulated, threadQuery: {id: comment.threadId}, channelQuery: {id: null}}
+                        comment.item = commentItem;
                         comment.itemType = ObjectTypes.comment;
                         comment.id = comment.id.toString()
 
@@ -224,7 +234,7 @@ this.pluginContext.logger.d("Community doesn't have any categories")
                         // }else{
                             this.allCommentIds.push(comment.id)
                         // }
-                        const searchResultItem = this.populateSearchResultItem(comment);
+                        const searchResultItem = this.populateSearchResultItem(comment, categoryId);
                         searchResults.array.push(searchResultItem);
                     }
                 }
@@ -268,17 +278,20 @@ this.pluginContext.logger.d("Community doesn't have any categories")
                         user.partialUrl = this.config.partialUrl
                         user.communityName = this.config.id.replace("_discourse","")
                         const userPopulated = populateSearchUser(user);
-                        user.item = userPopulated;
+                        const pluginUserItem: SearchResultItem.PluginUserItem = { user: userPopulated };
+
+                        user.item = pluginUserItem;
                         user.itemType = ObjectTypes.user;
                         user.id = user.username;
-                        if(this.allUserIds.includes(user.id)){
-                            return searchResults;
-                        }else{
+                        // if(this.allUserIds.includes(user.id)){
+                            
+                        //     return searchResults;
+                        // }else{
                             this.allUserIds.push(user.id)
-                        }
+                        // }
 
                         // user.id = user.id.toString()
-                        const searchResultItem = this.populateSearchResultItem(user);
+                        const searchResultItem = this.populateSearchResultItem(user, categoryId);
 
                         searchResults.array.push(searchResultItem);
                     }
@@ -292,7 +305,8 @@ this.pluginContext.logger.d("Community doesn't have any categories")
         }else if(!hasNextPage && searchResults.array.length > 49){
             searchResults.nextPageToken = "2"
         }
-        return searchResults;
+        return Result.success(searchResults)
+        // return searchResults;
     }
 
     private async setUrlToken(hasUser: boolean, url: string, key?: string) {
@@ -392,15 +406,39 @@ this.pluginContext.logger.d("Community doesn't have any categories")
         return activeFiltersStr;
     }
 
-    private populateSearchResultItem(data: any): SearchResultItem {
-        const searchItem: SearchResultItem = {
-            id: `${data.threadId}-${data.id.toString()}`,
-            item: data.item,
-        itemType: data.itemType
-        };
+    private populateSearchResultItem(data: any, kind: string) {
+        switch(kind){
+            case "threads":{
+                const searchItem: SearchResultItem = {
+                    id: `${data.threadId}-${data.id.toString()}`,
+                    item: data.item,
+                itemType: data.itemType
+                };
+                return searchItem;
+                break;
+            }
+            case "comments":{
+                const searchItem: SearchResultItem = {
+                    id: `${data.id.toString()}`,
+                    item: data.item,
+                itemType: data.itemType
+                };
+                return searchItem;
+                break;
+            }
+            case "users":{
+                const searchItem: SearchResultItem = {
+                    id: `${data.threadId}-${data.id.toString()}`,
+                    item: data.item,
+                    itemType: data.itemType
+                };
+                return searchItem;
+                break;
+            }
+        }
+        
 
         
 
-        return searchItem;
     }
 }

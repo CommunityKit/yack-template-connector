@@ -8,12 +8,14 @@ import {
     Category,
     Filter,
     TextContent,
+    Result,
+    PluginUser
 } from "yack-plugin-framework";
 import { IDiscourseConfig } from "../config/IDiscourseConfig";
-import { DiscourseChannelPopulator } from "./ChannelPopulator";
+import { ChannelPopulator } from "./ChannelPopulator";
 import * as filter from "../search/Filters";
 
-export class DiscourseChannelProvider implements IChannelProvider {
+export class ChannelProvider implements IChannelProvider {
     private pluginContext: PluginContext;
     private config: IDiscourseConfig;
 
@@ -25,12 +27,12 @@ export class DiscourseChannelProvider implements IChannelProvider {
     // setConfig(config: IDiscourseConfig) {}
 
     // TBD
-    async getCategories(options: PluginRequestOptions): Promise<PagedArray<Category>> {
-        return new PagedArray();
+    async getCategories(options: PluginRequestOptions): Promise<Result<PagedArray<Category>>> {
+        return Result.success(new PagedArray());
     }
 
     // DO THIS
-    async getFixedChannels(options: PluginRequestOptions): Promise<Channel[]> {
+    async getFixedChannels(options: PluginRequestOptions): Promise<Result<Channel[]>> {
         let fixedChannels: Channel[];
         if (!!options.session.user == false) {
             fixedChannels = [
@@ -68,7 +70,8 @@ export class DiscourseChannelProvider implements IChannelProvider {
                 { id: "unread", icon: Channel.Icons.default, name: "unread", description: {type: TextContent.Types.plain, value: "Your unread topics"}, threadsFilters: [] }
             ];
         }
-        return fixedChannels;
+        return Result.success(fixedChannels)
+        // return fixedChannels;
     }
 
     async getAllChannels(options: PluginRequestOptions, categoryId?: string): Promise<PagedArray<Channel>> {
@@ -95,9 +98,9 @@ export class DiscourseChannelProvider implements IChannelProvider {
         return latestFilters;
     }
 
-    async getChannelsByUserId(options: PluginRequestOptions, userId: string): Promise<PagedArray<Channel>> {
+    async getChannelsByUser(options: PluginRequestOptions, userQuery: PluginUser.Query): Promise<Result<PagedArray<Channel>>> {
         const channels = new PagedArray<Channel>();
-
+        const userId = userQuery.id;
         if (options.session.user) {
             let url: string;
             url = `${this.config.rootUrl}/site.json`;
@@ -113,7 +116,7 @@ export class DiscourseChannelProvider implements IChannelProvider {
             for (const channelItem of categoryList) {
                 // HIDE channels if they don't have any topics
                 // if(channelItem.topic_count > 0){
-                const channel = DiscourseChannelPopulator.populateChannel(channelItem, options.session.user);
+                const channel = ChannelPopulator.populateChannel(channelItem, options.session.user);
                 channels.array.push(channel);
                 // }
             }
@@ -127,15 +130,17 @@ export class DiscourseChannelProvider implements IChannelProvider {
 
 
         for (const channelItem of categoriesList) {
-            const channel = DiscourseChannelPopulator.populateChannel(channelItem, options.session.user);
+            const channel = ChannelPopulator.populateChannel(channelItem, options.session.user);
             channels.array.push(channel);
         }
 
         }
-        return channels;
+        return Result.success(channels)
+        // return channels;
     }
 
-    async getChannelById(options: PluginRequestOptions, channelId: string): Promise<Channel> {
+    async getChannel(options: PluginRequestOptions, channelQuery: Channel.Query): Promise<Result<Channel>> {
+        const channelId = channelQuery.id;
         let url: string;
         let resp;
             url = `${this.config.rootUrl}/categories.json`;
@@ -152,9 +157,9 @@ export class DiscourseChannelProvider implements IChannelProvider {
 
         const channelsList = resp.data.category_list.categories
         const channelItem = channelsList.filter(elem => elem.id === parseInt(channelId))[0]
-        const channel = DiscourseChannelPopulator.populateChannel(channelItem, options.session.user);
-
-        return channel;
+        const channel = ChannelPopulator.populateChannel(channelItem, options.session.user);
+        return Result.success(channel)
+        // return channel;
     }
 
     async getChannelByThreadId(options: PluginRequestOptions, threadId: string): Promise<Channel> {
