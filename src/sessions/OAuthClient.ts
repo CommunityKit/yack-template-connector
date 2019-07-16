@@ -102,7 +102,7 @@ export class OAuthClient implements IPluginOAuthClient {
 
     // For anonymous requests
     async getClientAccessToken(): Promise<Result<AccessToken>> {
-        return null;
+        return Result.success(null);
     }
 
     // ???

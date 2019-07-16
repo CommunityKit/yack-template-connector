@@ -34,7 +34,7 @@ export class ChannelProvider implements IChannelProvider {
     // DO THIS
     async getFixedChannels(options: PluginRequestOptions): Promise<Result<Channel[]>> {
         let fixedChannels: Channel[];
-        if (!!options.session.user == false) {
+        if (!options.session.user) {
             fixedChannels = [
                 {
                     id: "fixed:latest",
@@ -100,8 +100,9 @@ export class ChannelProvider implements IChannelProvider {
 
     async getChannelsByUser(options: PluginRequestOptions, userQuery: PluginUser.Query): Promise<Result<PagedArray<Channel>>> {
         const channels = new PagedArray<Channel>();
-        const userId = userQuery.id;
-        if (options.session.user) {
+        if (!!options.session.user) {
+            const userId = userQuery.id;
+
             let url: string;
             url = `${this.config.rootUrl}/site.json`;
     

@@ -90,12 +90,12 @@ export class ReactionProvider implements IReactionProvider {
 
     // objectId is one of [channelId, threadId, commentId]
     async saveReaction(options: PluginRequestOptions, objectType: Reaction.ObjectTypes, objectQuery: Reaction.ObjectQueryTypes, reaction: Reaction): Promise<Result<void>> {
-        const objectId = objectQuery.id
+        const objectId = objectQuery.id;
         let url, formData, resp;
         console.warn(`saveReaction() ObjectId ${objectId}`)
         // const parsedThreadId = objectId.split(" ")[0]
         // const postId = objectId.split(" ")[1]
-        const postId = await getThreadPostId(this.config.rootUrl, this.pluginContext.axios.get, options, objectId)
+        const postId = await getThreadPostId(this.config.rootUrl, this.pluginContext.axios.get, options, objectQuery, objectType)
         // const canUndo = await this.setReactionConfig(options, objectId, postId, objectType)
         if (options.session.user) {
 

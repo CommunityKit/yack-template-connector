@@ -3,13 +3,20 @@ import {
     Comment,
     TextContent, Reaction
 } from "yack-plugin-framework";
+import { threadId } from "worker_threads";
 
     export function populateComment(data: any, options: any, rootUrl:string): Comment {
         // console.log(`Comment Share Url: ${rootUrl}/t/${data.threadId}/${data.id.toString()}`)
-        let canUpdate;
-        data.username === options.session.user.username ? canUpdate = true :canUpdate = false;
+        let canUpdate = false;
+        if(options.session.user){
+        data.username === options.session.user.username ? canUpdate = true :null;
+        }
 
-        
+        let reactionCount = 0;
+        if(data.actions_summary.length > 0 ){
+            reactionCount = data.actions_summary[0].count
+        }
+        console.warn(`threadId: ${data.threadId} - commentId: ${data.id.toString()}`);
         const newComment: Comment = {
             id: data.id.toString(),
             ...data.parentCommentId && {parentCommentId: data.parentCommentId},
@@ -32,7 +39,7 @@ import {
             },
             // ...data.actions_summary && {}, 
             ...data.actions_summary && {countByReaction: {
-                [Reaction.love]: objectUtils.parseNumber(data.actions_summary[0].count),
+                [Reaction.love]: reactionCount,
             }},
             totalScore: data.score,
             canSessionUserUpdate: canUpdate,

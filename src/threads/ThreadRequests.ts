@@ -1,3 +1,5 @@
+import { ObjectTypes } from "yack-plugin-framework";
+
 export async function getUserCreatedContent(get, rootUrl, userId: string, currentPageToken){
 
     // CHANGE TO THIS ENDPOINT: https://community.cartalk.com/user_actions.json?offset=0&username=b.l.e&filter=5&no_results_help_key=user_activity.no_replies&_=1556298757193
@@ -80,12 +82,20 @@ function filterUserComments(data:any){
 }
 
 
-export async function getThreadPostId(rootUrl, get, options, threadId: string) {
+export async function getThreadPostId(rootUrl, get, options, objectQuery: any, objectType: string) {
     // const tId = threadId.split(" ")[0]
     // const postId = threadId.split(" ")[1]
-
+    let url, threadId, commentId;
     const hasUser = !!options.session.user;
-    let url = `${rootUrl}/t/${threadId}.json`; // only using first element so don't need pagination
+    if(objectType === ObjectTypes.thread){
+        threadId = objectQuery.id
+        url = `${rootUrl}/t/${threadId}.json`; 
+    }else if(objectType === ObjectTypes.comment){
+        threadId = objectQuery.threadId
+        commentId = objectQuery.id
+        url = `${rootUrl}/t/${threadId}/${commentId}.json`; 
+
+    }
     const data = await setUrlToken(get, hasUser, url, options.session.user ? options.session.accessToken.token : null);
 
     

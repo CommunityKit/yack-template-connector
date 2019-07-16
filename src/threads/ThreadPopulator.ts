@@ -9,13 +9,15 @@ import * as htmlEncoderDecoder from "html-encoder-decoder";
 import {populateAttachments} from "../threads/AttachmentPopulator"
 
     export async function populateThread(data: any, options: PluginRequestOptions, rootUrl: string): Promise<Thread> {
-        let reactionsConfig, canUpdate;
+        let reactionsConfig
+        let canUpdate = false;
 
         // console.warn(`Thread Share Urls: ${rootUrl}/t/${data.id.toString()}`)
 
 
-        data.creator_username === options.session.user.username ? canUpdate = true :canUpdate = false;
         if(options.session.user){
+            data.creator_username === options.session.user.username ? canUpdate = true : null;
+
         if(data.creator_username === options.session.user.username){
             reactionsConfig =  
             {
