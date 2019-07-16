@@ -27,9 +27,23 @@ import {populateAttachments} from "../threads/AttachmentPopulator"
             }
         } 
     }
+
+    let reactionCount = 0;
+    if("actions_summary" in data){
+
+    if(data["actions_summary"].length > 0 ){
+        if("count" in data.actions_summary[0]){
+        reactionCount = parseInt(data["actions_summary"][0].count)
+        }
+        }
+    }
+
         const thread: Thread = {
         totalComments: data.reply_count,
         id: data.id.toString(),
+        countByReaction: {
+            [Reaction.like]: reactionCount,
+        },
         
         channelName: data.channelName,
         channelId: data.channelId,

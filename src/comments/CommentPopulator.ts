@@ -14,9 +14,11 @@ import { threadId } from "worker_threads";
 
         let reactionCount = 0;
         if(data.actions_summary.length > 0 ){
-            reactionCount = data.actions_summary[0].count
+            if("count" in data.actions_summary[0]){
+            reactionCount = parseInt(data.actions_summary[0].count)
         }
-        console.warn(`threadId: ${data.threadId} - commentId: ${data.id.toString()}`);
+        }
+        // console.warn(`threadId: ${data.threadId} - commentId: ${data.id.toString()}`);
         const newComment: Comment = {
             id: data.id.toString(),
             ...data.parentCommentId && {parentCommentId: data.parentCommentId},
@@ -38,9 +40,9 @@ import { threadId } from "worker_threads";
                 url: `${rootUrl}/t/${data.threadId}/${data.id.toString()}`
             },
             // ...data.actions_summary && {}, 
-            ...data.actions_summary && {countByReaction: {
-                [Reaction.love]: reactionCount,
-            }},
+           countByReaction: {
+                [Reaction.like]: reactionCount,
+            },
             totalScore: data.score,
             canSessionUserUpdate: canUpdate,
             canSessionUserDelete: canUpdate,

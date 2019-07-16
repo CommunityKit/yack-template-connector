@@ -7,12 +7,12 @@ export class ReactionProvider implements IReactionProvider {
     reactionConfigByObjectType = {
         [ObjectTypes.thread]: {
             concept: Reaction.Concepts.like,
-            reactions: [Reaction.like, Reaction.none],
+            reactions: [Reaction.like],
             canBrowseUserReactions: true
         },
         [ObjectTypes.comment]: {
             concept: Reaction.Concepts.like,
-            reactions: [Reaction.like, Reaction.none],
+            reactions: [Reaction.like],
             canBrowseUserReactions: true
         }
     };
