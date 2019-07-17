@@ -8,7 +8,8 @@ export namespace ChannelPopulator {
   export function populateChannel(data: any, sessionUser: PluginUser): Channel {
     // const channel = new Channel();
     const channel: Channel = {
-       id: data.id.toString(),
+    //    id: data.id.toString(),
+    id: data.slug,
        icon: Channel.Icons.default,
        name: data.name,
        ...sessionUser && {canSessionUserPostNewThread: true}

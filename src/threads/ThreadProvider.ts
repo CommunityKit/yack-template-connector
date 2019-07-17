@@ -393,9 +393,11 @@ export class ThreadProvider implements IThreadProvider {
 
     // IF threadId: user is trying to edit a thread
     async getSaveThreadForm(options: PluginRequestOptions, channelQuery: Channel.Query, threadQuery: Thread.Query): Promise<Result<Form>> {
-        const threadId = threadQuery.id;
+        let thread, channel, threadId;
+
+        threadQuery ? threadId = threadQuery.id : threadId = null;
+        console.warn("in getSaveThreadForm ThreadQuery:" + threadQuery)
         const channelId = channelQuery.id;
-        let thread, channel;
         if (!stringUtils.isNullOrEmpty(threadId)) {
             thread = await this.getThread(options, threadQuery);
             channel = await this.channelProvider.getChannel(options, channelQuery);

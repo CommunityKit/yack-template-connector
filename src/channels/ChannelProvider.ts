@@ -115,6 +115,13 @@ export class ChannelProvider implements IChannelProvider {
             const categoryList = channelsResponse.data.categories;
     
             for (const channelItem of categoryList) {
+                // parent_category_id
+                
+                if("parent_category_id" in channelItem){
+                    const parentSlug = categoryList.filter(elem => elem.id === channelItem.parent_category_id)[0]
+                    channelItem.slug = `${parentSlug.slug}/${channelItem.slug}`
+                }
+
                 // HIDE channels if they don't have any topics
                 // if(channelItem.topic_count > 0){
                 const channel = ChannelPopulator.populateChannel(channelItem, options.session.user);
@@ -123,7 +130,6 @@ export class ChannelProvider implements IChannelProvider {
             }
 
         }else{
-
             const url = `${this.config.rootUrl}/categories.json`;
         const response = await this.pluginContext.axios.get(url);
 
