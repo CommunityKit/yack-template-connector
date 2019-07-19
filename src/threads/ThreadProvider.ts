@@ -433,7 +433,7 @@ export class ThreadProvider implements IThreadProvider {
         const bodyField: Form.RichTextField = {
             title: "Text",
             type: Form.Field.Types.richText,
-            options: [Form.RichTextField.Options.bold, Form.RichTextField.Options.italic, Form.RichTextField.Options.link, Form.RichTextField.Options.imageupload, Form.RichTextField.Options.heading, Form.RichTextField.Options.bulletedlist, Form.RichTextField.Options.numberedlist, Form.RichTextField.Options.quoteblock, Form.RichTextField.Options.emoji],
+            options: [Form.RichTextField.Options.bold, Form.RichTextField.Options.italic, Form.RichTextField.Options.link, Form.RichTextField.Options.imageupload, Form.RichTextField.Options.heading, Form.RichTextField.Options.bulletedlist, Form.RichTextField.Options.numberedlist, Form.RichTextField.Options.quoteblock, Form.RichTextField.Options.emoji, Form.RichTextField.Options.codeblock],
             valueType: thread && thread.content ? thread.content.type : null,
             value: thread && thread.content ? thread.content.value : null
         };

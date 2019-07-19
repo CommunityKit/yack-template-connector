@@ -12,6 +12,7 @@ import {populateAttachments} from "../threads/AttachmentPopulator"
         let reactionsConfig
         let canUpdate = false;
         const hasUser = !!options.session.user;
+       
 
         // console.warn(`Thread Share Urls: ${rootUrl}/t/${data.id.toString()}`)
 
@@ -28,11 +29,12 @@ import {populateAttachments} from "../threads/AttachmentPopulator"
             }
         } 
     }
-
+    let canUndo;
     let reactionCount = 0;
     if("actions_summary" in data){
 
     if(data["actions_summary"].length > 0 ){
+        canUndo = "can_undo" in data.actions_summary[0] === false && data.actions_summary[0].acted
         if("count" in data.actions_summary[0]){
         reactionCount = parseInt(data["actions_summary"][0].count)
         }

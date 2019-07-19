@@ -20,7 +20,7 @@
     "homepage": "https://github.com/maxgedikli/yack-discourse-plugin#readme",
     "dependencies": {
         "node-forge": "^0.8.2",
-        "yack-plugin-framework": "^1.0.173"
+        "yack-plugin-framework": "^1.0.178"
     },
     "devDependencies": {
         "@types/node": "^11.13.2",

@@ -152,7 +152,11 @@ export class ReactionProvider implements IReactionProvider {
                 }
                 if (options.session.user.username === objectQuery.createdBy.username) {
                     return Result.error(`Error: You cannot like your own content.`);
+                }else if(resp.status != 200) {
+                    return Result.error(`Error: You can no longer react to this content.`);
                 }
+
+               
 
                 return Result.success(null)
             }
