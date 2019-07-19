@@ -40,13 +40,17 @@ import {populateAttachments} from "../threads/AttachmentPopulator"
         }
         }
     }
-
+    let avatarUrl
+    if("avatar_template" in data){
+    avatarUrl = data.avatar_template.includes("https://") ? data.avatar_template.replace('{size}','200') : `${rootUrl}${data.avatar_template.replace('{size}','200')}`
+}
         const thread: Thread = {
         totalComments: data.reply_count,
         id: data.id.toString(),
         countByReaction: {
             [Reaction.like]: reactionCount,
         },
+
         
         channelName: data.channelName,
         ...data.channelId && {channelId: data.channelId},
@@ -80,7 +84,13 @@ import {populateAttachments} from "../threads/AttachmentPopulator"
            
             id: data.creator_username,
             username: data.creator_username,
-            fullName: data.creator_full_name
+            fullName: data.creator_full_name,
+            // ...data.avatar_template
+            // http://community.yack.io/user_avatar/community.yack.io/katrpilar/200/4_2.png
+            ...data.avatar_template && {profileImageUrl: avatarUrl},
+        // ...data.custom_avatar_upload_id && {
+        // profileImageUrl: `https://discourse-cdn-sjc1.com/${data.communityName}/user_avatar/${data.partialUrl}/${data.creator_username.toLowerCase()}/240/4_2.png`},
+        
         },
         ...options.session.user && {sessionUserReactionDisabled: (data.creator_username === options.session.user.username )},
         ...!hasUser && {sessionUserReactionDisabled: true},

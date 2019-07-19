@@ -12,7 +12,7 @@ import {
 import { SearchResultItem } from "yack-plugin-framework";
 import { populateThread } from "../threads/ThreadPopulator";
 import { populateComment } from "../comments/CommentPopulator";
-import { populateSearchUser } from "../sessions/UserPopulator";
+import { populateUser } from "../sessions/UserPopulator";
 import { IDiscourseConfig } from "../config/IDiscourseConfig";
 import * as filter from "./Filters";
 
@@ -279,7 +279,8 @@ this.pluginContext.logger.d("Community doesn't have any categories")
                         user.score = user.like_count;
                         user.partialUrl = this.config.partialUrl
                         user.communityName = this.config.id.replace("_discourse","")
-                        const userPopulated = populateSearchUser(user);
+                        user.userInfo = user;
+                        const userPopulated = populateUser(user, this.config.rootUrl);
                         const pluginUserItem: SearchResultItem.PluginUserItem = { user: userPopulated };
 
                         user.item = pluginUserItem;

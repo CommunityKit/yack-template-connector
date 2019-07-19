@@ -86,7 +86,7 @@ export class UserProvider {
         allData.communityName = this.config.id.replace("_discourse","")
         
 
-        const user = populateUser(allData)
+        const user = populateUser(allData, this.config.rootUrl)
         // let user = new PluginUser();
         //   return user;
         return Result.success(user);
@@ -110,7 +110,7 @@ export class UserProvider {
         allData.communityName = this.config.id.replace("_discourse","")
         
 
-        const user = populateUser(allData)
+        const user = populateUser(allData, this.config.rootUrl)
         // let user = new PluginUser();
         //   return user;
         return Result.success(user);

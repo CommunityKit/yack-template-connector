@@ -21,6 +21,11 @@ import { threadId } from "worker_threads";
             reactionCount = parseInt(data.actions_summary[0].count)
         }
         }}
+
+        let avatarUrl;
+        if("avatar_template" in data){
+            avatarUrl = data.avatar_template.includes("https://") ? data.avatar_template.replace('{size}','200') : `${rootUrl}${data.avatar_template.replace('{size}','200')}`
+        }
         // console.warn(`threadId: ${data.threadId} - commentId: ${data.id.toString()}`);
         const newComment: Comment = {
             id: data.id.toString(),
@@ -60,7 +65,9 @@ import { threadId } from "worker_threads";
                 id: data.username,
                 ...data.user_id && {id: data.user_id},
                 fullName: data.name,
-                username: data.username
+                username: data.username,
+                ...data.avatar_template && {profileImageUrl: avatarUrl},
+
             },
             utcCreateDate: Date.parse(data.created_at),
             ...data.updated_at && {utcLastUpdateDate: Date.parse(data.updated_at)},

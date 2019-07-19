@@ -154,6 +154,8 @@ export class ThreadProvider implements IThreadProvider {
             topic.creator_full_name = userObject.name;
             topic.creator_username = userObject.username;
             // this.pluginContext.logger.d(`Topic = ${JSON.stringify(topic)}`);
+            topic.communityName = this.config.id.replace("_discourse","")
+            topic.partialUrl = this.config.partialUrl
 
             const thread = await populateThread(topic, options, this.config.rootUrl);
             thread.metadata = {}
@@ -201,6 +203,8 @@ export class ThreadProvider implements IThreadProvider {
         firstPostInThread.last_posted_at = firstPostInThread.last_posted_at;
         firstPostInThread.pinned = data.pinned ? data.pinned : null;
         firstPostInThread.channelId = data.category_id.toString();
+        firstPostInThread.communityName = this.config.id.replace("_discourse","")
+        firstPostInThread.partialUrl = this.config.partialUrl
 
         const thread = await populateThread(firstPostInThread, options, this.config.rootUrl);
 
@@ -395,6 +399,10 @@ export class ThreadProvider implements IThreadProvider {
         const userThreadsData = await getUserCreatedContent(this.pluginContext.axios.get, this.config.rootUrl, userId, options.nextPageToken);
         for(const threadData of userThreadsData){
             // populate thread
+            threadData.partialUrl = this.config.partialUrl
+
+           threadData.communityName = this.config.id.replace("_discourse","")
+
             const thread = await populateThread(threadData, options, this.config.rootUrl)
             thread.channelName = userId
             thread.channelId = userId
@@ -444,7 +452,7 @@ export class ThreadProvider implements IThreadProvider {
             title: "Upload Images & Videos",
             maxItems: 50,
             supportedTypes: [Form.UploadField.Types.image],
-            maxImageFileSizeInMB: 10,
+            maxImageFileSizeInMB: 40,
             maxVideoFileSizeInMB: 0,
             maxAnyFileSizeInMB: 0,
             disabled: thread != null
