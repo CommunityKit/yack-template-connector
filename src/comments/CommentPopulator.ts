@@ -9,7 +9,6 @@ import { threadId } from "worker_threads";
 
         const hasUser = !!options.session.user;
 
-        // console.log(`Comment Share Url: ${rootUrl}/t/${data.threadId}/${data.id.toString()}`)
         let canUpdate = false;
         if(options.session.user){
         data.username === options.session.user.username ? canUpdate = true :null;

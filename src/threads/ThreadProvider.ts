@@ -433,18 +433,19 @@ export class ThreadProvider implements IThreadProvider {
         const bodyField: Form.RichTextField = {
             title: "Text",
             type: Form.Field.Types.richText,
-            options: [],
+            options: [Form.RichTextField.Options.bold, Form.RichTextField.Options.italic, Form.RichTextField.Options.link, Form.RichTextField.Options.imageupload, Form.RichTextField.Options.heading, Form.RichTextField.Options.bulletedlist, Form.RichTextField.Options.numberedlist, Form.RichTextField.Options.quoteblock, Form.RichTextField.Options.emoji],
             valueType: thread && thread.content ? thread.content.type : null,
             value: thread && thread.content ? thread.content.value : null
         };
 
+        // Can't upload videos to discourse
         const uploadField: Form.UploadField = {
             type: Form.Field.Types.upload,
             title: "Upload Images & Videos",
             maxItems: 50,
-            supportedTypes: [Form.UploadField.Types.image, Form.UploadField.Types.video],
+            supportedTypes: [Form.UploadField.Types.image],
             maxImageFileSizeInMB: 10,
-            maxVideoFileSizeInMB: 200,
+            maxVideoFileSizeInMB: 0,
             maxAnyFileSizeInMB: 0,
             disabled: thread != null
         };
