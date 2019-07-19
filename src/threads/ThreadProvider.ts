@@ -65,8 +65,8 @@ export class ThreadProvider implements IThreadProvider {
         let hasPageToken: boolean = !!paginationString;
 
         // Lookup channelName by Category Id
-        let categoryDictionary: object = await this.createCategoryDictionary(options);
-        this.pluginContext.logger.d(`Category Dictionary Test = ${categoryDictionary}`);
+        // let categoryDictionary: object = await this.createCategoryDictionary(options);
+        // this.pluginContext.logger.d(`Category Dictionary Test = ${categoryDictionary}`);
 
         // Determine threadCount
         let totalThreads = data => data.topic_list.topics.length;
@@ -142,7 +142,8 @@ export class ThreadProvider implements IThreadProvider {
         for (const topic of topicsList) {
             // Map Channel info to Topic
             topic.channelId = channelId;
-            topic.channelName = categoryDictionary[topic.category_id.toString()];
+            topic.channelName = channelQuery.name;
+            // topic.channelName = categoryDictionary[topic.category_id.toString()];
 
             // Determine the thread topic creator
             // Get User Id
@@ -330,7 +331,7 @@ export class ThreadProvider implements IThreadProvider {
 
     private async setUrlToken(hasUser: boolean, url: string, key?: string) {
         let response: any;
-        if (hasUser) {
+        if (key) {
             response = await this.pluginContext.axios.get(url, {
                 responseType: "json",
                 headers: {
@@ -341,6 +342,14 @@ export class ThreadProvider implements IThreadProvider {
             response = await this.pluginContext.axios.get(url);
         }
         return response.data;
+        // if(response.success){
+        //     return response.data;
+        // }else{
+        //     console.log('FAILED RESPONSE'+response)
+        //     console.log(response)
+        //     console.log(url)
+
+        // }
     }
 
     private parseNextPageToken(pageToken: string) {

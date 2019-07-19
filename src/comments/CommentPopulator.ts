@@ -6,6 +6,9 @@ import {
 import { threadId } from "worker_threads";
 
     export function populateComment(data: any, options: any, rootUrl:string): Comment {
+
+        const hasUser = !!options.session.user;
+
         // console.log(`Comment Share Url: ${rootUrl}/t/${data.threadId}/${data.id.toString()}`)
         let canUpdate = false;
         if(options.session.user){
@@ -13,11 +16,12 @@ import { threadId } from "worker_threads";
         }
 
         let reactionCount = 0;
+        if("actions_summary" in data){
         if(data.actions_summary.length > 0 ){
             if("count" in data.actions_summary[0]){
             reactionCount = parseInt(data.actions_summary[0].count)
         }
-        }
+        }}
         // console.warn(`threadId: ${data.threadId} - commentId: ${data.id.toString()}`);
         const newComment: Comment = {
             id: data.id.toString(),
@@ -46,7 +50,13 @@ import { threadId } from "worker_threads";
             totalScore: data.score,
             canSessionUserUpdate: canUpdate,
             canSessionUserDelete: canUpdate,
+
             canSessionUserComment: true,
+            ...!hasUser && {canSessionUserUpdate: false},
+            ...!hasUser && {canSessionUserDelete: false},
+            ...!hasUser && {canSessionUserComment: false},
+
+
             createdBy: {
                 id: data.username,
                 ...data.user_id && {id: data.user_id},
@@ -55,7 +65,10 @@ import { threadId } from "worker_threads";
             },
             utcCreateDate: Date.parse(data.created_at),
             ...data.updated_at && {utcLastUpdateDate: Date.parse(data.updated_at)},
-            sessionUserReactionDisabled: (data.username === options.session.user.username),
+            ...options.session.user && {sessionUserReactionDisabled: (data.creator_username === options.session.user.username )},
+            ...!hasUser && {sessionUserReactionDisabled: true},
+
+            // sessionUserReactionDisabled: (data.username === options.session.user.username),
 
         };
         return newComment;

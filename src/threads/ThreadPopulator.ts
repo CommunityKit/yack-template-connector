@@ -11,6 +11,7 @@ import {populateAttachments} from "../threads/AttachmentPopulator"
     export async function populateThread(data: any, options: PluginRequestOptions, rootUrl: string): Promise<Thread> {
         let reactionsConfig
         let canUpdate = false;
+        const hasUser = !!options.session.user;
 
         // console.warn(`Thread Share Urls: ${rootUrl}/t/${data.id.toString()}`)
 
@@ -79,7 +80,8 @@ import {populateAttachments} from "../threads/AttachmentPopulator"
             username: data.creator_username,
             fullName: data.creator_full_name
         },
-        sessionUserReactionDisabled: (data.creator_username === options.session.user.username),
+        ...options.session.user && {sessionUserReactionDisabled: (data.creator_username === options.session.user.username )},
+        ...!hasUser && {sessionUserReactionDisabled: true},
         ...data.link_counts && {attachments: await populateAttachments(data.link_counts)},
 
         shareProps: {
