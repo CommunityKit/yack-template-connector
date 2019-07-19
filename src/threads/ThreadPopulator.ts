@@ -46,7 +46,7 @@ import {populateAttachments} from "../threads/AttachmentPopulator"
         },
         
         channelName: data.channelName,
-        channelId: data.channelId,
+        ...data.channelId && {channelId: data.channelId},
 
         ...reactionsConfig && 
         { commentsReactionConfig: 
@@ -55,9 +55,9 @@ import {populateAttachments} from "../threads/AttachmentPopulator"
 
         canSessionUserUpdate: canUpdate,
         canSessionUserDelete: canUpdate,
+        canSessionUserComment: true,
 
-
-        ...data.category_id &&{channelId: data.category_id.toString()},
+        // ...data.category_id &&{channelId: data.category_id.toString()},
         // ...data.slug && {channelId: data.slug},
         
         // channelId: "top:popular",
@@ -79,6 +79,7 @@ import {populateAttachments} from "../threads/AttachmentPopulator"
             username: data.creator_username,
             fullName: data.creator_full_name
         },
+        sessionUserReactionDisabled: (data.creator_username === options.session.user.username),
         ...data.link_counts && {attachments: await populateAttachments(data.link_counts)},
 
         shareProps: {

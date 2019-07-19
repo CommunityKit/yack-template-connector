@@ -95,7 +95,12 @@ export class ReactionProvider implements IReactionProvider {
         console.warn(`saveReaction() ObjectId ${objectId}`)
         // const parsedThreadId = objectId.split(" ")[0]
         // const postId = objectId.split(" ")[1]
-        const postId = await getThreadPostId(this.config.rootUrl, this.pluginContext.axios.get, options, objectQuery, objectType)
+        const postId = objectQuery.metadata
+
+        // const postId = await getThreadPostId(this.config.rootUrl, this.pluginContext.axios.get, options, objectQuery, objectType);
+
+
+        
         // const canUndo = await this.setReactionConfig(options, objectId, postId, objectType)
         if (options.session.user) {
 
@@ -145,6 +150,10 @@ export class ReactionProvider implements IReactionProvider {
 
                     }
                 }
+                if (options.session.user.username === objectQuery.createdBy.username) {
+                    return Result.error(`Error: You cannot like your own content.`);
+                }
+
                 return Result.success(null)
             }
 

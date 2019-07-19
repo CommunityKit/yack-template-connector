@@ -113,7 +113,7 @@ export class ChannelProvider implements IChannelProvider {
                 }
             });
             const categoryList = channelsResponse.data.categories;
-    
+            let categoryId;
             for (const channelItem of categoryList) {
                 // parent_category_id
                 
@@ -125,6 +125,7 @@ export class ChannelProvider implements IChannelProvider {
                 // HIDE channels if they don't have any topics
                 // if(channelItem.topic_count > 0){
                 const channel = ChannelPopulator.populateChannel(channelItem, options.session.user);
+                channel.metadata = {categoryId: channelItem.id}
                 channels.array.push(channel);
                 // }
             }
@@ -138,6 +139,7 @@ export class ChannelProvider implements IChannelProvider {
 
         for (const channelItem of categoriesList) {
             const channel = ChannelPopulator.populateChannel(channelItem, options.session.user);
+            channel.metadata = {categoryId: channelItem.id}
             channels.array.push(channel);
         }
 
@@ -147,11 +149,21 @@ export class ChannelProvider implements IChannelProvider {
     }
 
     async getChannel(options: PluginRequestOptions, channelQuery: Channel.Query): Promise<Result<Channel>> {
-        const channelId = channelQuery.id;
-        let url: string;
-        let resp;
-            url = `${this.config.rootUrl}/categories.json`;
-            if(options.session.user){
+        console.warn(`channelQuery: ${JSON.stringify(channelQuery)}`)
+        let channelId = channelQuery.id;
+        const url = `${this.config.rootUrl}/site.json`;
+        let resp, channel, channelSlug, parentChannelSlug;
+
+        if(typeof channelId !== "number"){
+            if(channelId.includes("/")){
+                // Check if channel is a subcategory channel
+                parentChannelSlug = channelId.split('/')[0]
+                channelId = channelId.split('/')[1]
+            } 
+        }
+
+ 
+        if(options.session.user){
             resp = await this.pluginContext.axios.get(url, {
                 responseType: "json",
                 headers: {
@@ -162,9 +174,36 @@ export class ChannelProvider implements IChannelProvider {
             resp = await this.pluginContext.axios.get(url)
         }
 
-        const channelsList = resp.data.category_list.categories
-        const channelItem = channelsList.filter(elem => elem.id === parseInt(channelId))[0]
-        const channel = ChannelPopulator.populateChannel(channelItem, options.session.user);
+        const categoryList = resp.data.categories;
+
+        if(typeof channelId !== "number"){
+            if(parentChannelSlug){
+                const channelItem = categoryList.filter(elem => elem.slug === channelId)[0]
+                channel = ChannelPopulator.populateChannel(channelItem, options.session.user);
+                channel.id = channelId;
+            }else{
+                const channelItem = categoryList.filter(elem => elem.slug === channelId)[0]
+                channel = ChannelPopulator.populateChannel(channelItem, options.session.user);
+                channel.id = channelId
+                channel.metadata = {categoryId: channelItem.id}
+
+            }
+        }else if(typeof channelId === "number"){
+            
+            // Used for search results
+            const channelItem = categoryList.filter(elem => elem.id === channelId)[0]
+            if("parent_category_id" in channelItem){
+                const parentSlug = categoryList.filter(elem => elem.id === channelItem.parent_category_id)[0]
+                channelItem.slug = `${parentSlug.slug}/${channelItem.slug}`
+            }
+            channel = ChannelPopulator.populateChannel(channelItem, options.session.user);
+            channel.metadata = {categoryId: channelItem.id}
+            // channel.id = channelId
+
+        }
+
+        // const channelsList = resp.data.category_list.categories
+        // const channelItem = channelsList.filter(elem => elem.slug === channelId)[0]
         return Result.success(channel)
         // return channel;
     }

@@ -46,6 +46,7 @@ import { threadId } from "worker_threads";
             totalScore: data.score,
             canSessionUserUpdate: canUpdate,
             canSessionUserDelete: canUpdate,
+            canSessionUserComment: true,
             createdBy: {
                 id: data.username,
                 ...data.user_id && {id: data.user_id},
@@ -53,7 +54,9 @@ import { threadId } from "worker_threads";
                 username: data.username
             },
             utcCreateDate: Date.parse(data.created_at),
-            ...data.updated_at && {utcLastUpdateDate: Date.parse(data.updated_at)}
+            ...data.updated_at && {utcLastUpdateDate: Date.parse(data.updated_at)},
+            sessionUserReactionDisabled: (data.username === options.session.user.username),
+
         };
         return newComment;
     }

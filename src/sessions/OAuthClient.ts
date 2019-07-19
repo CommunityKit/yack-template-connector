@@ -134,7 +134,7 @@ export class OAuthClient implements IPluginOAuthClient {
 
     private populateAccessToken(data: any): AccessToken {
         this.pluginContext.logger.d(`populateAccessToken = ${data}`)
-        const token: AccessToken ={
+        const token: AccessToken = {
             // Need to replace this
             token: data,
             refreshToken: data["refresh_token"],

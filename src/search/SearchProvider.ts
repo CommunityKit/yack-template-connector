@@ -190,7 +190,9 @@ this.pluginContext.logger.d("Community doesn't have any categories")
                 if(threadsData){
                 for (const thread of threadsData) {
                     const threadPopulated = await populateThread(thread, options, this.config.rootUrl);
-                    const threadItem: SearchResultItem.ThreadItem = {thread: threadPopulated, channelQuery: {id: thread.channelId}}
+                    const threadItem: SearchResultItem.ThreadItem = {thread: threadPopulated, channelQuery: {id: thread.category_id}}
+
+                    // const threadItem: SearchResultItem.ThreadItem = {thread: threadPopulated, channelQuery: {id: thread.channelId}}
 
                     thread.item = threadItem;
                     thread.itemType = ObjectTypes.thread;
@@ -410,7 +412,7 @@ this.pluginContext.logger.d("Community doesn't have any categories")
         switch(kind){
             case "threads":{
                 const searchItem: SearchResultItem = {
-                    id: `${data.threadId}-${data.id.toString()}`,
+                    id: `${data.id.toString()}`,
                     item: data.item,
                 itemType: data.itemType
                 };
@@ -428,7 +430,7 @@ this.pluginContext.logger.d("Community doesn't have any categories")
             }
             case "users":{
                 const searchItem: SearchResultItem = {
-                    id: `${data.threadId}-${data.id.toString()}`,
+                    id: `${data.id.toString()}`,
                     item: data.item,
                     itemType: data.itemType
                 };

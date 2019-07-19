@@ -9,7 +9,7 @@ export namespace ChannelPopulator {
     // const channel = new Channel();
     const channel: Channel = {
     //    id: data.id.toString(),
-    id: data.slug,
+    ...("slug" in data) && {id: data.slug},
        icon: Channel.Icons.default,
        name: data.name,
        ...sessionUser && {canSessionUserPostNewThread: true}

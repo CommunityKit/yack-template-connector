@@ -338,11 +338,12 @@ export class CommentProvider implements ICommentProvider {
         // };
         return Result.success(newComment);
     }
-    async deleteComment(options: PluginRequestOptions, commentQuery: Comment.Query): Promise<Result<void>> {
-        return Result.success(null)
-    }
+    // async deleteComment(options: PluginRequestOptions, commentQuery: Comment.Query): Promise<Result<void>> {
+    //     return Result.success(null)
+    // }
 
-    async deleteCommentById(options: PluginRequestOptions, commentId: string): Promise<void> {
+    async deleteComment(options: PluginRequestOptions, commentQuery: Comment.Query): Promise<Result<void>> {
+        const commentId = commentQuery.id
         // const thread = await this.getCommentById(options,commentId);
         // if(thread.createdBy.username === options.session.user.username){
             let url = `${this.config.rootUrl}/posts/${commentId}.json`; // only using first element so don't need pagination
@@ -352,6 +353,7 @@ export class CommentProvider implements ICommentProvider {
                     "user-api-key": options.session.accessToken.token
                 }
             }); 
+            return Result.success(null)
         // }else{
         //     return null;
         // }
