@@ -59,7 +59,8 @@ import {populateAttachments} from "../threads/AttachmentPopulator"
         { commentsReactionConfig: 
             reactionsConfig
         },
-
+        ...data.totalComments && {totalComments: data.totalComments},
+        ...data.posts_count	&& {totalComments: data.posts_count - 1},
         canSessionUserUpdate: canUpdate,
         canSessionUserDelete: canUpdate,
         canSessionUserComment: true,

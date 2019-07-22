@@ -92,7 +92,11 @@ export class CommentProvider implements ICommentProvider {
                     default: {
                       // If have parentCommentId
                         !!commentsMap[commentPostNumber] == false ? (commentsMap[commentPostNumber] = comment.id.toString()) : null;
-                        if (isReply && !!parentCommentId == false) {
+
+                        // NOT sure why made this change previously...
+                        // if (isReply && !parentCommentId == false) {
+
+                        if (isReply && !parentCommentId) {
                             parentComment = commentsMap[comment.reply_to_post_number.toString()];
                             comment.parentCommentId = parentComment;
                         } else if (!!parentCommentId == true) {
@@ -297,31 +301,54 @@ export class CommentProvider implements ICommentProvider {
         const body = formValue.valueByFieldId["body"];
         let formData
         let url: string;
+
+        if(commentQuery){
+            // user is editing post
+            url = `${this.config.rootUrl}/posts/${comment.id}.json`;
+            // formData = {
+            //     "topic_id": parseInt(threadId),
+            //     "raw": body,
+            //     ...parentComment && {"reply_to_post_number": parentComment.id}
+
+            //     // ...parentCommentQuery && {"reply_to_post_number": parentComment.id}
+            //     // "created_at": "2017-01-31"
+            // };
+
+            formData = {
+                // "post[topic_id]": threadId,
+                "post[raw]": body.toString(),
+                }
+                const response = await this.pluginContext.axios.put(url, querystring.stringify(formData), {responseType: "json",
+        headers: {
+                // "Api-Key": `${options.session.accessToken.token}`,
+                "content-type": "application/x-www-form-urlencoded",
+                // "Access-Control-Allow-Origin": "*"
+                // "Accept": "application/json"
+                "user-api-key": options.session.accessToken.token           
+                }});
+        const data = response.data;
+
+       
+        const newComment = populateComment(data.post, options, this.config.rootUrl);
+        // return {
+        //     resultObject: newComment
+        // };
+        return Result.success(newComment);
+
+        }else{
+            //user is creating new post
         url = `${this.config.rootUrl}/posts.json`;
 
         // if (comment) {
             formData = {
-                "topic_id": parseInt(threadId.split(" ")[0]),
+                "topic_id": parseInt(threadId),
                 "raw": body,
+                ...parentComment && {"reply_to_post_number": parentComment.id}
+
+                // ...parentCommentQuery && {"reply_to_post_number": parentComment.id}
                 // "created_at": "2017-01-31"
             };
-            
-            // formData["thing_id"] = `${Kinds.comment}_${comment.id}`;
-        // } 
-        // else {
-        //     formData = {
-        //         "title": "string",
-        //         "topic_id": 0,
-        //         "raw": "string",
-        //         "category": 0,
-        //         "target_usernames": "discourse1,discourse2",
-        //         "archetype": "private_message",
-        //         "created_at": "2017-01-31"
-        //         }
-        //     // formData["thing_id"] = parentComment ? `${Kinds.comment}_${parentComment.id}` : `${Kinds.link}_${threadId}`;
-        // }
-
-        const response = await this.pluginContext.axios.post(url, querystring.stringify(formData), {responseType: "json",
+            const response = await this.pluginContext.axios.post(url, querystring.stringify(formData), {responseType: "json",
         headers: {
                 // "Api-Key": `${options.session.accessToken.token}`,
                 "content-type": "application/x-www-form-urlencoded",
@@ -337,6 +364,23 @@ export class CommentProvider implements ICommentProvider {
         //     resultObject: newComment
         // };
         return Result.success(newComment);
+            }
+            // formData["thing_id"] = `${Kinds.comment}_${comment.id}`;
+        // } 
+        // else {
+        //     formData = {
+        //         "title": "string",
+        //         "topic_id": 0,
+        //         "raw": "string",
+        //         "category": 0,
+        //         "target_usernames": "discourse1,discourse2",
+        //         "archetype": "private_message",
+        //         "created_at": "2017-01-31"
+        //         }
+        //     // formData["thing_id"] = parentComment ? `${Kinds.comment}_${parentComment.id}` : `${Kinds.link}_${threadId}`;
+        // }
+
+        
     }
     // async deleteComment(options: PluginRequestOptions, commentQuery: Comment.Query): Promise<Result<void>> {
     //     return Result.success(null)

@@ -205,6 +205,7 @@ export class ThreadProvider implements IThreadProvider {
         firstPostInThread.channelId = data.category_id.toString();
         firstPostInThread.communityName = this.config.id.replace("_discourse","")
         firstPostInThread.partialUrl = this.config.partialUrl
+        firstPostInThread.totalComments = posts.length - 1
 
         const thread = await populateThread(firstPostInThread, options, this.config.rootUrl);
 
