@@ -91,25 +91,32 @@ export class CommentProvider implements ICommentProvider {
                     }
                     default: {
                       // If have parentCommentId
-                        !!commentsMap[commentPostNumber] == false ? (commentsMap[commentPostNumber] = comment.id.toString()) : null;
+                        // !!commentsMap[commentPostNumber] == false ? (commentsMap[commentPostNumber] = comment.id.toString()) : null;
 
-                        // NOT sure why made this change previously...
-                        // if (isReply && !parentCommentId == false) {
+                        // // NOT sure why made this change previously...
+                        // // if (isReply && !parentCommentId == false) {
 
-                        if (isReply && !parentCommentId) {
-                            parentComment = commentsMap[comment.reply_to_post_number.toString()];
-                            comment.parentCommentId = parentComment;
-                        } else if (!!parentCommentId == true) {
-                            comment.parentCommentId = parentCommentId.toString();
-                            // IF comment.reply_count > 20 
-                            // THEN set comment.repliesNextPageToken
-                            // when called again
-                            // SENDS comment.id && comment.nextPageToken (to access the previously set comment.repliesNextPageToken)
-                        } else {
-                            comment.parentCommentId = null;
-                        }
-                        break;
+                        // // if (isReply && !parentCommentId) {
+                        // //     // parentComment = commentsMap[comment.reply_to_post_number.toString()];
+                        // //     // comment.parentCommentId = parentComment;
+                        // //     comment.parentCommentId = 
+                        // // } else if (!!parentCommentId == true) {
+                        // //     comment.parentCommentId = parentCommentId.toString();
+                        // //     // IF comment.reply_count > 20 
+                        // //     // THEN set comment.repliesNextPageToken
+                        // //     // when called again
+                        // //     // SENDS comment.id && comment.nextPageToken (to access the previously set comment.repliesNextPageToken)
+                        // // } else {
+                        // //     comment.parentCommentId = null;
+                        // // }
+                        // if(isReply){
+                        //     comment.parentCommentId = parentCommentId.toString()
+                        // }
+                        // break;
                     }
+                }
+                if(isReply){
+                    comment.parentCommentId = parentCommentId.toString()
                 }
                 comment.threadId = threadId;
                 let newComment = populateComment(comment, options, this.config.rootUrl);
@@ -343,7 +350,7 @@ export class CommentProvider implements ICommentProvider {
             formData = {
                 "topic_id": parseInt(threadId),
                 "raw": body,
-                ...parentComment && {"reply_to_post_number": parentComment.id}
+                "reply_to_post_number": parentComment.id || ""
 
                 // ...parentCommentQuery && {"reply_to_post_number": parentComment.id}
                 // "created_at": "2017-01-31"

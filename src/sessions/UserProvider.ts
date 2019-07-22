@@ -68,7 +68,7 @@ export class UserProvider {
         return Result.success(pluginUser);
     }
     async getUser(options: PluginRequestOptions, userQuery: PluginUser.Query): Promise<Result<PluginUser>> {
-        const userId = userQuery.id
+        const userId = userQuery.username
         // userID === username
         let allData;
         await Promise.all(
@@ -84,7 +84,6 @@ export class UserProvider {
 
         allData.partialUrl = this.config.partialUrl
         allData.communityName = this.config.id.replace("_discourse","")
-        
 
         const user = populateUser(allData, this.config.rootUrl)
         // let user = new PluginUser();

@@ -95,8 +95,12 @@ export class ReactionProvider implements IReactionProvider {
         console.warn(`saveReaction() ObjectId ${objectId}`)
         // const parsedThreadId = objectId.split(" ")[0]
         // const postId = objectId.split(" ")[1]
-        const postId = objectQuery.metadata.postId
-
+        let postId;
+        if(objectType === ObjectTypes.comment){
+            postId = objectQuery.id
+        }else{
+        postId = objectQuery.metadata.postId
+        }
         // const postId = await getThreadPostId(this.config.rootUrl, this.pluginContext.axios.get, options, objectQuery, objectType);
 
 
