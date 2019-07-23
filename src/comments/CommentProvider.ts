@@ -31,98 +31,67 @@ export class CommentProvider implements ICommentProvider {
     }
 
     async getCommentsByThread(options: PluginRequestOptions, threadQuery: Thread.Query, parentCommentQuery: Comment.Query): Promise<Result<PagedArray<Comment>>> {
+        let currentPage, totalPages, response, url, nextPageNumber;
         const threadId = threadQuery.id;
-        const parentCommentId = !!parentCommentQuery ? parentCommentQuery.id : false;
+        const parentCommentId = !!parentCommentQuery ? parentCommentQuery.id : null;
         const hasUser: boolean = !!options.session.user;
-        let url: string;
-        let response: any;
         let paginationString = options.nextPageToken;
-        let currentPage: number;
-        let totalPages: number;
         let hasPageToken: boolean = !!paginationString;
 
-        // Determine commentCount
+        const comments = new PagedArray<Comment>();
+
+        // TOP LEVEL COMMENTS - Determine commentCount
         let totalComments = data => data.post_stream.stream.length;
 
-        const comments = new PagedArray<Comment>();
-        const commentsMap = {};
-
-        // {{base}}/posts/972977/replies.json
-        // {{base}}/posts/by_number/119632/1.json
         if (hasPageToken) {
-            currentPage = this.setCommentsPageToken(comments, paginationString, true, 20);
+            // currentPage = this.setCommentsPageToken(comments, paginationString, true, 20);
+            currentPage = paginationString
             url = `${this.config.rootUrl}/t/${threadId}.json?page=${currentPage}`;
             response = await this.setUrlToken(hasUser, url, options.session.user ? options.session.accessToken.token : null);
+            const commentCount = totalComments(response); // 20 per page
+            nextPageNumber = commentCount === 20 ? parseInt(currentPage) + 1 : null
         } else {
             // if we don't have a nextPageToken yet we need to set it on the first request or if they're aren't anymore pages don't set it
-            url = `${this.config.rootUrl}/t/${threadId}.json`;
+            currentPage = 1
+            url = `${this.config.rootUrl}/t/${threadId}.json?page=${currentPage}`;
             response = await this.setUrlToken(hasUser, url, options.session.user ? options.session.accessToken.token : null);
-            let commentCount = totalComments(response); // 20 per page
-            commentCount >= 20 ? this.setCommentsPageToken(comments, null, false, commentCount) : (comments.nextPageToken = null); // No need for pagination if less than 20 pages
+            const commentCount = totalComments(response); // 20 per page
+            nextPageNumber = commentCount === 20 ? currentPage + 1 : null // No need for pagination if less than 20 pages
         }
+        comments.nextPageToken = nextPageNumber;
+        // ----------------------------------
 
+        // ITTERATE COMMENTS + REPLIES PAGINATION
         const threadCommentList = response.post_stream.posts;
-
         for (let comment of threadCommentList) {
             let replyCount = comment.reply_count;
-            let hasRepliesToken = !!comment.repliesNextPageToken;
             let isReply = !!comment.reply_to_post_number;
-            let parentComment;
-            let commentPostNumber = comment.post_number.toString();
+            comment.id = comment.post_number.toString();
 
-            if (comment.post_number !== 1) {
-                switch (replyCount) {
-                    case replyCount === 20: {
-                        switch (hasRepliesToken) {
-                            case hasRepliesToken === true: {
-                                this.setRepliesPageToken(comment, comment.repliesNextPageToken, true, 20);
-                                break;
-                            }
-                            default: {
-                                this.setRepliesPageToken(comment, null, false, 20);
-                                break;
-                            }
-                        }
-                    }
-                    case replyCount >= 0 && replyCount < 20: {
-                        // has no replies OR has under 20 replies
-                        !!commentsMap[commentPostNumber] ? (commentsMap[commentPostNumber] = comment.id.toString()) : null;
-                        comment.repliesNextPageToken = null;
-                    }
-                    default: {
-                      // If have parentCommentId
-                        // !!commentsMap[commentPostNumber] == false ? (commentsMap[commentPostNumber] = comment.id.toString()) : null;
+            if (comment.post_number !== 1) { // first post is the topic
+                if (isReply) {
+                    // SET PARENT COMMENT ID IF REPLY
+                    comment.parentCommentId = !!parentCommentId ? parentCommentId : comment.reply_to_post_number.toString();
 
-                        // // NOT sure why made this change previously...
-                        // // if (isReply && !parentCommentId == false) {
-
-                        // // if (isReply && !parentCommentId) {
-                        // //     // parentComment = commentsMap[comment.reply_to_post_number.toString()];
-                        // //     // comment.parentCommentId = parentComment;
-                        // //     comment.parentCommentId = 
-                        // // } else if (!!parentCommentId == true) {
-                        // //     comment.parentCommentId = parentCommentId.toString();
-                        // //     // IF comment.reply_count > 20 
-                        // //     // THEN set comment.repliesNextPageToken
-                        // //     // when called again
-                        // //     // SENDS comment.id && comment.nextPageToken (to access the previously set comment.repliesNextPageToken)
-                        // // } else {
-                        // //     comment.parentCommentId = null;
-                        // // }
-                        // if(isReply){
-                        //     comment.parentCommentId = parentCommentId.toString()
-                        // }
-                        // break;
+                    // SET REPLY PAGNIATION IF REPLYCOUNT === 20 REPLIES
+                    let hasRepliesToken = !!comment.repliesNextPageToken;
+                    if(replyCount === 20){
+                        // can't find any test data for this
+                        // Discourse doesn't fetch replies in their own paginiated format
+                        // Instead they only fetch comments/replies by date posted
                     }
                 }
-                if(isReply){
-                    comment.parentCommentId = parentCommentId.toString()
-                }
+
+                // PUSH to array
                 comment.threadId = threadId;
                 let newComment = populateComment(comment, options, this.config.rootUrl);
+                console.log(`Comment: ${JSON.stringify(comment)}`)
+
                 comments.array.push(newComment);
+                console.log(`ALL COMMENTS: ${JSON.stringify(comments)}`)
             }
-        }
+                
+            }
         return Result.success(comments);
         // return comments;
     }

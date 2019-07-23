@@ -34,7 +34,7 @@ import { threadId } from "worker_threads";
             threadId: data.threadId,
             
             ...data.topic_id && {threadId: data.topic_id.toString()},
-                        content: {
+            content: {
                 type: TextContent.Types.html,
                 ...data.blurb && {value: data.blurb},
                 ...data.cooked && {value: data.cooked}
@@ -63,7 +63,7 @@ import { threadId } from "worker_threads";
 
             createdBy: {
                 id: data.username,
-                ...data.user_id && {id: data.user_id},
+                // ...data.user_id && {id: data.user_id},
                 fullName: data.name,
                 username: data.username,
                 ...data.avatar_template && {profileImageUrl: avatarUrl},
