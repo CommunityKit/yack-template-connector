@@ -319,7 +319,7 @@ export class CommentProvider implements ICommentProvider {
             formData = {
                 "topic_id": parseInt(threadId),
                 "raw": body,
-                "reply_to_post_number": parentComment.id || ""
+                ...parentComment && {"reply_to_post_number": parentComment.id}
 
                 // ...parentCommentQuery && {"reply_to_post_number": parentComment.id}
                 // "created_at": "2017-01-31"
