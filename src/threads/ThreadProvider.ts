@@ -13,7 +13,8 @@ import {
     Result,
     Action,
     ThreadDisplayProperties,
-    PluginUser
+    PluginUser,
+    TextContent
 } from "yack-plugin-framework";
 import { IDiscourseConfig } from "../config/IDiscourseConfig";
 import { populateThread } from "./ThreadPopulator";
@@ -443,8 +444,8 @@ export class ThreadProvider implements IThreadProvider {
             title: "Text",
             type: Form.Field.Types.richText,
             options: [Form.RichTextField.Options.bold, Form.RichTextField.Options.italic, Form.RichTextField.Options.link, Form.RichTextField.Options.imageupload, Form.RichTextField.Options.heading, Form.RichTextField.Options.bulletedlist, Form.RichTextField.Options.numberedlist, Form.RichTextField.Options.quoteblock, Form.RichTextField.Options.emoji, Form.RichTextField.Options.codeblock],
-            valueType: thread && thread.content ? thread.content.type : null,
-            value: thread && thread.content ? thread.content.value : null
+            valueType: thread && thread.content ? thread.content.type : TextContent.Types.html,
+            value: thread && thread.content ? thread.content.value : ""
         };
 
         // Can't upload videos to discourse

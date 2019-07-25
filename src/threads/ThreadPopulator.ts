@@ -95,7 +95,7 @@ import {populateAttachments} from "../threads/AttachmentPopulator"
         },
         ...options.session.user && {sessionUserReactionDisabled: (data.creator_username === options.session.user.username )},
         ...!hasUser && {sessionUserReactionDisabled: true},
-        ...data.link_counts && {attachments: await populateAttachments(data.link_counts)},
+        // ...data.link_counts && {attachments: await populateAttachments(data.link_counts)},
 
         shareProps: {
             ...data.cooked && {title: data.cooked},

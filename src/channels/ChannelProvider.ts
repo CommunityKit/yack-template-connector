@@ -39,7 +39,7 @@ export class ChannelProvider implements IChannelProvider {
                 {
                     id: "fixed:latest",
                     icon: Channel.Icons.home,
-                    name: "latest",
+                    name: "home",
                     description: {type: TextContent.Types.plain, value: "The latest topics"},
                     threadsFilters: this.getLatestChannelSortFilters(options)
                 },

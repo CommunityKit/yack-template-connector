@@ -5,7 +5,7 @@ import {
     ICommentProvider,
     Comment,
     Filter,
-    Form, Action, Result, Thread, PluginUser
+    Form, Action, Result, Thread, PluginUser, TextContent
 } from "yack-plugin-framework";
 import * as querystring from "querystring";
 import { IDiscourseConfig } from "../config/IDiscourseConfig";
@@ -249,8 +249,8 @@ export class CommentProvider implements ICommentProvider {
             Form.RichTextField.Options.numberedlist,
             Form.RichTextField.Options.quoteblock,
             Form.RichTextField.Options.emoji],
-            valueType: comment && comment.content ? comment.content.type : null,
-            value: comment && comment.content ? comment.content.value : null
+            valueType: comment && comment.content ? comment.content.type : TextContent.Types.html,
+            value: comment && comment.content ? comment.content.value : ""
         };
         const form: Form = {
             id: uuid.v4(),
