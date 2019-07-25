@@ -19,11 +19,9 @@ import {
 import { IDiscourseConfig } from "../config/IDiscourseConfig";
 import { populateThread } from "./ThreadPopulator";
 import * as filter from "../search/Filters";
-import { getUserCreatedContent } from "./ThreadRequests"
+import { getUserCreatedContent } from "./ThreadRequests";
 import uuid = require("uuid");
 import * as querystring from "querystring";
-
-
 
 export class ThreadProvider implements IThreadProvider {
     private pluginContext: PluginContext;
@@ -31,29 +29,23 @@ export class ThreadProvider implements IThreadProvider {
     private channelProvider: IChannelProvider;
     actions = [Action.save, Action.report];
 
-
     constructor(context: PluginContext, config: IDiscourseConfig, channelProvider: IChannelProvider) {
         this.pluginContext = context;
         this.config = config;
         this.channelProvider = channelProvider;
-
     }
 
-    threadDisplayProperties: ThreadDisplayProperties[] = [
-        ThreadDisplayProperties.title,
-        ThreadDisplayProperties.attachments,
-        ThreadDisplayProperties.description
-    ];
+    threadDisplayProperties: ThreadDisplayProperties[] = [ThreadDisplayProperties.title, ThreadDisplayProperties.attachments];
 
     async getFilters(options: PluginRequestOptions): Promise<Result<Filter[]>> {
         // return DiscourseFilters.TOP_THREADS_FILTERS;
         // return filter.DEFAULT_CHANNELS_THREADS_FILTERS;
-        return Result.success(filter.DEFAULT_CHANNELS_THREADS_FILTERS)
+        return Result.success(filter.DEFAULT_CHANNELS_THREADS_FILTERS);
     }
 
     async getThreadsByChannel(options: PluginRequestOptions, channelQuery: Channel.Query): Promise<Result<PagedArray<Thread>>> {
         // SetHeaders
-        const channelId = channelQuery.id
+        const channelId = channelQuery.id;
         const hasUser = !!options.session.user;
 
         // Axios Request
@@ -156,15 +148,15 @@ export class ThreadProvider implements IThreadProvider {
             topic.creator_full_name = userObject.name;
             topic.creator_username = userObject.username;
             // this.pluginContext.logger.d(`Topic = ${JSON.stringify(topic)}`);
-            topic.communityName = this.config.id.replace("_discourse","")
-            topic.partialUrl = this.config.partialUrl
+            topic.communityName = this.config.id.replace("_discourse", "");
+            topic.partialUrl = this.config.partialUrl;
 
             const thread = await populateThread(topic, options, this.config.rootUrl);
-            thread.metadata = {}
+            thread.metadata = {};
             // this.populateTestAttachments(thread);
             threads.array.push(thread);
         }
-        return Result.success(threads)
+        return Result.success(threads);
         // return threads;
     }
 
@@ -177,7 +169,6 @@ export class ThreadProvider implements IThreadProvider {
         let url = `${this.config.rootUrl}/t/${threadId}.json`; // only using first element so don't need pagination
         const data = await this.setUrlToken(hasUser, url, options.session.user ? options.session.accessToken.token : null);
 
-        
         const posts = data.post_stream.posts;
         const postId = data.post_stream.posts[0].id;
 
@@ -205,18 +196,18 @@ export class ThreadProvider implements IThreadProvider {
         firstPostInThread.last_posted_at = firstPostInThread.last_posted_at;
         firstPostInThread.pinned = data.pinned ? data.pinned : null;
         firstPostInThread.channelId = data.category_id;
-        firstPostInThread.communityName = this.config.id.replace("_discourse","")
-        firstPostInThread.partialUrl = this.config.partialUrl
-        firstPostInThread.totalComments = posts.length - 1
+        firstPostInThread.communityName = this.config.id.replace("_discourse", "");
+        firstPostInThread.partialUrl = this.config.partialUrl;
+        firstPostInThread.totalComments = posts.length - 1;
 
         const thread = await populateThread(firstPostInThread, options, this.config.rootUrl);
 
-        thread.metadata = { postId: postId};
-        thread.channelId = threadQuery.channelId
-        thread.channelName = threadQuery.channelName
+        thread.metadata = { postId: postId };
+        thread.channelId = threadQuery.channelId;
+        thread.channelName = threadQuery.channelName;
         // thread.detailsPrepopulated = true;
         // return thread;
-        return Result.success(thread)
+        return Result.success(thread);
     }
 
     async saveThread(options: PluginRequestOptions, channelId: string, thread: Thread): Promise<Thread> {
@@ -227,45 +218,44 @@ export class ThreadProvider implements IThreadProvider {
         const threadId = threadQuery.id;
         // const thread = await this.getThreadById(options,threadId);
         // if(thread.createdBy.username === options.session.user.username){
-            let url = `${this.config.rootUrl}/t/${threadId}.json`; // only using first element so don't need pagination
-            await this.pluginContext.axios.delete(url, {
-                responseType: "json",
-                headers: {
-                    "user-api-key": options.session.accessToken.token
-                }
-            }); 
-            return Result.success(null)
+        let url = `${this.config.rootUrl}/t/${threadId}.json`; // only using first element so don't need pagination
+        await this.pluginContext.axios.delete(url, {
+            responseType: "json",
+            headers: {
+                "user-api-key": options.session.accessToken.token
+            }
+        });
+        return Result.success(null);
         // }else{
         //     return null;
         // }
-
     }
 
     // async saveThreadAction(options: PluginRequestOptions, threadId: string, actionItem: ObjectAction.Item): Promise<void> {}
     async saveAction(options: PluginRequestOptions, threadQuery: Thread.Query, action: Action, actionType: Action.Types): Promise<Result<void>> {
-        const threadId = threadQuery.id
+        const threadId = threadQuery.id;
         let url, response, data, formData;
         if (action == Action.report) {
-            url = `${this.config.rootUrl}/post_actions.json`
-            formData = `id=${threadId}&post_action_type_id=${8}&flag_topic=true`
+            url = `${this.config.rootUrl}/post_actions.json`;
+            formData = `id=${threadId}&post_action_type_id=${8}&flag_topic=true`;
             await this.pluginContext.axios.post(url, formData, {
                 responseType: "json",
                 headers: {
                     "user-api-key": options.session.accessToken.token
                 }
-            }); 
+            });
         } else if (action == Action.save) {
-            url = `${this.config.rootUrl}/t/${threadId}/bookmark.json`
-            await this.pluginContext.axios.put(url,'', {
+            url = `${this.config.rootUrl}/t/${threadId}/bookmark.json`;
+            await this.pluginContext.axios.put(url, "", {
                 // responseType: "json",
                 headers: {
                     "user-api-key": options.session.accessToken.token
                 }
-            }); 
+            });
         } else {
             throw new Error(`Not implemented`);
-        }  
-        return Result.success(null)     
+        }
+        return Result.success(null);
     }
 
     private async getTopicStream() {
@@ -300,13 +290,13 @@ export class ThreadProvider implements IThreadProvider {
     private getTopChannelFilters(options: PluginRequestOptions): string {
         const sortByFilter = Filter.findFilter(options.filters, "sort_interval");
         const sortId = sortByFilter.value.toString();
-        if(sortId === "default"){
-            return '';
-        }else{
-        const partialUrl = `/${sortId}`;
-        // const topThreadsFilters = objectUtils.clone(DiscourseFilters.TOP_THREADS_FILTERS);
-        return partialUrl;
-    }
+        if (sortId === "default") {
+            return "";
+        } else {
+            const partialUrl = `/${sortId}`;
+            // const topThreadsFilters = objectUtils.clone(DiscourseFilters.TOP_THREADS_FILTERS);
+            return partialUrl;
+        }
     }
 
     private getSolvedFilters(options: PluginRequestOptions): string {
@@ -401,34 +391,33 @@ export class ThreadProvider implements IThreadProvider {
         // https://community.cartalk.com/user_actions.json?offset=0&username=b.l.e&filter=5&no_results_help_key=user_activity.no_replies&_=1556298757193
         const userThreads = new PagedArray<Thread>();
         const userThreadsData = await getUserCreatedContent(this.pluginContext.axios.get, this.config.rootUrl, userId, options.nextPageToken);
-        for(const threadData of userThreadsData){
+        for (const threadData of userThreadsData) {
             // populate thread
-            threadData.partialUrl = this.config.partialUrl
+            threadData.partialUrl = this.config.partialUrl;
 
-           threadData.communityName = this.config.id.replace("_discourse","")
+            threadData.communityName = this.config.id.replace("_discourse", "");
 
-            const thread = await populateThread(threadData, options, this.config.rootUrl)
-            thread.channelName = userId
-            thread.channelId = userId
+            const thread = await populateThread(threadData, options, this.config.rootUrl);
+            thread.channelName = userId;
+            thread.channelId = userId;
             // thread.detailsPrepopulated = true;
-            userThreads.array.push(thread)
+            userThreads.array.push(thread);
             // push to PagedArray
         }
         return Result.success(userThreads);
         // return userThreads;
     }
 
-
     // IF threadId: user is trying to edit a thread
     async getSaveThreadForm(options: PluginRequestOptions, channelQuery: Channel.Query, threadQuery: Thread.Query): Promise<Result<Form>> {
         let thread, channel, threadId;
-        channel = channelQuery
-        threadQuery ? threadId = threadQuery.id : threadId = null;
-    
-        console.warn("in getSaveThreadForm ThreadQuery:" + JSON.stringify(threadQuery))
+        channel = channelQuery;
+        threadQuery ? (threadId = threadQuery.id) : (threadId = null);
+
+        console.warn("in getSaveThreadForm ThreadQuery:" + JSON.stringify(threadQuery));
         // const channelId = channelQuery.id;
         if (threadId) {
-            thread = threadQuery
+            thread = threadQuery;
             // thread = await this.getThread(options, threadQuery);
             // channel = await this.channelProvider.getChannel(options, channelQuery);
         } else {
@@ -445,7 +434,18 @@ export class ThreadProvider implements IThreadProvider {
         const bodyField: Form.RichTextField = {
             title: "Text",
             type: Form.Field.Types.richText,
-            options: [Form.RichTextField.Options.bold, Form.RichTextField.Options.italic, Form.RichTextField.Options.link, Form.RichTextField.Options.imageupload, Form.RichTextField.Options.heading, Form.RichTextField.Options.bulletedlist, Form.RichTextField.Options.numberedlist, Form.RichTextField.Options.quoteblock, Form.RichTextField.Options.emoji, Form.RichTextField.Options.codeblock],
+            options: [
+                Form.RichTextField.Options.bold,
+                Form.RichTextField.Options.italic,
+                Form.RichTextField.Options.link,
+                Form.RichTextField.Options.imageupload,
+                Form.RichTextField.Options.heading,
+                Form.RichTextField.Options.bulletedlist,
+                Form.RichTextField.Options.numberedlist,
+                Form.RichTextField.Options.quoteblock,
+                Form.RichTextField.Options.emoji,
+                Form.RichTextField.Options.codeblock
+            ],
             valueType: thread && thread.content ? thread.content.type : TextContent.Types.html,
             value: thread && thread.content ? thread.content.value : ""
         };
@@ -464,10 +464,10 @@ export class ThreadProvider implements IThreadProvider {
 
         const categories = await this.getCategories(this.pluginContext.axios.get, options);
         let categoryIds: number[] = [];
-         categories.forEach(element => categoryIds.push(element.id));
+        categories.forEach(element => categoryIds.push(element.id));
 
-         let categoryNames: string[] = [];
-         categories.forEach(element => categoryNames.push(element.name));
+        let categoryNames: string[] = [];
+        categories.forEach(element => categoryNames.push(element.name));
 
         const categoriesField: Form.SelectField = {
             title: "Category",
@@ -496,7 +496,6 @@ export class ThreadProvider implements IThreadProvider {
             upload: uploadField
         };
 
-
         postFieldsById["postProps"] = {
             type: Form.Field.Types.group,
             childrenById: {}
@@ -506,8 +505,6 @@ export class ThreadProvider implements IThreadProvider {
             type: Form.Field.Types.group,
             childrenById: {}
         };
-
-
 
         const postTypesField: Form.TabsField = {
             type: Form.Field.Types.tabs,
@@ -526,8 +523,8 @@ export class ThreadProvider implements IThreadProvider {
 
         if (thread) {
             postTypesField.disabled = true;
-            
-                postTypesField.value = "post";
+
+            postTypesField.value = "post";
         }
 
         const form: Form = {
@@ -540,10 +537,15 @@ export class ThreadProvider implements IThreadProvider {
         return Result.success(form);
     }
 
-    async saveThreadForm(options: PluginRequestOptions, channelQuery: Channel.Query, threadQuery: Thread.Query, formValue: Form.Value): Promise<Result<Thread>> {
+    async saveThreadForm(
+        options: PluginRequestOptions,
+        channelQuery: Channel.Query,
+        threadQuery: Thread.Query,
+        formValue: Form.Value
+    ): Promise<Result<Thread>> {
         let threadId;
         // const channelId = channelQuery.id;
-        threadQuery ? threadId = threadQuery.id : threadId = null;
+        threadQuery ? (threadId = threadQuery.id) : (threadId = null);
 
         // const threadId = threadQuery.id;
         const valueByFieldId = formValue.valueByFieldId;
@@ -554,52 +556,52 @@ export class ThreadProvider implements IThreadProvider {
         // const postType = valueByFieldId["postTypes"] as string;
         // const spoiler = valueByFieldId["spoiler"] ? (valueByFieldId["spoiler"] as boolean) : false;
 
-        if(threadId){
+        if (threadId) {
             // IF threadId update the current thread
             // TBD
             const postId = threadQuery.metadata.postId;
 
             const formData = {
                 "post[topic_id]": threadId,
-                "post[raw]": body,
-                }
-    
+                "post[raw]": body
+            };
+
             const url = `${this.config.rootUrl}/posts/${postId}.json`;
-            
-    
-            const response = await this.pluginContext.axios.put(url, querystring.stringify(formData), {responseType: "json",
-            headers: {
+
+            const response = await this.pluginContext.axios.put(url, querystring.stringify(formData), {
+                responseType: "json",
+                headers: {
                     "content-type": "application/x-www-form-urlencoded",
-                    "user-api-key": options.session.accessToken.token           
-                    }});
-    
+                    "user-api-key": options.session.accessToken.token
+                }
+            });
+
             const data = response.data;
-            const thread = await this.getThread(options, {...threadQuery, channelId: channelQuery.id});
+            const thread = await this.getThread(options, { ...threadQuery, channelId: channelQuery.id });
             return Result.success(thread.result);
-        }else{
-        const formData = {
-            "title": title,
-            "raw": body,
-            "category": channelQuery.metadata.categoryId,
-            }
+        } else {
+            const formData = {
+                title: title,
+                raw: body,
+                category: channelQuery.metadata.categoryId
+            };
 
-        const url = `${this.config.rootUrl}/posts.json`;
-        
+            const url = `${this.config.rootUrl}/posts.json`;
 
-        const response = await this.pluginContext.axios.post(url, querystring.stringify(formData), {responseType: "json",
-        headers: {
-                "content-type": "application/x-www-form-urlencoded",
-                "user-api-key": options.session.accessToken.token           
-                }});
+            const response = await this.pluginContext.axios.post(url, querystring.stringify(formData), {
+                responseType: "json",
+                headers: {
+                    "content-type": "application/x-www-form-urlencoded",
+                    "user-api-key": options.session.accessToken.token
+                }
+            });
 
-        const data = response.data;
-       
+            const data = response.data;
 
-        const newThreadId = data.topic_id;
-        const thread = await this.getThread(options, {id: newThreadId});
-        return Result.success(thread.result);
-
-    }
+            const newThreadId = data.topic_id;
+            const thread = await this.getThread(options, { id: newThreadId });
+            return Result.success(thread.result);
+        }
         // return {
         //     resultObject: thread
         // };
@@ -616,7 +618,7 @@ export class ThreadProvider implements IThreadProvider {
 
     // }
 
-    private async getCategories(get, options){
+    private async getCategories(get, options) {
         let url: string;
         url = `${this.config.rootUrl}/site.json`;
 
@@ -627,12 +629,11 @@ export class ThreadProvider implements IThreadProvider {
             }
         });
         const categoryList = channelsResponse.data.categories;
-        
-        let selectableCategories = []
+
+        let selectableCategories = [];
 
         for (const category of categoryList) {
-            selectableCategories.push({id: category.id, name: category.name})
-        
+            selectableCategories.push({ id: category.id, name: category.name });
         }
         return selectableCategories;
     }
