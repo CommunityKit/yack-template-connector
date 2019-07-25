@@ -67,7 +67,7 @@ export class ChannelProvider implements IChannelProvider {
                     description: {type: TextContent.Types.plain, value: "All top trending topics"},
                     threadsFilters: this.getTopChannelFilters(options)
                 },
-                { id: "unread", icon: Channel.Icons.default, name: "unread", description: {type: TextContent.Types.plain, value: "Your unread topics"}, threadsFilters: [] }
+                // { id: "unread", icon: Channel.Icons.default, name: "unread", description: {type: TextContent.Types.plain, value: "Your unread topics"}, threadsFilters: [] }
             ];
         }
         return Result.success(fixedChannels)
@@ -126,7 +126,7 @@ export class ChannelProvider implements IChannelProvider {
                 // if(channelItem.topic_count > 0){
                 const channel = ChannelPopulator.populateChannel(channelItem, options.session.user);
                 channel.metadata = {categoryId: channelItem.id}
-                channels.array.push(channel);
+                channel.name != "Uncategorized" ? channels.array.push(channel) : null;
                 // }
             }
 
