@@ -49,7 +49,8 @@ export class ChannelProvider implements IChannelProvider {
                     name: "home",
                     description: {type: TextContent.Types.plain, value: "The latest topics"},
                     threadsFilters: this.getLatestChannelSortFilters(options),
-                    metadata: {categoryMap: categoryMap}
+                    metadata: {categoryMap: categoryMap},
+                    channelProfileDisabled: true
                 },
                 {
                     id: "top:popular",
@@ -57,7 +58,8 @@ export class ChannelProvider implements IChannelProvider {
                     name: "top",
                     description: {type: TextContent.Types.plain, value: "All top trending topics"},
                     threadsFilters: this.getTopChannelFilters(options),
-                    metadata: {categoryMap: categoryMap}
+                    metadata: {categoryMap: categoryMap},
+                    channelProfileDisabled: true
                 }
             ];
         } else if (!!options.session.user) {
@@ -68,7 +70,8 @@ export class ChannelProvider implements IChannelProvider {
                     name: "home",
                     description: {type: TextContent.Types.plain, value: "The latest topics"},
                     threadsFilters: this.getLatestChannelSortFilters(options),
-                    metadata: {categoryMap: categoryMap}
+                    metadata: {categoryMap: categoryMap},
+                    channelProfileDisabled: true
                 },
                 {
                     id: "top:popular",
@@ -76,7 +79,8 @@ export class ChannelProvider implements IChannelProvider {
                     name: "top",
                     description: {type: TextContent.Types.plain, value: "All top trending topics"},
                     threadsFilters: this.getTopChannelFilters(options),
-                    metadata: {categoryMap: categoryMap}
+                    metadata: {categoryMap: categoryMap},
+                    channelProfileDisabled: true
                 },
                 // { id: "unread", icon: Channel.Icons.default, name: "unread", description: {type: TextContent.Types.plain, value: "Your unread topics"}, threadsFilters: [] }
             ];
