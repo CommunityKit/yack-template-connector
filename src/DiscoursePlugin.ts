@@ -51,9 +51,8 @@ export class DiscoursePlugin implements IPlugin {
         this.name = this.config.name;
         this.iconBase64 = this.config.iconBase64;
         // this.accentColor = this.config.accentColor;
-        this.primaryColor = this.config.accentColor;
-        this.secondaryColor = this.config.accentColor;
-
+        this.primaryColor = this.config.primaryColor;
+        this.secondaryColor = this.config.secondaryColor;
     }
     // primaryColor = this.config.accentColor;
     // secondaryColor = this.config.accentColor;
@@ -69,6 +68,5 @@ export class DiscoursePlugin implements IPlugin {
         // this.conversationMessageProvider = new RedditConversationMessageProvider(context);
         this.searchProvider = new SearchProvider(context, this.config);
         this.reactionProvider = new ReactionProvider(context, this.config);
-
     }
 }

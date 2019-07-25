@@ -7,6 +7,7 @@ export const YackBetaConfig: IDiscourseConfig = {
     id: "yack_discourse",
     name: "Yack Beta",
     iconBase64: icon,
-    accentColor: "#144C94",
+    primaryColor: "#1d1e1f",
+    secondaryColor: "#434649",
     communityGuidelines: "https://community.yack.io/guidelines"
 };

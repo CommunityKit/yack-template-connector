@@ -7,6 +7,7 @@ export const EnvatoConfig: IDiscourseConfig = {
     id: "envato_discourse",
     name: "Envato",
     iconBase64: icon,
-    accentColor: "#81b739",
+    primaryColor: "#81b739",
+    secondaryColor: "#81b739",
     communityGuidelines: "https://forums.envato.com/tos"
 };

@@ -3,7 +3,8 @@ export interface IDiscourseConfig {
     partialUrl: string;
     id: string;
     name: string;
-    accentColor: string;
+    primaryColor: string;
+    secondaryColor: string;
     iconBase64: any;
     communityGuidelines?: string;
 }
