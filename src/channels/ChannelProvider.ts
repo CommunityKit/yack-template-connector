@@ -33,6 +33,13 @@ export class ChannelProvider implements IChannelProvider {
 
     // DO THIS
     async getFixedChannels(options: PluginRequestOptions): Promise<Result<Channel[]>> {
+        let getChannelMap
+        if(options.session.user){
+            getChannelMap = await this.getChannelsByUser(options, {id: options.session.user.username, username: options.session.user.username})
+        }else{
+            getChannelMap = await this.getChannelsByUser(options, null)
+        }
+       const categoryMap = getChannelMap.result.array[0].metadata.categoryMap;
         let fixedChannels: Channel[];
         if (!options.session.user) {
             fixedChannels = [
@@ -41,14 +48,16 @@ export class ChannelProvider implements IChannelProvider {
                     icon: Channel.Icons.home,
                     name: "home",
                     description: {type: TextContent.Types.plain, value: "The latest topics"},
-                    threadsFilters: this.getLatestChannelSortFilters(options)
+                    threadsFilters: this.getLatestChannelSortFilters(options),
+                    metadata: {categoryMap: categoryMap}
                 },
                 {
                     id: "top:popular",
                     icon: Channel.Icons.popular,
                     name: "top",
                     description: {type: TextContent.Types.plain, value: "All top trending topics"},
-                    threadsFilters: this.getTopChannelFilters(options)
+                    threadsFilters: this.getTopChannelFilters(options),
+                    metadata: {categoryMap: categoryMap}
                 }
             ];
         } else if (!!options.session.user) {
@@ -58,14 +67,16 @@ export class ChannelProvider implements IChannelProvider {
                     icon: Channel.Icons.home,
                     name: "home",
                     description: {type: TextContent.Types.plain, value: "The latest topics"},
-                    threadsFilters: this.getLatestChannelSortFilters(options)
+                    threadsFilters: this.getLatestChannelSortFilters(options),
+                    metadata: {categoryMap: categoryMap}
                 },
                 {
                     id: "top:popular",
                     icon: Channel.Icons.popular,
                     name: "top",
                     description: {type: TextContent.Types.plain, value: "All top trending topics"},
-                    threadsFilters: this.getTopChannelFilters(options)
+                    threadsFilters: this.getTopChannelFilters(options),
+                    metadata: {categoryMap: categoryMap}
                 },
                 // { id: "unread", icon: Channel.Icons.default, name: "unread", description: {type: TextContent.Types.plain, value: "Your unread topics"}, threadsFilters: [] }
             ];
@@ -113,6 +124,12 @@ export class ChannelProvider implements IChannelProvider {
                 }
             });
             const categoryList = channelsResponse.data.categories;
+            // create object on all channels' metadata to map category ids to names
+            const categoryMap = {}
+            for(const cate of categoryList){
+                categoryMap[cate.id] = cate.name
+            }
+
             let categoryId;
             for (const channelItem of categoryList) {
                 // parent_category_id
@@ -125,7 +142,7 @@ export class ChannelProvider implements IChannelProvider {
                 // HIDE channels if they don't have any topics
                 // if(channelItem.topic_count > 0){
                 const channel = ChannelPopulator.populateChannel(channelItem, options.session.user);
-                channel.metadata = {categoryId: channelItem.id}
+                channel.metadata = {categoryId: channelItem.id, categoryMap: categoryMap}
                 channel.name != "Uncategorized" ? channels.array.push(channel) : null;
                 // }
             }
@@ -136,10 +153,15 @@ export class ChannelProvider implements IChannelProvider {
 
         const categoriesList = response.data.category_list.categories;
 
+        // create object on all channels' metadata to map category ids to names
+        const categoryMap = {}
+        for(const cate of categoriesList){
+            categoryMap[cate.id] = cate.name
+        }
 
         for (const channelItem of categoriesList) {
             const channel = ChannelPopulator.populateChannel(channelItem, options.session.user);
-            channel.metadata = {categoryId: channelItem.id}
+            channel.metadata = {categoryId: channelItem.id, categoryMap: categoryMap}
             channels.array.push(channel);
         }
 
@@ -185,7 +207,7 @@ export class ChannelProvider implements IChannelProvider {
                 const channelItem = categoryList.filter(elem => elem.slug === channelId)[0]
                 channel = ChannelPopulator.populateChannel(channelItem, options.session.user);
                 channel.id = channelId
-                channel.metadata = {categoryId: channelItem.id}
+                channel.metadata = {...channel.metadata, categoryId: channelItem.id}
 
             }
         }else if(typeof channelId === "number"){

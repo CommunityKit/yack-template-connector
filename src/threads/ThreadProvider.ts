@@ -142,8 +142,9 @@ export class ThreadProvider implements IThreadProvider {
 
         for (const topic of topicsList) {
             // Map Channel info to Topic
-            topic.channelId = channelId;
-            topic.channelName = channelQuery.name;
+            // topic.channelId = channelId;
+            topic.channelId = topic.category_id;
+            topic.channelName = channelQuery.metadata.categoryMap[topic.category_id];
             // topic.channelName = categoryDictionary[topic.category_id.toString()];
 
             // Determine the thread topic creator
@@ -203,7 +204,7 @@ export class ThreadProvider implements IThreadProvider {
         firstPostInThread.created_at = firstPostInThread.created_at;
         firstPostInThread.last_posted_at = firstPostInThread.last_posted_at;
         firstPostInThread.pinned = data.pinned ? data.pinned : null;
-        firstPostInThread.channelId = data.category_id.toString();
+        firstPostInThread.channelId = data.category_id;
         firstPostInThread.communityName = this.config.id.replace("_discourse","")
         firstPostInThread.partialUrl = this.config.partialUrl
         firstPostInThread.totalComments = posts.length - 1
@@ -212,6 +213,7 @@ export class ThreadProvider implements IThreadProvider {
 
         thread.metadata = { postId: postId};
         thread.channelId = threadQuery.channelId
+        thread.channelName = threadQuery.channelName
         // thread.detailsPrepopulated = true;
         // return thread;
         return Result.success(thread)
