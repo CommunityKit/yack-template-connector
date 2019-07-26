@@ -148,8 +148,9 @@ export class ChannelProvider implements IChannelProvider {
                 // HIDE channels if they don't have any topics
                 // if(channelItem.topic_count > 0){
                 const channel = ChannelPopulator.populateChannel(channelItem, options.session.user);
-                channel.metadata = {categoryId: channelItem.id, categoryMap: categoryMap}
-                channel.name != "Uncategorized" ? channels.array.push(channel) : null;
+                channel.metadata = {categoryId: channelItem.id, categoryMap: categoryMap};
+                channels.array.push(channel)
+                // channel.name != "Uncategorized" ? channels.array.push(channel) : null;
                 // }
             }
 
