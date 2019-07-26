@@ -72,8 +72,8 @@ export class UserProvider {
         // userID === username
         let allData;
         await Promise.all(
-            [getUserStats(this.config.rootUrl, this.pluginContext.axios.get, userId),
-            getUserData(this.config.rootUrl, this.pluginContext.axios.get, userId)
+            [getUserStats(this.config.rootUrl, this.pluginContext.axios.get, userId, options),
+            getUserData(this.config.rootUrl, this.pluginContext.axios.get, userId, options)
         ]).then(data => {
             allData = {
                 summary: data[0].user_summary,
@@ -95,8 +95,8 @@ export class UserProvider {
         // userID === username
         let allData;
         await Promise.all(
-            [getUserStats(this.config.rootUrl, this.pluginContext.axios.get, username),
-            getUserData(this.config.rootUrl, this.pluginContext.axios.get, username)
+            [getUserStats(this.config.rootUrl, this.pluginContext.axios.get, username, options),
+            getUserData(this.config.rootUrl, this.pluginContext.axios.get, username, options)
         ]).then(data => {
             allData = {
                 summary: data[0].user_summary,

@@ -1,13 +1,36 @@
-export async function getUserStats(rootUrl, get, userId: string){
+export async function getUserStats(rootUrl, get, userId: string, options){
     const url = `${rootUrl}/u/${userId}/summary.json`
-    const response = await get(url)
+    let response;
+
+    if (!!options.session.user) {
+        response = await get(url, {
+            responseType: "json",
+            headers: {
+                "user-api-key": options.session.accessToken.token
+            }
+        });
+    } else {
+        response = await get(url);
+    }
+    // response = await get(url)
     const stats = response.data;
     return stats
 }
 
-export async function getUserData(rootUrl, get, userId: string){
+export async function getUserData(rootUrl, get, userId: string, options){
     const url = `${rootUrl}/u/${userId}.json`
-    const response = await get(url)
+    let response;
+
+    if (!!options.session.user) {
+        response = await get(url, {
+            responseType: "json",
+            headers: {
+                "user-api-key": options.session.accessToken.token
+            }
+        });
+    } else {
+        response = await get(url);
+    }
     const data = response.data;
     return data
 }

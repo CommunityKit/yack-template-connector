@@ -1,6 +1,6 @@
 import { ObjectTypes } from "yack-plugin-framework";
 
-export async function getUserCreatedContent(get, rootUrl, userId: string, currentPageToken){
+export async function getUserCreatedContent(get, rootUrl, userId: string, currentPageToken, options){
 
     // CHANGE TO THIS ENDPOINT: https://community.cartalk.com/user_actions.json?offset=0&username=b.l.e&filter=5&no_results_help_key=user_activity.no_replies&_=1556298757193
     // NEXT PAGE: https://community.cartalk.com/user_actions.json?offset=30&username=b.l.e&filter=5&no_results_help_key=user_activity.no_replies&_=1556298757194
@@ -30,8 +30,19 @@ export async function getUserCreatedContent(get, rootUrl, userId: string, curren
     }else{
         // check if has enough content for pagination
         const summaryUrl = `${rootUrl}/u/${userId}/summary.json`
-        const userResp = await get(summaryUrl)
-        const topicCount = userResp.data.user_summary.topic_count;
+        let userResp;
+
+        if (!!options.session.user) {
+            userResp = await this.pluginContext.axios.get(summaryUrl, {
+                responseType: "json",
+                headers: {
+                    "user-api-key": options.session.accessToken.token
+                }
+            });
+        } else {
+            userResp = await this.pluginContext.axios.get(summaryUrl);
+        }
+         const topicCount = userResp.data.user_summary.topic_count;
         if(topicCount > 30){
             // nextPageToken = `maxToken currentToken`
             currentPageToken = 0

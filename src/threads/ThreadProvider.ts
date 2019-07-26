@@ -390,7 +390,7 @@ export class ThreadProvider implements IThreadProvider {
         // Pagination???
         // https://community.cartalk.com/user_actions.json?offset=0&username=b.l.e&filter=5&no_results_help_key=user_activity.no_replies&_=1556298757193
         const userThreads = new PagedArray<Thread>();
-        const userThreadsData = await getUserCreatedContent(this.pluginContext.axios.get, this.config.rootUrl, userId, options.nextPageToken);
+        const userThreadsData = await getUserCreatedContent(this.pluginContext.axios.get, this.config.rootUrl, userId, options.nextPageToken, options);
         for (const threadData of userThreadsData) {
             // populate thread
             threadData.partialUrl = this.config.partialUrl;
