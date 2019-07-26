@@ -7,5 +7,5 @@ import { EnvatoConfig } from "./config/EnvatoConfig";
 let yackBeta = new DiscoursePlugin(YackBetaConfig);
 let carTalk = new DiscoursePlugin(CartalkConfig);
 let envato = new DiscoursePlugin(EnvatoConfig);
-const plugins: IPlugin[] = [yackBeta, carTalk, envato];
+const plugins: IPlugin[] = [yackBeta];
 export default plugins;
