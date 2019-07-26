@@ -50,7 +50,8 @@ export class ChannelProvider implements IChannelProvider {
                     description: {type: TextContent.Types.plain, value: "The latest topics"},
                     threadsFilters: this.getLatestChannelSortFilters(options),
                     metadata: {categoryMap: categoryMap},
-                    channelProfileDisabled: true
+                    channelProfileDisabled: true,
+                    canSessionUserPostNewThread: true
                 },
                 {
                     id: "top:popular",
@@ -59,7 +60,8 @@ export class ChannelProvider implements IChannelProvider {
                     description: {type: TextContent.Types.plain, value: "All top trending topics"},
                     threadsFilters: this.getTopChannelFilters(options),
                     metadata: {categoryMap: categoryMap},
-                    channelProfileDisabled: true
+                    channelProfileDisabled: true,
+                    canSessionUserPostNewThread: true
                 }
             ];
         } else if (!!options.session.user) {
@@ -165,6 +167,7 @@ export class ChannelProvider implements IChannelProvider {
 
         for (const channelItem of categoriesList) {
             const channel = ChannelPopulator.populateChannel(channelItem, options.session.user);
+            channel.canSessionUserPostNewThread = true;
             channel.metadata = {categoryId: channelItem.id, categoryMap: categoryMap}
             channels.array.push(channel);
         }
