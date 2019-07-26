@@ -4,6 +4,8 @@ import {
     TextContent, Reaction
 } from "yack-plugin-framework";
 import { threadId } from "worker_threads";
+import * as htmlEncoderDecoder from "html-encoder-decoder";
+
 
     export function populateComment(data: any, options: any, rootUrl:string): Comment {
 
@@ -42,8 +44,8 @@ import { threadId } from "worker_threads";
 
             shareProps: {
                 // title?: string;
-                ...data.blurb && {description: data.blurb},
-                ...data.cooked && {description: data.cooked},
+                ...data.blurb && {description: htmlEncoderDecoder.decode(data.blurb)},
+                ...data.cooked && {description: htmlEncoderDecoder.decode(data.cooked)},
                 // previewImageUrl?: string;
                 url: `${rootUrl}/t/${data.threadId}/${data.id.toString()}`
             },

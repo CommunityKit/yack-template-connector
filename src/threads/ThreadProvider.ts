@@ -556,6 +556,12 @@ export class ThreadProvider implements IThreadProvider {
         // const postType = valueByFieldId["postTypes"] as string;
         // const spoiler = valueByFieldId["spoiler"] ? (valueByFieldId["spoiler"] as boolean) : false;
 
+        if(title.length < 15){
+            return Result.validationError(["Title must be at least 15 characters"]);
+        }else if(body.length < 20){
+            return Result.validationError(["Post must be at least 20 characters"]);
+        }
+
         if (threadId) {
             // IF threadId update the current thread
             // TBD
@@ -578,7 +584,12 @@ export class ThreadProvider implements IThreadProvider {
 
             const data = response.data;
             const thread = await this.getThread(options, { ...threadQuery, channelId: channelQuery.id });
-            return Result.success(thread.result);
+            // {"action":"create_post","errors":["Title seems unclear, is it a complete sentence?"]}
+            if("errors" in data){
+                return Result.validationError(data.errors)
+            }else{
+                return Result.success(thread.result);
+            }
         } else {
             const formData = {
                 title: title,
@@ -600,8 +611,15 @@ export class ThreadProvider implements IThreadProvider {
 
             const newThreadId = data.topic_id;
             const thread = await this.getThread(options, { id: newThreadId });
-            return Result.success(thread.result);
-        }
+            if("errors" in data){
+                return Result.validationError(data.errors)
+            }else{
+                return Result.success(thread.result);
+            }        }
+
+
+        
+
         // return {
         //     resultObject: thread
         // };

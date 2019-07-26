@@ -73,7 +73,7 @@ import {populateAttachments} from "../threads/AttachmentPopulator"
             type: TextContent.Types.html,
             value: data.cooked}},
         detailsPrepopulated: false,
-        title: data.title,
+        title: htmlEncoderDecoder.decode(data.title),
         ...data.totalScore && {totalScore: data.totalScore},
         ...data.score && {totalScore: data.score},
         totalViews: data.views,
@@ -98,7 +98,7 @@ import {populateAttachments} from "../threads/AttachmentPopulator"
         // ...data.link_counts && {attachments: await populateAttachments(data.link_counts)},
 
         shareProps: {
-            ...data.cooked && {title: data.cooked},
+            ...data.cooked && {title: htmlEncoderDecoder.decode(data.cooked)},
             // previewImageUrl?: string;
             url: `${rootUrl}/t/${data.id.toString()}`
         },
