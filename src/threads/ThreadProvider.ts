@@ -583,11 +583,11 @@ export class ThreadProvider implements IThreadProvider {
             });
 
             const data = response.data;
-            const thread = await this.getThread(options, { ...threadQuery, channelId: channelQuery.id });
             // {"action":"create_post","errors":["Title seems unclear, is it a complete sentence?"]}
             if("errors" in data){
                 return Result.validationError(data.errors)
             }else{
+                const thread = await this.getThread(options, { ...threadQuery, channelId: channelQuery.id });
                 return Result.success(thread.result);
             }
         } else {
@@ -610,10 +610,11 @@ export class ThreadProvider implements IThreadProvider {
             const data = response.data;
 
             const newThreadId = data.topic_id;
-            const thread = await this.getThread(options, { id: newThreadId });
             if("errors" in data){
                 return Result.validationError(data.errors)
             }else{
+                const thread = await this.getThread(options, { id: newThreadId });
+
                 return Result.success(thread.result);
             }        }
 

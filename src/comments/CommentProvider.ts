@@ -304,13 +304,12 @@ export class CommentProvider implements ICommentProvider {
                 }});
         const data = response.data;
 
-       
-        const newComment = populateComment(data.post, options, this.config.rootUrl);
-        // return {
-        //     resultObject: newComment
-        // };
-        return Result.success(newComment);
-
+            if("errors" in data){
+                return Result.validationError(data.errors)
+            }else{
+                const newComment = populateComment(data, options, this.config.rootUrl);
+                return Result.success(newComment);
+            }
         }else{
             //user is creating new post
         url = `${this.config.rootUrl}/posts.json`;
@@ -334,12 +333,18 @@ export class CommentProvider implements ICommentProvider {
                 }});
         const data = response.data;
 
+        if("errors" in data){
+            return Result.validationError(data.errors)
+        }else{
+            const newComment = populateComment(data, options, this.config.rootUrl);
+            return Result.success(newComment);
+        }
        
-        const newComment = populateComment(data, options, this.config.rootUrl);
+       
+
         // return {
         //     resultObject: newComment
         // };
-        return Result.success(newComment);
             }
             // formData["thing_id"] = `${Kinds.comment}_${comment.id}`;
         // } 
