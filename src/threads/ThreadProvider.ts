@@ -22,6 +22,7 @@ import * as filter from "../search/Filters";
 import { getUserCreatedContent } from "./ThreadRequests";
 import uuid = require("uuid");
 import * as querystring from "querystring";
+import {catchErrors} from "../utils/PluginUtils"
 
 export class ThreadProvider implements IThreadProvider {
     private pluginContext: PluginContext;
@@ -79,8 +80,12 @@ export class ThreadProvider implements IThreadProvider {
                 } else {
                     url = `${this.config.rootUrl}/top${this.getTopChannelFilters(options)}.json?${this.getSolvedFilters(options)}`;
                     response = await this.setUrlToken(hasUser, url, options.session.user ? options.session.accessToken.token : null);
-                    let threadCount = totalThreads(response); // 50 max per page
-                    threadCount === 50 ? this.setPageToken(threads, null, false, threadCount) : (threads.nextPageToken = null);
+                    if(catchErrors(response)){
+                        return catchErrors(response)
+                    }else{
+                        let threadCount = totalThreads(response.data); // 50 max per page
+                        threadCount === 50 ? this.setPageToken(threads, null, false, threadCount) : (threads.nextPageToken = null);
+                    }
                 }
                 break;
             }
@@ -92,8 +97,12 @@ export class ThreadProvider implements IThreadProvider {
                 } else {
                     url = `${this.config.rootUrl}/latest.json?${this.getSolvedFilters(options)}`;
                     response = await this.setUrlToken(hasUser, url, options.session.user ? options.session.accessToken.token : null);
-                    let threadCount = totalThreads(response); // 30 per page
-                    threadCount === 30 ? this.setPageToken(threads, null, false, threadCount) : (threads.nextPageToken = null); // No need for pagination if less than 30 pages
+                    if(catchErrors(response)){
+                        return catchErrors(response);
+                    }else{
+                        let threadCount = totalThreads(response.data); // 30 per page
+                        threadCount === 30 ? this.setPageToken(threads, null, false, threadCount) : (threads.nextPageToken = null); // No need for pagination if less than 30 pages
+                    }
                 }
                 break;
             }
@@ -105,8 +114,12 @@ export class ThreadProvider implements IThreadProvider {
                 } else {
                     url = `${this.config.rootUrl}/unread.json`;
                     response = await this.setUrlToken(hasUser, url, options.session.accessToken.token);
-                    let threadCount = totalThreads(response); // 30 per page
-                    threadCount === 30 ? this.setPageToken(threads, null, false, threadCount) : (threads.nextPageToken = null); // No need for pagination if less than 30 pages
+                    if(catchErrors(response)){
+                        return catchErrors(response)
+                    }else{
+                        let threadCount = totalThreads(response.data); // 30 per page
+                        threadCount === 30 ? this.setPageToken(threads, null, false, threadCount) : (threads.nextPageToken = null); // No need for pagination if less than 30 pages
+                    }
                 }
                 break;
             }
@@ -120,15 +133,23 @@ export class ThreadProvider implements IThreadProvider {
                 } else {
                     url = `${this.config.rootUrl}/c/${channelId}.json?${this.getOrderChannelFilters(options)}${this.getSolvedFilters(options)}`;
                     response = await this.setUrlToken(hasUser, url, options.session.user ? options.session.accessToken.token : null);
-                    let threadCount = totalThreads(response); // 30 per page
-                    threadCount >= 30 ? this.setPageToken(threads, null, false, threadCount) : (threads.nextPageToken = null); // No need for pagination if less than 30 pages
-                    this.pluginContext.logger.d(`Set PageToken = ${threads.nextPageToken}`);
+                    if(catchErrors(response)){
+                        return catchErrors(response);
+                    }else{
+                        let threadCount = totalThreads(response.data); // 30 per page
+                        threadCount >= 30 ? this.setPageToken(threads, null, false, threadCount) : (threads.nextPageToken = null); // No need for pagination if less than 30 pages
+                        this.pluginContext.logger.d(`Set PageToken = ${threads.nextPageToken}`);
+                    }
                 }
                 break;
             }
         }
 
         // this.pluginContext.logger.d(`Debug = ${JSON.stringify(response.topic_list.topics)}`);
+        if(catchErrors(response)){
+            return catchErrors(response);
+        }else{
+            response = response.data;
         const users = response.users;
         const topicsList = response.topic_list.topics;
 
@@ -156,7 +177,9 @@ export class ThreadProvider implements IThreadProvider {
             // this.populateTestAttachments(thread);
             threads.array.push(thread);
         }
+        
         return Result.success(threads);
+    }
         // return threads;
     }
 
@@ -167,47 +190,50 @@ export class ThreadProvider implements IThreadProvider {
 
         const hasUser = !!options.session.user;
         let url = `${this.config.rootUrl}/t/${threadId}.json`; // only using first element so don't need pagination
-        const data = await this.setUrlToken(hasUser, url, options.session.user ? options.session.accessToken.token : null);
+        const response = await this.setUrlToken(hasUser, url, options.session.user ? options.session.accessToken.token : null);
+        if(catchErrors(response)){
+            return catchErrors(response);
+        }else{
+            const posts = response.data.post_stream.posts;
+            const postId = response.data.post_stream.posts[0].id;
 
-        const posts = data.post_stream.posts;
-        const postId = data.post_stream.posts[0].id;
+            const firstPostInThread = posts[0];
+            // if(postId === true){
+            //     return firstPostInThread.id;
+            // }
 
-        const firstPostInThread = posts[0];
-        // if(postId === true){
-        //     return firstPostInThread.id;
-        // }
+            // firstPostInThread.channelId = channelId;
+            // firstPostInThread.channelName = channelId;
 
-        // firstPostInThread.channelId = channelId;
-        // firstPostInThread.channelName = channelId;
+            // Set Topic Creator User Info
+            firstPostInThread.creator_id = firstPostInThread.user_id;
+            firstPostInThread.creator_full_name = firstPostInThread.name;
+            firstPostInThread.creator_username = firstPostInThread.username;
+            // firstPostInThread.cooked = firstPostInThread.cooked
+            firstPostInThread.id = threadId;
 
-        // Set Topic Creator User Info
-        firstPostInThread.creator_id = firstPostInThread.user_id;
-        firstPostInThread.creator_full_name = firstPostInThread.name;
-        firstPostInThread.creator_username = firstPostInThread.username;
-        // firstPostInThread.cooked = firstPostInThread.cooked
-        firstPostInThread.id = threadId;
+            // firstPostInThread.id = `${threadId} ${firstPostInThread.id}`;
+            // console.warn(`TESTING NEW THREAD ID: ${firstPostInThread.id}`)
+            firstPostInThread.title = response.data.fancy_title ? response.data.fancy_title : null;
+            firstPostInThread.totalScore = firstPostInThread.score ? firstPostInThread.score : null;
+            firstPostInThread.views = response.data.views ? response.data.views : null;
+            firstPostInThread.created_at = firstPostInThread.created_at;
+            firstPostInThread.last_posted_at = firstPostInThread.last_posted_at;
+            firstPostInThread.pinned = response.data.pinned ? response.data.pinned : null;
+            firstPostInThread.channelId = response.data.category_id;
+            firstPostInThread.communityName = this.config.id.replace("_discourse", "");
+            firstPostInThread.partialUrl = this.config.partialUrl;
+            firstPostInThread.totalComments = posts.length - 1;
 
-        // firstPostInThread.id = `${threadId} ${firstPostInThread.id}`;
-        // console.warn(`TESTING NEW THREAD ID: ${firstPostInThread.id}`)
-        firstPostInThread.title = data.fancy_title ? data.fancy_title : null;
-        firstPostInThread.totalScore = firstPostInThread.score ? firstPostInThread.score : null;
-        firstPostInThread.views = data.views ? data.views : null;
-        firstPostInThread.created_at = firstPostInThread.created_at;
-        firstPostInThread.last_posted_at = firstPostInThread.last_posted_at;
-        firstPostInThread.pinned = data.pinned ? data.pinned : null;
-        firstPostInThread.channelId = data.category_id;
-        firstPostInThread.communityName = this.config.id.replace("_discourse", "");
-        firstPostInThread.partialUrl = this.config.partialUrl;
-        firstPostInThread.totalComments = posts.length - 1;
+            const thread = await populateThread(firstPostInThread, options, this.config.rootUrl);
 
-        const thread = await populateThread(firstPostInThread, options, this.config.rootUrl);
-
-        thread.metadata = { postId: postId };
-        thread.channelId = threadQuery.channelId;
-        thread.channelName = threadQuery.channelName;
-        // thread.detailsPrepopulated = true;
-        // return thread;
-        return Result.success(thread);
+            thread.metadata = { postId: postId };
+            // thread.channelId = threadQuery.channelId;
+            thread.channelName = threadQuery.channelName;
+            // thread.detailsPrepopulated = true;
+            // return thread;
+            return Result.success(thread);
+        }
     }
 
     async saveThread(options: PluginRequestOptions, channelId: string, thread: Thread): Promise<Thread> {
@@ -219,16 +245,17 @@ export class ThreadProvider implements IThreadProvider {
         // const thread = await this.getThreadById(options,threadId);
         // if(thread.createdBy.username === options.session.user.username){
         let url = `${this.config.rootUrl}/t/${threadId}.json`; // only using first element so don't need pagination
-        await this.pluginContext.axios.delete(url, {
+        const response = await this.pluginContext.axios.delete(url, {
             responseType: "json",
             headers: {
                 "user-api-key": options.session.accessToken.token
             }
         });
-        return Result.success(null);
-        // }else{
-        //     return null;
-        // }
+        if(catchErrors(response)){
+            return catchErrors(response);
+        }else{
+            return Result.success(null);
+        }
     }
 
     // async saveThreadAction(options: PluginRequestOptions, threadId: string, actionItem: ObjectAction.Item): Promise<void> {}
@@ -238,7 +265,7 @@ export class ThreadProvider implements IThreadProvider {
         if (action == Action.report) {
             url = `${this.config.rootUrl}/post_actions.json`;
             formData = `id=${threadId}&post_action_type_id=${8}&flag_topic=true`;
-            await this.pluginContext.axios.post(url, formData, {
+            response = await this.pluginContext.axios.post(url, formData, {
                 responseType: "json",
                 headers: {
                     "user-api-key": options.session.accessToken.token
@@ -246,7 +273,7 @@ export class ThreadProvider implements IThreadProvider {
             });
         } else if (action == Action.save) {
             url = `${this.config.rootUrl}/t/${threadId}/bookmark.json`;
-            await this.pluginContext.axios.put(url, "", {
+            response = await this.pluginContext.axios.put(url, "", {
                 // responseType: "json",
                 headers: {
                     "user-api-key": options.session.accessToken.token
@@ -255,24 +282,28 @@ export class ThreadProvider implements IThreadProvider {
         } else {
             throw new Error(`Not implemented`);
         }
-        return Result.success(null);
+        if(catchErrors(response)){
+            return catchErrors(response);
+        }else{
+            return Result.success(null);
+        }
     }
 
-    private async getTopicStream() {
-        return null;
-    }
+    // private async getTopicStream() {
+    //     return null;
+    // }
 
-    private async createCategoryDictionary(options: PluginRequestOptions) {
-        let categoryDictionary: object = {};
-        const hasUser = !!options.session.user;
-        let url = `${this.config.rootUrl}/site.json`;
-        const allData = await this.setUrlToken(hasUser, url, options.session.user ? options.session.accessToken.token : null);
-        // this.pluginContext.logger.d(`createCategoryDictionary Response = ${JSON.stringify(allData.categories)}`);
-        const categories = allData.categories;
-        categories.forEach(category => (categoryDictionary[category.id.toString()] = category.name));
-        // this.pluginContext.logger.d(`Completed Dictionary: ${JSON.stringify(categoryDictionary)}`);
-        return categoryDictionary;
-    }
+    // private async createCategoryDictionary(options: PluginRequestOptions) {
+    //     let categoryDictionary: object = {};
+    //     const hasUser = !!options.session.user;
+    //     let url = `${this.config.rootUrl}/site.json`;
+    //     const allData = await this.setUrlToken(hasUser, url, options.session.user ? options.session.accessToken.token : null);
+    //     // this.pluginContext.logger.d(`createCategoryDictionary Response = ${JSON.stringify(allData.categories)}`);
+    //     const categories = allData.categories;
+    //     categories.forEach(category => (categoryDictionary[category.id.toString()] = category.name));
+    //     // this.pluginContext.logger.d(`Completed Dictionary: ${JSON.stringify(categoryDictionary)}`);
+    //     return categoryDictionary;
+    // }
 
     // private getLatestChannelFilters(options: PluginRequestOptions): string {
     //     //Get Order Filter
@@ -339,7 +370,7 @@ export class ThreadProvider implements IThreadProvider {
         } else {
             response = await this.pluginContext.axios.get(url);
         }
-        return response.data;
+        return response;
         // if(response.success){
         //     return response.data;
         // }else{
@@ -556,11 +587,14 @@ export class ThreadProvider implements IThreadProvider {
         // const postType = valueByFieldId["postTypes"] as string;
         // const spoiler = valueByFieldId["spoiler"] ? (valueByFieldId["spoiler"] as boolean) : false;
 
-        if(title.length < 15){
-            return Result.validationError(["Title must be at least 15 characters"]);
-        }else if(body.length < 20){
-            return Result.validationError(["Post must be at least 20 characters"]);
+        if(!!title === false || !!body === false){
+            return Result.validationError(["Please provide a title and body"]);
         }
+        // else if(title.length < 15){
+        //     return Result.validationError(["Title must be at least 15 characters"]);
+        // }else if(body.length < 20){
+        //     return Result.validationError(["Post must be at least 20 characters"]);
+        // }
 
         if (threadId) {
             // IF threadId update the current thread
@@ -582,13 +616,17 @@ export class ThreadProvider implements IThreadProvider {
                 }
             });
 
-            const data = response.data;
             // {"action":"create_post","errors":["Title seems unclear, is it a complete sentence?"]}
-            if("errors" in data){
-                return Result.validationError(data.errors)
+            
+            if(!catchErrors(response)){
+                const data = response.data;
+                // , channelQuery: channelQuery
+                const thread = await this.getThread(options, {id: threadQuery.id});
+
+                // const thread = await this.getThread(options, {id: threadQuery.id, channelId: threadQuery.channelId });
+                return Result.success(thread.result)
             }else{
-                const thread = await this.getThread(options, { ...threadQuery, channelId: channelQuery.id });
-                return Result.success(thread.result);
+                return catchErrors(response)
             }
         } else {
             const formData = {
@@ -607,23 +645,17 @@ export class ThreadProvider implements IThreadProvider {
                 }
             });
 
-            const data = response.data;
-
-            const newThreadId = data.topic_id;
-            if("errors" in data){
-                return Result.validationError(data.errors)
+           
+             if(!catchErrors(response)){
+                const data = response.data;
+                const newThreadId = data.topic_id;
+                // , channelId: channelQuery.id
+                const thread = await this.getThread(options, { id: newThreadId.toString()});
+                return Result.success(thread.result)
             }else{
-                const thread = await this.getThread(options, { id: newThreadId });
-
-                return Result.success(thread.result);
-            }        }
-
-
-        
-
-        // return {
-        //     resultObject: thread
-        // };
+                return catchErrors(response)
+            }      
+        }
     }
 
     // async uploadSaveThreadFormFile(

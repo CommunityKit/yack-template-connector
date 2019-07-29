@@ -53,7 +53,7 @@ import {populateAttachments} from "../threads/AttachmentPopulator"
 
         
         channelName: data.channelName,
-        ...data.channelId && {channelId: data.channelId},
+        ...data.channelId && {channelId: data.channelId.toString()},
 
         ...reactionsConfig && 
         { commentsReactionConfig: 

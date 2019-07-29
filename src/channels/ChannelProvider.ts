@@ -180,7 +180,7 @@ export class ChannelProvider implements IChannelProvider {
 
     async getChannel(options: PluginRequestOptions, channelQuery: Channel.Query): Promise<Result<Channel>> {
         console.warn(`channelQuery: ${JSON.stringify(channelQuery)}`)
-        let channelId = channelQuery.id;
+        let channelId = typeof parseInt(channelQuery.id) === "number" ? parseInt(channelQuery.id) : channelQuery.id;
         const url = `${this.config.rootUrl}/site.json`;
         let resp, channel, channelSlug, parentChannelSlug;
 
