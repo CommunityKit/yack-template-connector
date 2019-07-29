@@ -179,8 +179,32 @@ export class ChannelProvider implements IChannelProvider {
     }
 
     async getChannel(options: PluginRequestOptions, channelQuery: Channel.Query): Promise<Result<Channel>> {
+
+        // channel_by_thread_id_
+
         console.warn(`channelQuery: ${JSON.stringify(channelQuery)}`)
-        let channelId = typeof parseInt(channelQuery.id) === "number" ? parseInt(channelQuery.id) : channelQuery.id;
+        let channelId
+        if(channelQuery.id.includes("channel_by_thread_id_")){
+            const threadId = channelQuery.id.replace("channel_by_thread_id_", "");
+            const hasUser = !!options.session.user;
+        let url = `${this.config.rootUrl}/t/${threadId}.json`;
+        let response
+        if (hasUser) {
+            response = await this.pluginContext.axios.get(url, {
+                responseType: "json",
+                headers: {
+                    "user-api-key": options.session.accessToken.token
+                }
+            });
+        } else {
+            response = await this.pluginContext.axios.get(url);
+        }
+            channelId = response.data.category_id;
+        }else{
+            channelId = typeof parseInt(channelQuery.id) === "number" ? parseInt(channelQuery.id) : channelQuery.id;
+        }
+
+
         const url = `${this.config.rootUrl}/site.json`;
         let resp, channel, channelSlug, parentChannelSlug;
 
@@ -221,7 +245,7 @@ export class ChannelProvider implements IChannelProvider {
         }else if(typeof channelId === "number"){
             
             // Used for search results
-            const channelItem = categoryList.filter(elem => elem.id === channelId)[0]
+            const channelItem = categoryList.filter(elem => elem.id.toString() == channelId.toString())[0]
             if("parent_category_id" in channelItem){
                 const parentSlug = categoryList.filter(elem => elem.id === channelItem.parent_category_id)[0]
                 channelItem.slug = `${parentSlug.slug}/${channelItem.slug}`

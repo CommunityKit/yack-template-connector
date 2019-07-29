@@ -226,7 +226,7 @@ this.pluginContext.logger.d("Community doesn't have any categories")
                         const commentPopulated = populateComment(comment, options, this.config.rootUrl);
 
 
-                        const commentItem: SearchResultItem.CommentItem = {comment: commentPopulated, threadQuery: {id: comment.threadId}, channelQuery: {id: null}}
+                        const commentItem: SearchResultItem.CommentItem = {comment: commentPopulated, threadQuery: {id: comment.threadId, title: commentPopulated.content.value}, channelQuery: {id: `channel_by_thread_id_${comment.threadId}`}}
                         comment.item = commentItem;
                         comment.itemType = ObjectTypes.comment;
                         comment.id = comment.id.toString()
