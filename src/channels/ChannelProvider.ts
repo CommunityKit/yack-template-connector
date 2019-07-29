@@ -187,18 +187,18 @@ export class ChannelProvider implements IChannelProvider {
         if(channelQuery.id.includes("channel_by_thread_id_")){
             const threadId = channelQuery.id.replace("channel_by_thread_id_", "");
             const hasUser = !!options.session.user;
-        let url = `${this.config.rootUrl}/t/${threadId}.json`;
-        let response
-        if (hasUser) {
-            response = await this.pluginContext.axios.get(url, {
-                responseType: "json",
-                headers: {
-                    "user-api-key": options.session.accessToken.token
-                }
-            });
-        } else {
-            response = await this.pluginContext.axios.get(url);
-        }
+            let url = `${this.config.rootUrl}/t/${threadId}.json`;
+            let response
+            if (hasUser) {
+                response = await this.pluginContext.axios.get(url, {
+                    responseType: "json",
+                    headers: {
+                        "user-api-key": options.session.accessToken.token
+                    }
+                });
+            } else {
+                response = await this.pluginContext.axios.get(url);
+            }
             channelId = response.data.category_id;
         }else{
             channelId = typeof parseInt(channelQuery.id) === "number" ? parseInt(channelQuery.id) : channelQuery.id;

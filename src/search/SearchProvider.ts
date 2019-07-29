@@ -190,7 +190,7 @@ this.pluginContext.logger.d("Community doesn't have any categories")
                 if(threadsData){
                 for (const thread of threadsData) {
                     const threadPopulated = await populateThread(thread, options, this.config.rootUrl);
-                    const threadItem: SearchResultItem.ThreadItem = {thread: threadPopulated, channelQuery: {id: thread.category_id}}
+                    const threadItem: SearchResultItem.ThreadItem = {thread: threadPopulated, channelQuery: {id: thread.category_id.toString()}}
 
                     // const threadItem: SearchResultItem.ThreadItem = {thread: threadPopulated, channelQuery: {id: thread.channelId}}
 
