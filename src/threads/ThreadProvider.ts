@@ -156,12 +156,14 @@ export class ThreadProvider implements IThreadProvider {
             response = response.data;
         const users = response.users;
         const topicsList = response.topic_list.topics;
-
+            console.log(`Your channelQuery: ${JSON.stringify(channelQuery)}`)
         for (const topic of topicsList) {
             // Map Channel info to Topic
             // topic.channelId = channelId;
             topic.channelId = topic.category_id;
-            topic.channelName = channelQuery.metadata.categoryMap[topic.category_id];
+            if(channelQuery.metadata.categoryMap){
+                topic.channelName = channelQuery.metadata.categoryMap[topic.category_id];
+            }
             // topic.channelName = categoryDictionary[topic.category_id.toString()];
 
             // Determine the thread topic creator
