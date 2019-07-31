@@ -110,7 +110,7 @@ export class CommentProvider implements ICommentProvider {
             response = await this.pluginContext.axios.get(url, {
                 responseType: "json",
                 headers: {
-                    "user-api-key": key
+                    [this.config.yackManagedSession ? "Api-Key" : "user-api-key"]: key
                 }
             });
         } else {
@@ -296,13 +296,11 @@ export class CommentProvider implements ICommentProvider {
 
                 }
                 const response = await this.pluginContext.axios.put(url, querystring.stringify(formData), {responseType: "json",
-        headers: {
-                // "Api-Key": `${options.session.accessToken.token}`,
-                "content-type": "application/x-www-form-urlencoded",
-                // "Access-Control-Allow-Origin": "*"
-                // "Accept": "application/json"
-                "user-api-key": options.session.accessToken.token           
-                }});
+                headers: {
+                    "content-type": "application/x-www-form-urlencoded",
+                    [this.config.yackManagedSession ? "Api-Key" : "user-api-key"]: options.session.accessToken.token
+                }
+        });
         const data = response.data;
 
             if("errors" in data){
@@ -327,13 +325,11 @@ export class CommentProvider implements ICommentProvider {
                 // "created_at": "2017-01-31"
             };
             const response = await this.pluginContext.axios.post(url, querystring.stringify(formData), {responseType: "json",
-        headers: {
-                // "Api-Key": `${options.session.accessToken.token}`,
+            headers: {
                 "content-type": "application/x-www-form-urlencoded",
-                // "Access-Control-Allow-Origin": "*"
-                // "Accept": "application/json"
-                "user-api-key": options.session.accessToken.token           
-                }});
+                [this.config.yackManagedSession ? "Api-Key" : "user-api-key"]: options.session.accessToken.token
+            }
+       });
         const data = response.data;
 
         if("errors" in data){
@@ -376,7 +372,7 @@ export class CommentProvider implements ICommentProvider {
             await this.pluginContext.axios.delete(url, {
                 responseType: "json",
                 headers: {
-                    "user-api-key": options.session.accessToken.token
+                    [this.config.yackManagedSession ? "Api-Key" : "user-api-key"]: options.session.accessToken.token
                 }
             }); 
             return Result.success(null)
@@ -396,7 +392,7 @@ export class CommentProvider implements ICommentProvider {
             await this.pluginContext.axios.post(url, formData, {
                 responseType: "json",
                 headers: {
-                    "user-api-key": options.session.accessToken.token
+                    [this.config.yackManagedSession ? "Api-Key" : "user-api-key"]: options.session.accessToken.token
                 }
             }); 
         } else if (action == Action.save) {
@@ -404,7 +400,7 @@ export class CommentProvider implements ICommentProvider {
             await this.pluginContext.axios.put(url,'', {
                 // responseType: "json",
                 headers: {
-                    "user-api-key": options.session.accessToken.token
+                    [this.config.yackManagedSession ? "Api-Key" : "user-api-key"]: options.session.accessToken.token
                 }
             }); 
         } else {

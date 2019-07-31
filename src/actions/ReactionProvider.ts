@@ -35,7 +35,7 @@ export class ReactionProvider implements IReactionProvider {
         const resp = await this.pluginContext.axios.get(url, {
             responseType: "json",
             headers: {
-                "user-api-key": options.session.accessToken.token
+                [this.config.yackManagedSession ? "Api-Key" : "user-api-key"]: options.session.accessToken.token
             }
         });
         const selectPostAction = resp.data.post_stream.posts.filter(elem => elem.id.toString() === postId)[0].actions_summary[0];
@@ -125,7 +125,7 @@ export class ReactionProvider implements IReactionProvider {
                             resp = await this.pluginContext.axios.post(url, formData, {
                                 responseType: "json",
                                 headers: {
-                                    "user-api-key": options.session.accessToken.token
+                                    [this.config.yackManagedSession ? "Api-Key" : "user-api-key"]: options.session.accessToken.token
                                 }
                             });
 
@@ -142,7 +142,7 @@ export class ReactionProvider implements IReactionProvider {
                             resp = await this.pluginContext.axios.delete(url, { data: {post_action_type_id: 2}, 
                                 responseType: "json",
                                 headers: {
-                                    "user-api-key": options.session.accessToken.token
+                                    [this.config.yackManagedSession ? "Api-Key" : "user-api-key"]: options.session.accessToken.token
                                 }
                             });
 

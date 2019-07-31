@@ -1,4 +1,4 @@
-export async function getUserStats(rootUrl, get, userId: string, options){
+export async function getUserStats(rootUrl, get, userId: string, options, config){
     const url = `${rootUrl}/u/${userId}/summary.json`
     let response;
 
@@ -6,7 +6,7 @@ export async function getUserStats(rootUrl, get, userId: string, options){
         response = await get(url, {
             responseType: "json",
             headers: {
-                "user-api-key": options.session.accessToken.token
+                [config.yackManagedSession ? "Api-Key" : "user-api-key"]: options.session.accessToken.token
             }
         });
     } else {
@@ -17,7 +17,7 @@ export async function getUserStats(rootUrl, get, userId: string, options){
     return stats
 }
 
-export async function getUserData(rootUrl, get, userId: string, options){
+export async function getUserData(rootUrl, get, userId: string, options, config){
     const url = `${rootUrl}/u/${userId}.json`
     let response;
 
@@ -25,7 +25,7 @@ export async function getUserData(rootUrl, get, userId: string, options){
         response = await get(url, {
             responseType: "json",
             headers: {
-                "user-api-key": options.session.accessToken.token
+                [config.yackManagedSession ? "Api-Key" : "user-api-key"]: options.session.accessToken.token
             }
         });
     } else {

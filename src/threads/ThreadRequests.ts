@@ -1,6 +1,6 @@
 import { ObjectTypes } from "yack-plugin-framework";
 
-export async function getUserCreatedContent(get, rootUrl, userId: string, currentPageToken, options){
+export async function getUserCreatedContent(get, rootUrl, userId: string, currentPageToken, options, config){
 
     // CHANGE TO THIS ENDPOINT: https://community.cartalk.com/user_actions.json?offset=0&username=b.l.e&filter=5&no_results_help_key=user_activity.no_replies&_=1556298757193
     // NEXT PAGE: https://community.cartalk.com/user_actions.json?offset=30&username=b.l.e&filter=5&no_results_help_key=user_activity.no_replies&_=1556298757194
@@ -33,14 +33,14 @@ export async function getUserCreatedContent(get, rootUrl, userId: string, curren
         let userResp;
 
         if (!!options.session.user) {
-            userResp = await this.pluginContext.axios.get(summaryUrl, {
+            userResp = await get(summaryUrl, {
                 responseType: "json",
                 headers: {
-                    "user-api-key": options.session.accessToken.token
+                    [config.yackManagedSession ? "Api-Key" : "user-api-key"]: options.session.accessToken.token
                 }
             });
         } else {
-            userResp = await this.pluginContext.axios.get(summaryUrl);
+            userResp = await get(summaryUrl);
         }
          const topicCount = userResp.data.user_summary.topic_count;
         if(topicCount > 30){
@@ -93,7 +93,7 @@ function filterUserComments(data:any){
 }
 
 
-export async function getThreadPostId(rootUrl, get, options, objectQuery: any, objectType: string) {
+export async function getThreadPostId(rootUrl, get, options, objectQuery: any, objectType: string, config) {
     // const tId = threadId.split(" ")[0]
     // const postId = threadId.split(" ")[1]
     let url, threadId, commentId;
@@ -107,7 +107,7 @@ export async function getThreadPostId(rootUrl, get, options, objectQuery: any, o
         url = `${rootUrl}/t/${threadId}/${commentId}.json`; 
 
     }
-    const data = await setUrlToken(get, hasUser, url, options.session.user ? options.session.accessToken.token : null);
+    const data = await setUrlToken(get, hasUser, url, config, options.session.user ? options.session.accessToken.token : null);
 
     
     const posts = data.post_stream.posts;
@@ -118,13 +118,13 @@ export async function getThreadPostId(rootUrl, get, options, objectQuery: any, o
 
 }
 
-async function setUrlToken(get, hasUser: boolean, url: string, key?: string) {
+async function setUrlToken(get, hasUser: boolean, url: string, config, key?: string) {
     let response: any;
     if (hasUser) {
         response = await get(url, {
             responseType: "json",
             headers: {
-                "user-api-key": key
+                [config.yackManagedSession ? "Api-Key" : "user-api-key"]: key
             }
         });
     } else {

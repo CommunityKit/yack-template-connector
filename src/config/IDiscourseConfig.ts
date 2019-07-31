@@ -7,4 +7,5 @@ export interface IDiscourseConfig {
     secondaryColor: string;
     iconBase64: any;
     communityGuidelines?: string;
+    yackManagedSession: boolean;
 }

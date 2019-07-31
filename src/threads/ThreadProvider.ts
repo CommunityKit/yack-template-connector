@@ -252,7 +252,7 @@ export class ThreadProvider implements IThreadProvider {
         const response = await this.pluginContext.axios.delete(url, {
             responseType: "json",
             headers: {
-                "user-api-key": options.session.accessToken.token
+                [this.config.yackManagedSession ? "Api-Key" : "user-api-key"]: options.session.accessToken.token
             }
         });
         if(catchErrors(response)){
@@ -272,7 +272,7 @@ export class ThreadProvider implements IThreadProvider {
             response = await this.pluginContext.axios.post(url, formData, {
                 responseType: "json",
                 headers: {
-                    "user-api-key": options.session.accessToken.token
+                    [this.config.yackManagedSession ? "Api-Key" : "user-api-key"]: options.session.accessToken.token
                 }
             });
         } else if (action == Action.save) {
@@ -280,7 +280,7 @@ export class ThreadProvider implements IThreadProvider {
             response = await this.pluginContext.axios.put(url, "", {
                 // responseType: "json",
                 headers: {
-                    "user-api-key": options.session.accessToken.token
+                    [this.config.yackManagedSession ? "Api-Key" : "user-api-key"]: options.session.accessToken.token
                 }
             });
         } else {
@@ -368,7 +368,7 @@ export class ThreadProvider implements IThreadProvider {
             response = await this.pluginContext.axios.get(url, {
                 responseType: "json",
                 headers: {
-                    "user-api-key": key
+                    [this.config.yackManagedSession ? "Api-Key" : "user-api-key"]: key
                 }
             });
         } else {
@@ -425,7 +425,7 @@ export class ThreadProvider implements IThreadProvider {
         // Pagination???
         // https://community.cartalk.com/user_actions.json?offset=0&username=b.l.e&filter=5&no_results_help_key=user_activity.no_replies&_=1556298757193
         const userThreads = new PagedArray<Thread>();
-        const userThreadsData = await getUserCreatedContent(this.pluginContext.axios.get, this.config.rootUrl, userId, options.nextPageToken, options);
+        const userThreadsData = await getUserCreatedContent(this.pluginContext.axios.get, this.config.rootUrl, userId, options.nextPageToken, options, this.config);
         for (const threadData of userThreadsData) {
             // populate thread
             threadData.partialUrl = this.config.partialUrl;
@@ -645,8 +645,8 @@ export class ThreadProvider implements IThreadProvider {
                 responseType: "json",
                 headers: {
                     "content-type": "application/x-www-form-urlencoded",
-                    "user-api-key": options.session.accessToken.token
-                }
+                    [this.config.yackManagedSession ? "Api-Key" : "user-api-key"]: options.session.accessToken.token
+                }                
             });
 
             // {"action":"create_post","errors":["Title seems unclear, is it a complete sentence?"]}
@@ -674,8 +674,10 @@ export class ThreadProvider implements IThreadProvider {
                 responseType: "json",
                 headers: {
                     "content-type": "application/x-www-form-urlencoded",
-                    "user-api-key": options.session.accessToken.token
+                    [this.config.yackManagedSession ? "Api-Key" : "user-api-key"]: options.session.accessToken.token
                 }
+                
+                
             });
 
            
@@ -775,13 +777,9 @@ export class ThreadProvider implements IThreadProvider {
                     // data: uploadFormData,
                     // responseType: "json",
                     headers: {
-                        
                         "content-type": setContentType,
-                        // "content-type": 'multipart/form-data',
-                        // "Content-Type": "multipart/form-data",
-                        // “content-type”: setContentType.toString(),
-                        "user-api-key": options.session.accessToken.token
-                    }
+                        [this.config.yackManagedSession ? "Api-Key" : "user-api-key"]: options.session.accessToken.token
+                    }                 
                 });
             // }
 
@@ -816,7 +814,7 @@ export class ThreadProvider implements IThreadProvider {
         const channelsResponse = await this.pluginContext.axios.get(url, {
             responseType: "json",
             headers: {
-                "user-api-key": options.session.accessToken.token
+                [this.config.yackManagedSession ? "Api-Key" : "user-api-key"]: options.session.accessToken.token
             }
         });
         const categoryList = channelsResponse.data.categories;

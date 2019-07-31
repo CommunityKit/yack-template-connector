@@ -318,7 +318,7 @@ this.pluginContext.logger.d("Community doesn't have any categories")
             response = await this.pluginContext.axios.get(url, {
                 responseType: "json",
                 headers: {
-                    "user-api-key": key
+                    [this.config.yackManagedSession ? "Api-Key" : "user-api-key"]: key
                 }
             });
         } else {

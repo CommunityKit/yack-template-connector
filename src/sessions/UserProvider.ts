@@ -19,8 +19,9 @@ export class UserProvider {
 
         const response = await this.pluginContext.axios.get(sessionURL, {
             headers: {
-                "user-api-key": `${options.session.accessToken.token}`
+                [this.config.yackManagedSession ? "Api-Key" : "user-api-key"]: options.session.accessToken.token
             }
+            
         });
 
         // this.pluginContext.logger.d(`USER RESPONSE = ${JSON.stringify(response)}`);
@@ -72,8 +73,8 @@ export class UserProvider {
         // userID === username
         let allData;
         await Promise.all(
-            [getUserStats(this.config.rootUrl, this.pluginContext.axios.get, userId, options),
-            getUserData(this.config.rootUrl, this.pluginContext.axios.get, userId, options)
+            [getUserStats(this.config.rootUrl, this.pluginContext.axios.get, userId, options, this.config),
+            getUserData(this.config.rootUrl, this.pluginContext.axios.get, userId, options, this.config)
         ]).then(data => {
             allData = {
                 summary: data[0].user_summary,
@@ -95,8 +96,8 @@ export class UserProvider {
         // userID === username
         let allData;
         await Promise.all(
-            [getUserStats(this.config.rootUrl, this.pluginContext.axios.get, username, options),
-            getUserData(this.config.rootUrl, this.pluginContext.axios.get, username, options)
+            [getUserStats(this.config.rootUrl, this.pluginContext.axios.get, username, options, this.config),
+            getUserData(this.config.rootUrl, this.pluginContext.axios.get, username, options, this.config)
         ]).then(data => {
             allData = {
                 summary: data[0].user_summary,

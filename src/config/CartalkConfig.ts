@@ -9,5 +9,6 @@ export const CartalkConfig: IDiscourseConfig = {
     iconBase64: icon,
     primaryColor: "#81b739",
     secondaryColor: "#81b739",
-    communityGuidelines: "https://community.cartalk.com/faq"
+    communityGuidelines: "https://community.cartalk.com/faq",
+    yackManagedSession: false
 };

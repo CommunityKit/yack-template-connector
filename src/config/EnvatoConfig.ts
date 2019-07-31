@@ -9,5 +9,6 @@ export const EnvatoConfig: IDiscourseConfig = {
     iconBase64: icon,
     primaryColor: "#81b739",
     secondaryColor: "#81b739",
-    communityGuidelines: "https://forums.envato.com/tos"
+    communityGuidelines: "https://forums.envato.com/tos",
+    yackManagedSession: false
 };

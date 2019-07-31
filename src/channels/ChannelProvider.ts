@@ -125,11 +125,12 @@ export class ChannelProvider implements IChannelProvider {
     
             const channelsResponse = await this.pluginContext.axios.get(url, {
                 responseType: "json",
-                headers: {
                     // "user-api-key": options.session.accessToken.token
                     // "Api-Key": options.session.accessToken.token
-                    "Api-Key": "ce83dc44d6722de95a183ef3ff8eda23b80f181ed64991d2df788e865de1948d"
-                }
+                    // "Api-Key": "ce83dc44d6722de95a183ef3ff8eda23b80f181ed64991d2df788e865de1948d"
+                    headers: {
+                        [this.config.yackManagedSession ? "Api-Key" : "user-api-key"]: options.session.accessToken.token
+                    }
             });
             const categoryList = channelsResponse.data.categories;
             // create object on all channels' metadata to map category ids to names
@@ -194,8 +195,11 @@ export class ChannelProvider implements IChannelProvider {
             if (hasUser) {
                 response = await this.pluginContext.axios.get(url, {
                     responseType: "json",
+                    // headers: {
+                    //     "user-api-key": options.session.accessToken.token
+                    // }
                     headers: {
-                        "user-api-key": options.session.accessToken.token
+                        [this.config.yackManagedSession ? "Api-Key" : "user-api-key"]: options.session.accessToken.token
                     }
                 });
             } else {
@@ -223,7 +227,7 @@ export class ChannelProvider implements IChannelProvider {
             resp = await this.pluginContext.axios.get(url, {
                 responseType: "json",
                 headers: {
-                    "user-api-key": options.session.accessToken.token
+                    [this.config.yackManagedSession ? "Api-Key" : "user-api-key"]: options.session.accessToken.token
                 }
             });
         }else{

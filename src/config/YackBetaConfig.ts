@@ -9,5 +9,6 @@ export const YackBetaConfig: IDiscourseConfig = {
     iconBase64: icon,
     primaryColor: "#1d1e1f",
     secondaryColor: "#434649",
-    communityGuidelines: "https://community.yack.io/guidelines"
+    communityGuidelines: "https://community.yack.io/guidelines",
+    yackManagedSession: true
 };
