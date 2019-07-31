@@ -273,12 +273,13 @@ export class CommentProvider implements ICommentProvider {
         const threadId = threadQuery.id;
         const parentComment = parentCommentQuery;
         const comment = commentQuery;
+        console.log(`commentQuery: ${JSON.stringify(commentQuery)}`)
         console.log(threadId, parentComment, comment);
         const body = formValue.valueByFieldId["body"];
         let formData
         let url: string;
 
-        if(commentQuery){
+        if(!!commentQuery){
             // user is editing post
             url = `${this.config.rootUrl}/posts/${comment.id}.json`;
             // formData = {
@@ -291,8 +292,8 @@ export class CommentProvider implements ICommentProvider {
             // };
 
             formData = {
-                // "post[topic_id]": threadId,
-                "post[raw]": body.toString(),
+                "post[raw]": body,
+
                 }
                 const response = await this.pluginContext.axios.put(url, querystring.stringify(formData), {responseType: "json",
         headers: {
@@ -307,7 +308,9 @@ export class CommentProvider implements ICommentProvider {
             if("errors" in data){
                 return Result.validationError(data.errors)
             }else{
-                const newComment = populateComment(data, options, this.config.rootUrl);
+                // data.id = commentQuery.id
+                const newComment = populateComment(data.post, options, this.config.rootUrl);
+                newComment.createdBy = commentQuery.createdBy;
                 return Result.success(newComment);
             }
         }else{
@@ -339,13 +342,11 @@ export class CommentProvider implements ICommentProvider {
             const newComment = populateComment(data, options, this.config.rootUrl);
             return Result.success(newComment);
         }
-       
-       
-
+    }
         // return {
         //     resultObject: newComment
         // };
-            }
+            
             // formData["thing_id"] = `${Kinds.comment}_${comment.id}`;
         // } 
         // else {

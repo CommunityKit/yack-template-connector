@@ -754,6 +754,8 @@ export class ThreadProvider implements IThreadProvider {
 
                 // uploadFormData.app              // uploadFormData.append("file", transformed); 
                 // let buff = Buffer.from(file.content)
+                let setContentType = uploadFormData.getHeaders()
+                setContentType = setContentType["content-type"]
 
                 // uploadFormData.append("file", file.content, { filename: file.name, contentType: file.contentType }); 
                 const formDataToBufferObject = this.formDataToBuffer(uploadFormData);
@@ -761,7 +763,7 @@ export class ThreadProvider implements IThreadProvider {
                 // const formData = {
                 //     'type': "composer",
                 //     'synchronous': true,
-                //     'file': file.content.values
+                //     'file': file.content
                 // }
 
                 // const testForm = new FormData(formData)
@@ -769,13 +771,15 @@ export class ThreadProvider implements IThreadProvider {
 
 
                 const response = await this.pluginContext.axios.post(uploadUrl, formDataToBufferObject, {
-                   
+                    // body: formData,
                     // data: uploadFormData,
                     // responseType: "json",
                     headers: {
-                        // "content-type": "application/x-www-form-urlencoded",
-                        "content-type": 'multipart/form-data',
+                        
+                        "content-type": setContentType,
+                        // "content-type": 'multipart/form-data',
                         // "Content-Type": "multipart/form-data",
+                        // “content-type”: setContentType.toString(),
                         "user-api-key": options.session.accessToken.token
                     }
                 });
