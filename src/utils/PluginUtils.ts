@@ -33,7 +33,7 @@ export function catchErrors<T>(response: AxiosResponse) {
     let errorType, errors; 
     if(hasErrors){
         errors = response.data.errors
-        if("error_type" in response.data){
+        if("error_type" in response.data){ 
             errorType = response.data.error_type;
             if(errorType == "invalid_access"){
                 return Result.errorWithType<T>(Result.ErrorTypes.InvalidSessionError, errors);
@@ -41,7 +41,9 @@ export function catchErrors<T>(response: AxiosResponse) {
                 return Result.errorWithType<T>(Result.ErrorTypes.GenericError, errors);
             }
         }else if("action" in response.data){
-            return Result.errorWithType<T>(Result.ErrorTypes.ValidationError,errors);
+            // return Result.errorWithType<T>(Result.ErrorTypes.ValidationError,errors);
+            return Result.validationError<T>(errors);
+
         }else{
             return Result.errorWithType<T>(Result.ErrorTypes.GenericError, errors);
         }

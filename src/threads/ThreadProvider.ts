@@ -14,7 +14,8 @@ import {
     Action,
     ThreadDisplayProperties,
     PluginUser,
-    TextContent
+    TextContent,
+    UploadFileResult
 } from "yack-plugin-framework";
 import { IDiscourseConfig } from "../config/IDiscourseConfig";
 import { populateThread } from "./ThreadPopulator";
@@ -23,6 +24,9 @@ import { getUserCreatedContent } from "./ThreadRequests";
 import uuid = require("uuid");
 import * as querystring from "querystring";
 import {catchErrors} from "../utils/PluginUtils"
+import { CancelToken, AxiosResponse, AxiosError } from "axios";
+import * as FormData from "form-data";
+
 
 export class ThreadProvider implements IThreadProvider {
     private pluginContext: PluginContext;
@@ -482,16 +486,16 @@ export class ThreadProvider implements IThreadProvider {
         };
 
         // Can't upload videos to discourse
-        const uploadField: Form.UploadField = {
-            type: Form.Field.Types.upload,
-            title: "Upload Images & Videos",
-            maxItems: 50,
-            supportedTypes: [Form.UploadField.Types.image],
-            maxImageFileSizeInMB: 40,
-            maxVideoFileSizeInMB: 0,
-            maxAnyFileSizeInMB: 0,
-            disabled: thread != null
-        };
+        // const uploadField: Form.UploadField = {
+        //     type: Form.Field.Types.upload,
+        //     title: "Upload Images & Videos",
+        //     maxItems: 50,
+        //     supportedTypes: [Form.UploadField.Types.image],
+        //     maxImageFileSizeInMB: 40,
+        //     maxVideoFileSizeInMB: 0,
+        //     maxAnyFileSizeInMB: 0,
+        //     disabled: thread != null
+        // };
 
         const categories = await this.getCategories(this.pluginContext.axios.get, options);
         let categoryIds: number[] = [];
@@ -522,20 +526,20 @@ export class ThreadProvider implements IThreadProvider {
             body: bodyField
         };
 
-        const imageVideoFieldsById: Form.ChildrenById = {
-            title: titleField,
-            upload: uploadField
-        };
+        // const imageVideoFieldsById: Form.ChildrenById = {
+        //     title: titleField,
+        //     upload: uploadField
+        // };
 
         postFieldsById["postProps"] = {
             type: Form.Field.Types.group,
             childrenById: {}
         };
 
-        imageVideoFieldsById["postProps"] = {
-            type: Form.Field.Types.group,
-            childrenById: {}
-        };
+        // imageVideoFieldsById["postProps"] = {
+        //     type: Form.Field.Types.group,
+        //     childrenById: {}
+        // };
 
         const postTypesField: Form.TabsField = {
             type: Form.Field.Types.tabs,
@@ -543,11 +547,12 @@ export class ThreadProvider implements IThreadProvider {
                 post: {
                     title: "Post",
                     childrenById: postFieldsById
-                },
-                image_video: {
-                    title: "Image & Video",
-                    childrenById: imageVideoFieldsById
                 }
+                // ,
+                // image_video: {
+                //     title: "Image & Video",
+                //     childrenById: imageVideoFieldsById
+                // }
             },
             defaultValue: "post"
         };
@@ -583,17 +588,45 @@ export class ThreadProvider implements IThreadProvider {
         const title = valueByFieldId["title"] as string;
         const body = valueByFieldId["body"] as string;
         // const url = valueByFieldId["url"] as string;
-        const files = valueByFieldId["upload"] as YackFile[];
+        // const files = valueByFieldId["upload"] as YackFile[];
         // const postType = valueByFieldId["postTypes"] as string;
         // const spoiler = valueByFieldId["spoiler"] ? (valueByFieldId["spoiler"] as boolean) : false;
 
-        if(!!title === false || !!body === false){
-            return Result.validationError(["Please provide a title and body"]);
+        if(!!title === false){
+            return Result.validationError(["Title is required"]);
         }
         // else if(title.length < 15){
         //     return Result.validationError(["Title must be at least 15 characters"]);
         // }else if(body.length < 20){
         //     return Result.validationError(["Post must be at least 20 characters"]);
+        // }
+
+        // if(files.length > 0){
+            // upload image to server
+            // const uploadUrl = `${this.config.rootUrl}/uploads.json`;
+            
+            // for(const image in files){
+            //     const uploadFormData = new FormData();
+            //     uploadFormData.set("type", "composer")
+            //     uploadFormData.set("synchronous", "true")
+            //     const transformed = new Buffer(image, 'binary').toString('base64');
+            //     uploadFormData.append("files[]", transformed); 
+            //     const response = await this.pluginContext.axios.post(uploadUrl, uploadFormData, {
+            //         responseType: "json",
+            //         headers: {
+            //             "content-type": "application/x-www-form-urlencoded",
+            //             "user-api-key": options.session.accessToken.token
+            //         }
+            //     });
+            //     console.log(JSON.stringify(response.data));
+            // }
+
+            // const uploadData = {
+            //     "type": "composer",
+            //     "synchronous": true,
+            // }
+            
+
         // }
 
         if (threadId) {
@@ -658,16 +691,119 @@ export class ThreadProvider implements IThreadProvider {
         }
     }
 
-    // async uploadSaveThreadFormFile(
-    //     options: PluginRequestOptions,
-    //     channelId: string,
-    //     threadId: string,
-    //     file: YackFile,
-    //     requestCancelToken: CancelToken
-    // ): Promise<UploadFileResult> {
-    //     return;
+    async uploadSaveThreadFormFile(
+        options: PluginRequestOptions,
+        channelQuery: Channel.Query,
+        threadQuery: Thread.Query,
+        file: YackFile,
+        requestCancelToken: CancelToken
+    ): Promise<Result<UploadFileResult>> {
+        console.log(`called uploadSaveThreadFormFile()`)
+        console.log(`file: ${file.content}`)
+        console.log(`isBuffer: ${Buffer.isBuffer(file.content)}`)
+        // console.log(`Buffer.from: ${Buffer.isEncoding(file.content)}`)
 
-    // }
+
+
+
+        const uploadUrl = `${this.config.rootUrl}/uploads.json`;
+            
+            // for(const image in files){
+                
+                // uploadFormData.append("file", file.content, { filename: file.name, contentType: file.contentType }); 
+                // var blob = new Blob([file.content], { type: file.contentType});
+
+                // var blob = new Blob([file.content], { type: "text/xml"});
+                // uploadFormData.append("file", blob.toString(), file.name); 
+
+
+                // uploadFormData.append("file", file.content, { filename: file.name, contentType: file.contentType }); 
+                // const transformed = file.content.toString('base64')
+                // const transformed = new Buffer(file.content.toString(), 'binary').toString('base64');
+                // const transformed = Buffer.from(file.content, file.content.byteOffset, file.content.length).toString('base64')
+                const transformed = Buffer.from(file.content, file.content.byteOffset, file.content.length).toString('base64')
+
+                console.log(`transformed: ${transformed}`)
+                // uploadFormData.append("file", file.content, { filename: file.name, contentType: file.contentType }); 
+                // uploadFormData.append("file", transformed, file.name); 
+                // const transformed = new Blob([file.content])
+                // uploadFormData.append("file", transformed, { filename: file.name, contentType: file.contentType }); 
+                // const blob = new Blob([file.content])
+                // uploadFormData.append("file", blob, file.name); 
+                // uploadFormData.append("file", btoa(file.content.toString('base64'))); 
+                // uploadFormData.append("file", btoa(transformed).toString()); 
+                // const buff = Buffer.from(file.content)
+                
+                // const blob = new Blob([new Uint8Array(file.content, file.content.byteOffset, file.content.length)]);
+                // console.log(`blob: ${blob}`)
+                // uploadFormData.append("file", blob);
+
+                // const buff = Buffer.from(file.content)
+                // uploadFormData.append("file", buff);
+
+                // uploadFormData.append("file", file.content, { filename: file.name, contentType: file.contentType }); 
+                
+
+                // uploadFormData.append("file", file.content.toString())
+                const uploadFormData = new FormData();
+                uploadFormData.append("type", "composer")
+                uploadFormData.append("synchronous", "true")
+                uploadFormData.append("file", file.content, { filename: file.name, contentType: file.contentType });   
+                // uploadFormData.append("file", file.content.toString('base64'), file.name);   
+                // uploadFormData.append("file", file.name)
+
+                // uploadFormData.app              // uploadFormData.append("file", transformed); 
+                // let buff = Buffer.from(file.content)
+
+                // uploadFormData.append("file", file.content, { filename: file.name, contentType: file.contentType }); 
+                const formDataToBufferObject = this.formDataToBuffer(uploadFormData);
+
+                // const formData = {
+                //     'type': "composer",
+                //     'synchronous': true,
+                //     'file': file.content.values
+                // }
+
+                // const testForm = new FormData(formData)
+
+
+
+                const response = await this.pluginContext.axios.post(uploadUrl, formDataToBufferObject, {
+                   
+                    // data: uploadFormData,
+                    // responseType: "json",
+                    headers: {
+                        // "content-type": "application/x-www-form-urlencoded",
+                        "content-type": 'multipart/form-data',
+                        // "Content-Type": "multipart/form-data",
+                        "user-api-key": options.session.accessToken.token
+                    }
+                });
+            // }
+
+            // {"failed":"FAILED","message":"undefined method `tempfile' for #<String:0x00007fd2c7136cc0>"}
+            // {"errors":["param is missing or the value is empty: type"]}
+
+            if("failed" in response.data || "errors" in response.data || "error" in response.data){
+                console.log(JSON.stringify(response.data));
+                return Result.error("something went wrong")
+            }else{
+                console.log(JSON.stringify(response.data));
+                const uploadFileResult: UploadFileResult = { fileId: response.data.id.toString(), srcUrl: `https:${response.data.url}` };
+                return Result.success(uploadFileResult)
+            }
+    }
+
+    async deleteSaveThreadFormFile?(
+        options: PluginRequestOptions,
+        channelQuery: Channel.Query,
+        threadQuery: Thread.Query,
+        fileQuery: YackFile.Query
+    ): Promise<Result<void>> {
+        // await this.imgUrProvider.deleteImagebyId(fileQuery.id);
+        return Result.success(null);
+    }
+
 
     private async getCategories(get, options) {
         let url: string;
@@ -687,6 +823,48 @@ export class ThreadProvider implements IThreadProvider {
             selectableCategories.push({ id: category.id, name: category.name });
         }
         return selectableCategories;
+    }
+    private formDataToBuffer(formData) {
+        let dataBuffer = new Buffer(0);
+        let boundary = formData.getBoundary();
+        for (let i = 0, len = formData._streams.length; i < len; i++) {
+            if (typeof formData._streams[i] !== "function") {
+                dataBuffer = this.bufferWrite(dataBuffer, formData._streams[i]);
+
+                // The item have 2 more "-" in the boundary. No clue why
+                // rfc7578 specifies (4.1): "The boundary is supplied as a "boundary"
+                //    parameter to the multipart/form-data type.  As noted in Section 5.1
+                //    of [RFC2046], the boundary delimiter MUST NOT appear inside any of
+                //    the encapsulated parts, and it is often necessary to enclose the
+                //    "boundary" parameter values in quotes in the Content-Type header
+                //    field."
+                // This means, that we can use the boundary as unique value, indicating that
+                // we do NOT need to add a break (\r\n). These are added by data-form package.
+                //
+                // As seen in this example (https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/POST#Example)
+                // the boundary is preceded by 2x "-". If thus --Boundary exists, do not add the break.
+                if (typeof formData._streams[i] !== "string" || formData._streams[i].substring(2, boundary.length + 2) !== boundary) {
+                    dataBuffer = this.bufferWrite(dataBuffer, "\r\n");
+                }
+            }
+        }
+
+        // Close the request
+        dataBuffer = this.bufferWrite(dataBuffer, "--" + boundary + "--");
+
+        return dataBuffer;
+    }
+
+    // Below function appends the data to the Buffer.
+    private bufferWrite(buffer, data) {
+        let addBuffer;
+        if (typeof data === "string") {
+            addBuffer = Buffer.from(data);
+        } else if (typeof data === "object" && Buffer.isBuffer(data)) {
+            addBuffer = data;
+        }
+
+        return Buffer.concat([buffer, addBuffer]);
     }
 }
 
@@ -723,3 +901,5 @@ export class ThreadProvider implements IThreadProvider {
 // Ex: ReadMe First: Getting Started article
 
 // How does discourse handle pagination?
+
+

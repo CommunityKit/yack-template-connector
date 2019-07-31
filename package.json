@@ -19,6 +19,7 @@
     },
     "homepage": "https://github.com/maxgedikli/yack-discourse-plugin#readme",
     "dependencies": {
+        "form-data": "^2.5.0",
         "node-forge": "^0.8.2",
         "yack-plugin-framework": "^1.0.178"
     },
