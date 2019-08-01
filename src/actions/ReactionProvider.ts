@@ -97,7 +97,8 @@ export class ReactionProvider implements IReactionProvider {
         // const postId = objectId.split(" ")[1]
         let postId;
         if(objectType === ObjectTypes.comment){
-            postId = objectQuery.id
+            postId = objectQuery.metadata.reactionId
+            // postId = objectQuery.id
         }else{
         postId = objectQuery.metadata.postId
         }

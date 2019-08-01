@@ -7,6 +7,7 @@ import {
 // import * as Remarkable from "remarkable";
 import * as htmlEncoderDecoder from "html-encoder-decoder";
 import {populateAttachments} from "../threads/AttachmentPopulator"
+import { populateReaction } from "../actions/ReactionPopulator"
 
     export async function populateThread(data: any, options: PluginRequestOptions, rootUrl: string): Promise<Thread> {
         let reactionsConfig
@@ -95,6 +96,10 @@ import {populateAttachments} from "../threads/AttachmentPopulator"
         },
         ...options.session.user && {sessionUserReactionDisabled: (data.creator_username === options.session.user.username )},
         ...!hasUser && {sessionUserReactionDisabled: true},
+
+
+        ...data.actions_summary && data.actions_summary[0].acted && { userReactions: populateReaction(options)},
+
         // ...data.link_counts && {attachments: await populateAttachments(data.link_counts)},
 
         shareProps: {

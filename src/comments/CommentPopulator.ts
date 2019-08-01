@@ -5,6 +5,7 @@ import {
 } from "yack-plugin-framework";
 import { threadId } from "worker_threads";
 import * as htmlEncoderDecoder from "html-encoder-decoder";
+import { populateReaction } from "../actions/ReactionPopulator"
 
 
     export function populateComment(data: any, options: any, rootUrl:string): Comment {
@@ -41,6 +42,7 @@ import * as htmlEncoderDecoder from "html-encoder-decoder";
                 ...data.blurb && {value: data.blurb},
                 ...data.cooked && {value: data.cooked}
             },
+            ...data.actions_summary[0].acted && { userReactions: populateReaction(options)},
 
             shareProps: {
                 // title?: string;
@@ -75,6 +77,15 @@ import * as htmlEncoderDecoder from "html-encoder-decoder";
             ...data.updated_at && {utcLastUpdateDate: Date.parse(data.updated_at)},
             ...options.session.user && {sessionUserReactionDisabled: (data.creator_username === options.session.user.username )},
             ...!hasUser && {sessionUserReactionDisabled: true},
+
+
+            // comments have a post_number AND an id
+            // We're using post_number as the comment.id
+            // but we need the post.id for reacions
+            metadata: {
+                reactionId: data.id.toString()
+            }
+
 
             // sessionUserReactionDisabled: (data.username === options.session.user.username),
 
