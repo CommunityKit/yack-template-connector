@@ -5,12 +5,16 @@ import {
     ICommentProvider,
     Comment,
     Filter,
-    Form, Action, Result, Thread, PluginUser, TextContent
+    Form, Action, Result, Thread, PluginUser, TextContent, UploadFileResult,     File as YackFile, Channel
+
 } from "yack-plugin-framework";
 import * as querystring from "querystring";
 import { IDiscourseConfig } from "../config/IDiscourseConfig";
 import uuid = require("uuid");
 import { populateComment } from "./CommentPopulator";
+import { CancelToken, AxiosResponse, AxiosError } from "axios";
+import * as FormData from "form-data";
+
 
 
 
@@ -66,12 +70,14 @@ export class CommentProvider implements ICommentProvider {
         for (let comment of threadCommentList) {
             let replyCount = comment.reply_count;
             let isReply = !!comment.reply_to_post_number;
-            comment.id = comment.post_number.toString();
+            // if(isReply === false){
+            //     comment.id = comment.post_number.toString();
+            // }
 
             if (comment.post_number !== 1) { // first post is the topic
                 if (isReply) {
                     // SET PARENT COMMENT ID IF REPLY
-                    comment.parentCommentId = !!parentCommentId ? parentCommentId : comment.reply_to_post_number.toString();
+                    comment.parentCommentId = !!parentCommentId ? parentCommentId.toString() : comment.reply_to_post_number.toString();
 
                     // SET REPLY PAGNIATION IF REPLYCOUNT === 20 REPLIES
                     let hasRepliesToken = !!comment.repliesNextPageToken;
@@ -370,6 +376,121 @@ export class CommentProvider implements ICommentProvider {
     //     return Result.success(null)
     // }
 
+    async uploadSaveCommentFormFile(
+        options: PluginRequestOptions,
+        threadQuery: Thread.Query,
+        commentQuery: Comment.Query, 
+        parentCommentQuery: Comment.Query,
+        file: YackFile,
+        requestCancelToken: CancelToken
+    ): Promise<Result<UploadFileResult>> {
+        console.log(`called uploadSaveThreadFormFile()`)
+        console.log(`file: ${file.content}`)
+        console.log(`isBuffer: ${Buffer.isBuffer(file.content)}`)
+        // console.log(`Buffer.from: ${Buffer.isEncoding(file.content)}`)
+
+
+
+
+        const uploadUrl = `${this.config.rootUrl}/uploads.json`;
+            
+            // for(const image in files){
+                
+                // uploadFormData.append("file", file.content, { filename: file.name, contentType: file.contentType }); 
+                // var blob = new Blob([file.content], { type: file.contentType});
+
+                // var blob = new Blob([file.content], { type: "text/xml"});
+                // uploadFormData.append("file", blob.toString(), file.name); 
+
+
+                // uploadFormData.append("file", file.content, { filename: file.name, contentType: file.contentType }); 
+                // const transformed = file.content.toString('base64')
+                // const transformed = new Buffer(file.content.toString(), 'binary').toString('base64');
+                // const transformed = Buffer.from(file.content, file.content.byteOffset, file.content.length).toString('base64')
+                const transformed = Buffer.from(file.content, file.content.byteOffset, file.content.length).toString('base64')
+
+                console.log(`transformed: ${transformed}`)
+                // uploadFormData.append("file", file.content, { filename: file.name, contentType: file.contentType }); 
+                // uploadFormData.append("file", transformed, file.name); 
+                // const transformed = new Blob([file.content])
+                // uploadFormData.append("file", transformed, { filename: file.name, contentType: file.contentType }); 
+                // const blob = new Blob([file.content])
+                // uploadFormData.append("file", blob, file.name); 
+                // uploadFormData.append("file", btoa(file.content.toString('base64'))); 
+                // uploadFormData.append("file", btoa(transformed).toString()); 
+                // const buff = Buffer.from(file.content)
+                
+                // const blob = new Blob([new Uint8Array(file.content, file.content.byteOffset, file.content.length)]);
+                // console.log(`blob: ${blob}`)
+                // uploadFormData.append("file", blob);
+
+                // const buff = Buffer.from(file.content)
+                // uploadFormData.append("file", buff);
+
+                // uploadFormData.append("file", file.content, { filename: file.name, contentType: file.contentType }); 
+                
+
+                // uploadFormData.append("file", file.content.toString())
+                const uploadFormData = new FormData();
+                uploadFormData.append("type", "composer")
+                uploadFormData.append("synchronous", "true")
+                uploadFormData.append("file", file.content, { filename: file.name, contentType: file.contentType });   
+                // uploadFormData.append("file", file.content.toString('base64'), file.name);   
+                // uploadFormData.append("file", file.name)
+
+                // uploadFormData.app              // uploadFormData.append("file", transformed); 
+                // let buff = Buffer.from(file.content)
+                let setContentType = uploadFormData.getHeaders()
+                setContentType = setContentType["content-type"]
+
+                // uploadFormData.append("file", file.content, { filename: file.name, contentType: file.contentType }); 
+                const formDataToBufferObject = this.formDataToBuffer(uploadFormData);
+
+                // const formData = {
+                //     'type': "composer",
+                //     'synchronous': true,
+                //     'file': file.content
+                // }
+
+                // const testForm = new FormData(formData)
+
+
+
+                const response = await this.pluginContext.axios.post(uploadUrl, formDataToBufferObject, {
+                    // body: formData,
+                    // data: uploadFormData,
+                    // responseType: "json",
+                    headers: {
+                        "content-type": setContentType,
+                        [this.config.yackManagedSession ? "Api-Key" : "user-api-key"]: options.session.accessToken.token
+                    }                 
+                });
+            // }
+
+            // {"failed":"FAILED","message":"undefined method `tempfile' for #<String:0x00007fd2c7136cc0>"}
+            // {"errors":["param is missing or the value is empty: type"]}
+
+            if("failed" in response.data || "errors" in response.data || "error" in response.data){
+                console.log(JSON.stringify(response.data));
+                return Result.error("something went wrong")
+            }else{
+                console.log(JSON.stringify(response.data));
+                const uploadFileResult: UploadFileResult = { fileId: response.data.id.toString(), srcUrl: `https:${response.data.url}` };
+                return Result.success(uploadFileResult)
+            }
+    }
+
+    async deleteSaveCommentFormFile?(
+        ptions: PluginRequestOptions, 
+        threadQuery: Thread.Query, 
+        commentQuery: Comment.Query, 
+        parentCommentQuery: Comment.Query,
+        fileQuery: YackFile.Query
+    ): Promise<Result<void>> {
+        // await this.imgUrProvider.deleteImagebyId(fileQuery.id);
+        return Result.success(null);
+    }
+
     async deleteComment(options: PluginRequestOptions, commentQuery: Comment.Query): Promise<Result<void>> {
         const commentId = commentQuery.id
         // const thread = await this.getCommentById(options,commentId);
@@ -418,6 +539,49 @@ export class CommentProvider implements ICommentProvider {
 
     async getUserComments(options: PluginRequestOptions, userId: string): Promise<PagedArray<Comment>> {
         return new PagedArray();
+    }
+
+    private formDataToBuffer(formData) {
+        let dataBuffer = new Buffer(0);
+        let boundary = formData.getBoundary();
+        for (let i = 0, len = formData._streams.length; i < len; i++) {
+            if (typeof formData._streams[i] !== "function") {
+                dataBuffer = this.bufferWrite(dataBuffer, formData._streams[i]);
+
+                // The item have 2 more "-" in the boundary. No clue why
+                // rfc7578 specifies (4.1): "The boundary is supplied as a "boundary"
+                //    parameter to the multipart/form-data type.  As noted in Section 5.1
+                //    of [RFC2046], the boundary delimiter MUST NOT appear inside any of
+                //    the encapsulated parts, and it is often necessary to enclose the
+                //    "boundary" parameter values in quotes in the Content-Type header
+                //    field."
+                // This means, that we can use the boundary as unique value, indicating that
+                // we do NOT need to add a break (\r\n). These are added by data-form package.
+                //
+                // As seen in this example (https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods/POST#Example)
+                // the boundary is preceded by 2x "-". If thus --Boundary exists, do not add the break.
+                if (typeof formData._streams[i] !== "string" || formData._streams[i].substring(2, boundary.length + 2) !== boundary) {
+                    dataBuffer = this.bufferWrite(dataBuffer, "\r\n");
+                }
+            }
+        }
+
+        // Close the request
+        dataBuffer = this.bufferWrite(dataBuffer, "--" + boundary + "--");
+
+        return dataBuffer;
+    }
+
+    // Below function appends the data to the Buffer.
+    private bufferWrite(buffer, data) {
+        let addBuffer;
+        if (typeof data === "string") {
+            addBuffer = Buffer.from(data);
+        } else if (typeof data === "object" && Buffer.isBuffer(data)) {
+            addBuffer = data;
+        }
+
+        return Buffer.concat([buffer, addBuffer]);
     }
 }
 

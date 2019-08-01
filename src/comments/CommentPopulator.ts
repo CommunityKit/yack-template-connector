@@ -30,8 +30,8 @@ import * as htmlEncoderDecoder from "html-encoder-decoder";
         }
         // console.warn(`threadId: ${data.threadId} - commentId: ${data.id.toString()}`);
         const newComment: Comment = {
-            id: data.id.toString(),
-            ...data.parentCommentId && {parentCommentId: data.parentCommentId},
+            id: data.post_number.toString(),
+            ...data.parentCommentId && {parentCommentId: data.parentCommentId.toString()},
             ...data.repliesNextPageToken && {repliesNextPageToken: data.repliesNextPageToken},
             threadId: data.threadId,
             
