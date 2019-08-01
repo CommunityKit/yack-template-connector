@@ -10,5 +10,5 @@ export const YackBetaConfig: IDiscourseConfig = {
     primaryColor: "#1d1e1f",
     secondaryColor: "#434649",
     communityGuidelines: "https://community.yack.io/guidelines",
-    yackManagedSession: false
+    yackManagedSession: true
 };
