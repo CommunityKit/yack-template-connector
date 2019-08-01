@@ -281,7 +281,7 @@ export class CommentProvider implements ICommentProvider {
 
         if(!!commentQuery){
             // user is editing post
-            url = `${this.config.rootUrl}/posts/${comment.id}.json`;
+            url = `${this.config.rootUrl}/posts/${commentQuery.id}.json`;
             // formData = {
             //     "topic_id": parseInt(threadId),
             //     "raw": body,
@@ -292,15 +292,17 @@ export class CommentProvider implements ICommentProvider {
             // };
 
             formData = {
-                "post[raw]": body,
-
+                "post[raw]": body
                 }
-                const response = await this.pluginContext.axios.put(url, querystring.stringify(formData), {responseType: "json",
-                headers: {
-                    "content-type": "application/x-www-form-urlencoded",
-                    [this.config.yackManagedSession ? "Api-Key" : "user-api-key"]: options.session.accessToken.token
-                }
-        });
+                const response = await this.pluginContext.axios.put(url, querystring.stringify(formData), 
+                    {
+                        responseType: "json",
+                        headers: {
+                            "content-type": "application/x-www-form-urlencoded",
+                            [this.config.yackManagedSession ? "Api-Key" : "user-api-key"]: options.session.accessToken.token
+                        }
+                    }
+                );
         const data = response.data;
 
             if("errors" in data){
@@ -323,19 +325,23 @@ export class CommentProvider implements ICommentProvider {
 
                 // ...parentCommentQuery && {"reply_to_post_number": parentComment.id}
                 // "created_at": "2017-01-31"
-            };
+            }; 
             const response = await this.pluginContext.axios.post(url, querystring.stringify(formData), {responseType: "json",
             headers: {
                 "content-type": "application/x-www-form-urlencoded",
                 [this.config.yackManagedSession ? "Api-Key" : "user-api-key"]: options.session.accessToken.token
             }
        });
+       console.log(`Empty Comment Body: ${body}`)
         const data = response.data;
 
         if("errors" in data){
             return Result.validationError(data.errors)
         }else{
+            console.log(`Created Comment id: ${data.id}`);
             const newComment = populateComment(data, options, this.config.rootUrl);
+            console.log(`newComment Id: ${newComment.id}`);
+
             return Result.success(newComment);
         }
     }
