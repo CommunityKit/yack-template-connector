@@ -42,7 +42,7 @@ import { populateReaction } from "../actions/ReactionPopulator"
                 ...data.blurb && {value: data.blurb},
                 ...data.cooked && {value: data.cooked}
             },
-            ...data.actions_summary[0].acted && { userReactions: populateReaction(options)},
+            ...data.actions_summary && data.actions_summary[0].acted && { userReactions: populateReaction(options)},
 
             shareProps: {
                 // title?: string;
