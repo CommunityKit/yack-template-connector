@@ -287,7 +287,7 @@ export class CommentProvider implements ICommentProvider {
 
         if(!!commentQuery){
             // user is editing post
-            url = `${this.config.rootUrl}/posts/${commentQuery.id}.json`;
+            url = `${this.config.rootUrl}/posts/${commentQuery.metadata.reactionId}.json`;
             // formData = {
             //     "topic_id": parseInt(threadId),
             //     "raw": body,
@@ -495,7 +495,7 @@ export class CommentProvider implements ICommentProvider {
         const commentId = commentQuery.id
         // const thread = await this.getCommentById(options,commentId);
         // if(thread.createdBy.username === options.session.user.username){
-            let url = `${this.config.rootUrl}/posts/${commentId}.json`; // only using first element so don't need pagination
+            let url = `${this.config.rootUrl}/posts/${commentQuery.metadata.reactionId}.json`; // only using first element so don't need pagination
             await this.pluginContext.axios.delete(url, {
                 responseType: "json",
                 headers: {
@@ -515,7 +515,7 @@ export class CommentProvider implements ICommentProvider {
         let url, response, data, formData;
         if (action == Action.report) {
             url = `${this.config.rootUrl}/post_actions.json`
-            formData = `id=${commentId}&post_action_type_id=${8}&flag_topic=true`
+            formData = `id=${commentQuery.metadata.reactionId}&post_action_type_id=${8}&flag_topic=true`
             await this.pluginContext.axios.post(url, formData, {
                 responseType: "json",
                 headers: {
@@ -523,7 +523,7 @@ export class CommentProvider implements ICommentProvider {
                 }
             }); 
         } else if (action == Action.save) {
-            url = `${this.config.rootUrl}/t/${commentId}/bookmark.json`
+            url = `${this.config.rootUrl}/t/${commentQuery.metadata.reactionId}/bookmark.json`
             await this.pluginContext.axios.put(url,'', {
                 // responseType: "json",
                 headers: {
