@@ -97,7 +97,7 @@ import { populateReaction } from "../actions/ReactionPopulator"
         ...options.session.user && data.username === options.session.user.username && {sessionUserReactionDisabled: true},
         ...!hasUser && {sessionUserReactionDisabled: true},
 
-
+        userReactions: [],
         ...data.actions_summary && data.actions_summary[0].acted && { userReactions: populateReaction(options)},
 
         // ...data.link_counts && {attachments: await populateAttachments(data.link_counts)},
