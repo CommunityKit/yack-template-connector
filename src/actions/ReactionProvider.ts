@@ -51,18 +51,18 @@ export class ReactionProvider implements IReactionProvider {
 
         
 
-        if(allowedToUndo === false){
-            switch(objectType){
-                case "thread": {
-                  this.reactionConfigByObjectType[ObjectTypes.thread].reactions = []
-                  return false;
-                }
-                case "comment": {
-                  this.reactionConfigByObjectType[ObjectTypes.comment].reactions = []
-                  return false;
-                }
-            }
-        }
+        // if(allowedToUndo === false){
+        //     switch(objectType){
+        //         case "thread": {
+        //           this.reactionConfigByObjectType[ObjectTypes.thread].reactions = []
+        //           return false;
+        //         }
+        //         case "comment": {
+        //           this.reactionConfigByObjectType[ObjectTypes.comment].reactions = []
+        //           return false;
+        //         }
+        //     }
+        // }
         return true;
     }
 

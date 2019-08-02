@@ -43,6 +43,7 @@ import { populateReaction } from "../actions/ReactionPopulator"
                 ...data.cooked && {value: data.cooked}
             },
             ...data.actions_summary && data.actions_summary[0].acted && { userReactions: populateReaction(options)},
+            
 
             shareProps: {
                 // title?: string;
@@ -75,7 +76,9 @@ import { populateReaction } from "../actions/ReactionPopulator"
             },
             utcCreateDate: Date.parse(data.created_at),
             ...data.updated_at && {utcLastUpdateDate: Date.parse(data.updated_at)},
-            ...options.session.user && {sessionUserReactionDisabled: (data.creator_username === options.session.user.username )},
+            ...options.session.user && data.username === options.session.user.username && {sessionUserReactionDisabled: true},
+
+            // ...options.session.user && {sessionUserReactionDisabled: (data.creator_username === options.session.user.username )},
             ...!hasUser && {sessionUserReactionDisabled: true},
 
 

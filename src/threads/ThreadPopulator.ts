@@ -21,14 +21,14 @@ import { populateReaction } from "../actions/ReactionPopulator"
         if(options.session.user){
             data.creator_username === options.session.user.username ? canUpdate = true : null;
 
-        if(data.creator_username === options.session.user.username){
-            reactionsConfig =  
-            {
-                concept: Reaction.Concepts.like,
-                reactions: [Reaction.none],
-                canBrowseUserReactions: true
-            }
-        } 
+        // if(data.creator_username === options.session.user.username){
+        //     reactionsConfig =  
+        //     {
+        //         concept: Reaction.Concepts.like,
+        //         reactions: [Reaction.none],
+        //         canBrowseUserReactions: true
+        //     }
+        // } 
     }
     let canUndo;
     let reactionCount = 0;
@@ -94,7 +94,7 @@ import { populateReaction } from "../actions/ReactionPopulator"
         // profileImageUrl: `https://discourse-cdn-sjc1.com/${data.communityName}/user_avatar/${data.partialUrl}/${data.creator_username.toLowerCase()}/240/4_2.png`},
         
         },
-        ...options.session.user && {sessionUserReactionDisabled: (data.creator_username === options.session.user.username )},
+        ...options.session.user && data.username === options.session.user.username && {sessionUserReactionDisabled: true},
         ...!hasUser && {sessionUserReactionDisabled: true},
 
 
