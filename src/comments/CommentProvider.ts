@@ -492,21 +492,45 @@ export class CommentProvider implements ICommentProvider {
     }
 
     async deleteComment(options: PluginRequestOptions, commentQuery: Comment.Query): Promise<Result<void>> {
-        const commentId = commentQuery.id
-        // const thread = await this.getCommentById(options,commentId);
-        // if(thread.createdBy.username === options.session.user.username){
-            let url = `${this.config.rootUrl}/posts/${commentQuery.metadata.reactionId}.json`; // only using first element so don't need pagination
-            await this.pluginContext.axios.delete(url, {
-                responseType: "json",
-                headers: {
-                    [this.config.yackManagedSession ? "Api-Key" : "user-api-key"]: options.session.accessToken.token
-                }
-            }); 
-            return Result.success(null)
-        // }else{
-        //     return null;
-        // }
+        // const commentId = commentQuery.id
+        // // const thread = await this.getCommentById(options,commentId);
+        // // if(thread.createdBy.username === options.session.user.username){
+        //     let url = `${this.config.rootUrl}/posts/${commentQuery.metadata.reactionId}.json`; // only using first element so don't need pagination
+        //     await this.pluginContext.axios.delete(url, {
+        //         responseType: "json",
+        //         headers: {
+        //             [this.config.yackManagedSession ? "Api-Key" : "user-api-key"]: options.session.accessToken.token
+        //         }
+        //     }); 
+        //     return Result.success(null)
+        // // }else{
+        // //     return null;
+        // // }
+        const url = `${this.config.rootUrl}/posts/${commentQuery.metadata.reactionId}.json`;
 
+
+        const formData = {
+            "post[raw]": '[deleted]'
+            }
+            const response = await this.pluginContext.axios.put(url, querystring.stringify(formData), 
+                {
+                    responseType: "json",
+                    headers: {
+                        "content-type": "application/x-www-form-urlencoded",
+                        [this.config.yackManagedSession ? "Api-Key" : "user-api-key"]: options.session.accessToken.token
+                    }
+                }
+            );
+    const data = response.data;
+
+        if("errors" in data){
+            return Result.validationError(data.errors)
+        }else{
+            // data.id = commentQuery.id
+            const newComment = populateComment(data.post, options, this.config.rootUrl);
+            newComment.createdBy = commentQuery.createdBy;
+            return Result.success(null);
+        }
     }
 
     // async saveCommentAction(options: PluginRequestOptions, commentId: string, actionItem: ObjectAction.Item): Promise<void> {}
