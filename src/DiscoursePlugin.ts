@@ -25,6 +25,7 @@ import { ReactionProvider } from "./actions/ReactionProvider";
 
 export class DiscoursePlugin implements IPlugin {
     authType = PluginAuthTypes.OAuth;
+    requiresAuthForBrowsing = true;
     oauthClient: IPluginOAuthClient;
     channelProvider?: IChannelProvider;
     threadProvider?: IThreadProvider;
