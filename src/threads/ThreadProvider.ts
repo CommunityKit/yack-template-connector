@@ -250,6 +250,32 @@ export class ThreadProvider implements IThreadProvider {
         const threadId = threadQuery.id;
         // const thread = await this.getThreadById(options,threadId);
         // if(thread.createdBy.username === options.session.user.username){
+        if(this.config.yackManagedSession){
+            const postId = threadQuery.metadata.postId;
+
+            const formData = {
+                "post[topic_id]": threadId,
+                "post[raw]": '[deleted]'
+            };  
+
+            const url = `${this.config.rootUrl}/posts/${postId}.json`;
+
+            const response = await this.pluginContext.axios.put(url, querystring.stringify(formData), {
+                responseType: "json",
+                headers: {
+                    "content-type": "application/x-www-form-urlencoded", 
+                    [this.config.yackManagedSession ? "Api-Key" : "user-api-key"]: options.session.accessToken.token
+                }                
+            });
+            if(catchErrors(response)){
+                return catchErrors(response);
+            }else{
+                return Result.success(null);
+            }
+
+
+
+        }else if(!this.config.yackManagedSession){
         let url = `${this.config.rootUrl}/t/${threadId}.json`; // only using first element so don't need pagination
         const response = await this.pluginContext.axios.delete(url, {
             responseType: "json",
@@ -261,7 +287,7 @@ export class ThreadProvider implements IThreadProvider {
             return catchErrors(response);
         }else{
             return Result.success(null);
-        }
+        }}
     }
 
     // async saveThreadAction(options: PluginRequestOptions, threadId: string, actionItem: ObjectAction.Item): Promise<void> {}
