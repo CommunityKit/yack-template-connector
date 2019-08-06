@@ -25,6 +25,7 @@ import { ReactionProvider } from "./actions/ReactionProvider";
 
 export class DiscoursePlugin implements IPlugin {
     authType = PluginAuthTypes.OAuth;
+    requiresAuthForBrowsing = true;
     oauthClient: IPluginOAuthClient;
     channelProvider?: IChannelProvider;
     threadProvider?: IThreadProvider;
@@ -43,7 +44,7 @@ export class DiscoursePlugin implements IPlugin {
     id: string;
     name: string;
     iconBase64: any;
-    requiresAuthForBrowsing: boolean;
+    // requiresAuthForBrowsing: boolean;
     // accentColor: string;
 
     constructor(configuration: IDiscourseConfig) {

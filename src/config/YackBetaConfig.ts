@@ -5,7 +5,7 @@ export const YackBetaConfig: IDiscourseConfig = {
     rootUrl: "https://community.yack.io",
     partialUrl: "community.yack.io",
     id: "yack_discourse",
-    name: "Yack Beta",
+    name: "Feedback",
     iconBase64: icon,
     primaryColor: "#1d1e1f",
     secondaryColor: "#434649",

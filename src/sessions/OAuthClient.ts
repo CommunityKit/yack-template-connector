@@ -42,10 +42,14 @@ export class OAuthClient implements IPluginOAuthClient {
 
         const encodedRedirect = encodeURI(this.oauthConfig.redirectUri);
 
-        let url = `${this.config.rootUrl}/user-api-key/new?scopes=read%2Cwrite%2Cmessage_bus%2Cpush%2Cnotifications%2Csession_info&client_id=${client}&nonce=${nonce}&auth_redirect=${this.oauthConfig.redirectUri}&application_name=Discourse&public_key=${DiscoursePluginConfig.yackDiscoursePublicKey}&discourse_app=1`;
+        let url = `${
+            this.config.rootUrl
+        }/user-api-key/new?scopes=read%2Cwrite%2Cmessage_bus%2Cpush%2Cnotifications%2Csession_info&client_id=${client}&nonce=${nonce}&auth_redirect=${
+            this.oauthConfig.redirectUri
+        }&application_name=Discourse&public_key=${DiscoursePluginConfig.yackDiscoursePublicKey}&discourse_app=1`;
 
         // return url;
-        return Result.success(url)
+        return Result.success(url);
     }
 
     async getUserAccessTokenFromCode(redirectCallbackUri: string): Promise<Result<AccessToken>> {
@@ -136,7 +140,7 @@ export class OAuthClient implements IPluginOAuthClient {
     }
 
     private populateAccessToken(data: any): AccessToken {
-        this.pluginContext.logger.d(`populateAccessToken = ${data}`)
+        this.pluginContext.logger.d(`populateAccessToken = ${data}`);
         const token: AccessToken = {
             // Need to replace this
             token: data,
