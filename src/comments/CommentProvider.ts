@@ -315,7 +315,11 @@ export class CommentProvider implements ICommentProvider {
                 return Result.validationError(data.errors)
             }else{
                 // data.id = commentQuery.id
+                
                 const newComment = populateComment(data.post, options, this.config.rootUrl);
+                if(parentCommentQuery !== null){
+                    newComment.parentCommentId = parentCommentQuery.id;
+                }
                 newComment.createdBy = commentQuery.createdBy;
                 return Result.success(newComment);
             }
@@ -346,6 +350,9 @@ export class CommentProvider implements ICommentProvider {
         }else{
             // console.log(`Created Comment id: ${data.id}`);
             const newComment = populateComment(data, options, this.config.rootUrl);
+            if(parentCommentQuery !== null){
+                newComment.parentCommentId = parentCommentQuery.id;
+            }
             // console.log(`newComment Id: ${newComment.id}`);
 
             return Result.success(newComment);
