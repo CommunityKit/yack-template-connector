@@ -35,9 +35,9 @@ import { populateReaction } from "../actions/ReactionPopulator"
     if("actions_summary" in data){
 
     if(data["actions_summary"].length > 0 ){
-        canUndo = "can_undo" in data.actions_summary[0] === false && data.actions_summary[0].acted
+        canUndo = "can_undo" in data.actions_summary[0] === false && "acted" in data.actions_summary[0]
         if("count" in data.actions_summary[0]){
-        reactionCount = parseInt(data["actions_summary"][0].count)
+            reactionCount = parseInt(data["actions_summary"][0].count)
         }
         }
     }
@@ -98,7 +98,7 @@ import { populateReaction } from "../actions/ReactionPopulator"
         ...!hasUser && {sessionUserReactionDisabled: true},
 
         userReactions: [],
-        ...data.actions_summary && data.actions_summary[0].acted && { userReactions: populateReaction(options)},
+        ...data.actions_summary && data.actions_summary[0] && "acted" in data.actions_summary[0] && { userReactions: populateReaction(options)},
 
         // ...data.link_counts && {attachments: await populateAttachments(data.link_counts)},
 

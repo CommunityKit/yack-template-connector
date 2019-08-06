@@ -379,10 +379,10 @@ this.pluginContext.logger.d("Community doesn't have any categories")
                 let allTags: string = ` tags:${item[1]}`;
                 let tagRegex = /[,]/g;
                 selectAll.value !== undefined ? (allTags = allTags.replace(tagRegex, "+")) : null;
-                this.pluginContext.logger.d(`All Tags = ${item[1]}`);
+                // this.pluginContext.logger.d(`All Tags = ${item[1]}`);
                 activeFiltersStr += allTags;
             } else if (item[0] === "#") {
-                this.pluginContext.logger.d(`Item = ${item[1]}`);
+                // this.pluginContext.logger.d(`Item = ${item[1]}`);
                 // let encoded = encodeURI(` #${item[1]}`);
                 let encoded = ` %23${item[1]}`;
 
@@ -391,9 +391,9 @@ this.pluginContext.logger.d("Community doesn't have any categories")
                 // this.pluginContext.logger.d(`activeFiltersStr = ${activeFiltersStr}`);
             } else if (item[0] === "before" || item[0] === "after") {
                 let month, day, year;
-                this.pluginContext.logger.d(item[1]);
+                // this.pluginContext.logger.d(item[1]);
                 const date = new Date(item[1]);
-                this.pluginContext.logger.d(date);
+                // this.pluginContext.logger.d(date);
                 date.getMonth() < 10 ? (month = `0${date.getMonth() + 1}`) : (month = date.getMonth() + 1);
                 date.getDate() < 10 ? (day = `0${date.getDate()}`) : (day = date.getDate());
                 year = date.getFullYear();
@@ -403,7 +403,7 @@ this.pluginContext.logger.d("Community doesn't have any categories")
                 activeFiltersStr += " " + item[0] + ":" + item[1];
             }
         });
-        this.pluginContext.logger.d(`activeFiltersStr = ${activeFiltersStr}`);
+        // this.pluginContext.logger.d(`activeFiltersStr = ${activeFiltersStr}`);
         // url = `${this.config.rootUrl}/search?${encodeURI(serializeQueryStr)}${encodeURI(activeFiltersStr)}`;
         // Fetches More Post Results: /search/query.json?term=bugatti
         return activeFiltersStr;

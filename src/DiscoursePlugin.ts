@@ -43,6 +43,7 @@ export class DiscoursePlugin implements IPlugin {
     id: string;
     name: string;
     iconBase64: any;
+    requiresAuthForBrowsing: boolean;
     // accentColor: string;
 
     constructor(configuration: IDiscourseConfig) {
@@ -53,6 +54,8 @@ export class DiscoursePlugin implements IPlugin {
         // this.accentColor = this.config.accentColor;
         this.primaryColor = this.config.primaryColor;
         this.secondaryColor = this.config.secondaryColor;
+        // this.requiresAuthForBrowsing = this.config.id === "yack_discourse" ? true : false;
+
     }
     // primaryColor = this.config.accentColor;
     // secondaryColor = this.config.accentColor;

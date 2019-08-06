@@ -32,6 +32,7 @@ export function populateUser(data:any, rootUrl: string): PluginUser{
     }
 
     let avatarUrl;
+    // 
     if("avatar_template" in data.userInfo){
         avatarUrl = data.userInfo.avatar_template.includes("https://") ? data.userInfo.avatar_template.replace('{size}','200') : `${rootUrl}${data.userInfo.avatar_template.replace('{size}','200')}`
         console.log(avatarUrl)

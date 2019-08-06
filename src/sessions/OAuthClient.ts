@@ -14,6 +14,7 @@ import { IDiscourseConfig } from "../config/IDiscourseConfig";
 import { YackBetaConfig } from "../config/YackBetaConfig";
 
 export class OAuthClient implements IPluginOAuthClient {
+    loginDisabled = true;
     oauthConfig: OAuthConfig = {
         clientId: "discourPlugin",
         userScopeClientId: "anotherRandomString",
@@ -28,6 +29,8 @@ export class OAuthClient implements IPluginOAuthClient {
         this.pluginContext = context;
         this.config = config;
     }
+
+    // loginDisabled = this.config.id === "yack_discourse" ? true : false;
 
     async getUserOAuthLoginUrl(state: string): Promise<Result<string>> {
         const nonce = uuid.v4();

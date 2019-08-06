@@ -43,7 +43,7 @@ import { populateReaction } from "../actions/ReactionPopulator"
                 ...data.cooked && {value: data.cooked}
             },
             userReactions: [],
-            ...data.actions_summary && data.actions_summary[0].acted && { userReactions: populateReaction(options)},
+            ...data.actions_summary && data.actions_summary[0] && "acted" in data.actions_summary[0] && { userReactions: populateReaction(options)},
             
 
             shareProps: {

@@ -91,10 +91,10 @@ export class CommentProvider implements ICommentProvider {
                 // PUSH to array
                 comment.threadId = threadId;
                 let newComment = populateComment(comment, options, this.config.rootUrl);
-                console.log(`Comment: ${JSON.stringify(comment)}`)
+                // console.log(`Comment: ${JSON.stringify(comment)}`)
 
                 comments.array.push(newComment);
-                console.log(`ALL COMMENTS: ${JSON.stringify(comments)}`)
+                // console.log(`ALL COMMENTS: ${JSON.stringify(comments)}`)
             }
                 
             }
@@ -240,7 +240,7 @@ export class CommentProvider implements ICommentProvider {
         const threadId = threadQuery.id;
         const parentComment = parentCommentQuery;
         const comment = commentQuery;
-        console.log(threadId, parentComment, comment);
+        // console.log(threadId, parentComment, comment);
     
         // Discourse has strikethrough and heading options but they are only accessible through Markdown/Html
         // Not sure if Discourse preformatted text is related to codeblock (dont think it is)
@@ -279,8 +279,8 @@ export class CommentProvider implements ICommentProvider {
         const threadId = threadQuery.id;
         const parentComment = parentCommentQuery;
         const comment = commentQuery;
-        console.log(`commentQuery: ${JSON.stringify(commentQuery)}`)
-        console.log(threadId, parentComment, comment);
+        // console.log(`commentQuery: ${JSON.stringify(commentQuery)}`)
+        // console.log(threadId, parentComment, comment);
         const body = formValue.valueByFieldId["body"];
         let formData
         let url: string;
@@ -338,15 +338,15 @@ export class CommentProvider implements ICommentProvider {
                 [this.config.yackManagedSession ? "Api-Key" : "user-api-key"]: options.session.accessToken.token
             }
        });
-       console.log(`Empty Comment Body: ${body}`)
+    //    console.log(`Empty Comment Body: ${body}`)
         const data = response.data;
 
         if("errors" in data){
             return Result.validationError(data.errors)
         }else{
-            console.log(`Created Comment id: ${data.id}`);
+            // console.log(`Created Comment id: ${data.id}`);
             const newComment = populateComment(data, options, this.config.rootUrl);
-            console.log(`newComment Id: ${newComment.id}`);
+            // console.log(`newComment Id: ${newComment.id}`);
 
             return Result.success(newComment);
         }
@@ -384,9 +384,9 @@ export class CommentProvider implements ICommentProvider {
         file: YackFile,
         requestCancelToken: CancelToken
     ): Promise<Result<UploadFileResult>> {
-        console.log(`called uploadSaveThreadFormFile()`)
-        console.log(`file: ${file.content}`)
-        console.log(`isBuffer: ${Buffer.isBuffer(file.content)}`)
+        // console.log(`called uploadSaveThreadFormFile()`)
+        // console.log(`file: ${file.content}`)
+        // console.log(`isBuffer: ${Buffer.isBuffer(file.content)}`)
         // console.log(`Buffer.from: ${Buffer.isEncoding(file.content)}`)
 
 
@@ -409,7 +409,7 @@ export class CommentProvider implements ICommentProvider {
                 // const transformed = Buffer.from(file.content, file.content.byteOffset, file.content.length).toString('base64')
                 const transformed = Buffer.from(file.content, file.content.byteOffset, file.content.length).toString('base64')
 
-                console.log(`transformed: ${transformed}`)
+                // console.log(`transformed: ${transformed}`)
                 // uploadFormData.append("file", file.content, { filename: file.name, contentType: file.contentType }); 
                 // uploadFormData.append("file", transformed, file.name); 
                 // const transformed = new Blob([file.content])
@@ -471,10 +471,10 @@ export class CommentProvider implements ICommentProvider {
             // {"errors":["param is missing or the value is empty: type"]}
 
             if("failed" in response.data || "errors" in response.data || "error" in response.data){
-                console.log(JSON.stringify(response.data));
+                // console.log(JSON.stringify(response.data));
                 return Result.error("something went wrong")
             }else{
-                console.log(JSON.stringify(response.data));
+                // console.log(JSON.stringify(response.data));
                 const uploadFileResult: UploadFileResult = { fileId: response.data.id.toString(), srcUrl: `https:${response.data.url}` };
                 return Result.success(uploadFileResult)
             }

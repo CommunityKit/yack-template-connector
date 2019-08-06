@@ -27,44 +27,44 @@ export class ReactionProvider implements IReactionProvider {
         // this.reactionConfigByObjectType
     }
 
-    private async setReactionConfig(options: PluginRequestOptions, threadId:string, postId:number, objectType: Reaction.ObjectTypes){
-        // const parsedThreadId = objectId.split(" ")[0]
-        // const postId = objectId.split(" ")[1]
-        const url = `${this.config.rootUrl}/t/${threadId}/posts.json?posts_ids[]=${postId}.json`
+    // private async setReactionConfig(options: PluginRequestOptions, threadId:string, postId:number, objectType: Reaction.ObjectTypes){
+    //     // const parsedThreadId = objectId.split(" ")[0]
+    //     // const postId = objectId.split(" ")[1]
+    //     const url = `${this.config.rootUrl}/t/${threadId}/posts.json?posts_ids[]=${postId}.json`
 
-        const resp = await this.pluginContext.axios.get(url, {
-            responseType: "json",
-            headers: {
-                [this.config.yackManagedSession ? "Api-Key" : "user-api-key"]: options.session.accessToken.token
-            }
-        });
-        const selectPostAction = resp.data.post_stream.posts.filter(elem => elem.id.toString() === postId)[0].actions_summary[0];
-        const acted = selectPostAction.acted;
-        let allowedToUndo, updateConfigObj;
-        if(acted){
-            if("can_undo" in selectPostAction){
-                selectPostAction.can_undo ? allowedToUndo = true : allowedToUndo = false;
-            }else{
-                allowedToUndo = false;
-            }
-        }
+    //     const resp = await this.pluginContext.axios.get(url, {
+    //         responseType: "json",
+    //         headers: {
+    //             [this.config.yackManagedSession ? "Api-Key" : "user-api-key"]: options.session.accessToken.token
+    //         }
+    //     });
+    //     const selectPostAction = resp.data.post_stream.posts.filter(elem => elem.id.toString() === postId)[0].actions_summary[0];
+    //     const acted = selectPostAction.acted;
+    //     let allowedToUndo, updateConfigObj;
+    //     if(acted){
+    //         if("can_undo" in selectPostAction){
+    //             selectPostAction.can_undo ? allowedToUndo = true : allowedToUndo = false;
+    //         }else{
+    //             allowedToUndo = false;
+    //         }
+    //     }
 
         
 
-        // if(allowedToUndo === false){
-        //     switch(objectType){
-        //         case "thread": {
-        //           this.reactionConfigByObjectType[ObjectTypes.thread].reactions = []
-        //           return false;
-        //         }
-        //         case "comment": {
-        //           this.reactionConfigByObjectType[ObjectTypes.comment].reactions = []
-        //           return false;
-        //         }
-        //     }
-        // }
-        return true;
-    }
+    //     // if(allowedToUndo === false){
+    //     //     switch(objectType){
+    //     //         case "thread": {
+    //     //           this.reactionConfigByObjectType[ObjectTypes.thread].reactions = []
+    //     //           return false;
+    //     //         }
+    //     //         case "comment": {
+    //     //           this.reactionConfigByObjectType[ObjectTypes.comment].reactions = []
+    //     //           return false;
+    //     //         }
+    //     //     }
+    //     // }
+    //     return true;
+    // }
 
     // When different types of reactions that the different reaction counts
     async getReactionsSummary(options: PluginRequestOptions, objectType: Reaction.ObjectTypes, objectQuery: Reaction.ObjectQueryTypes): Promise<Result<Reaction.Summary>> {
