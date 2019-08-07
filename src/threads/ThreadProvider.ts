@@ -81,6 +81,10 @@ export class ThreadProvider implements IThreadProvider {
                         options
                     )}.json?page=${currentPage}&no_subcategories=false&per_page=50${this.getSolvedFilters(options)}`;
                     response = await this.setUrlToken(hasUser, url, options.session.user ? options.session.accessToken.token : null);
+                    let threadCount = totalThreads(response.data); // 50 max per page
+
+                    threadCount === 50 ? this.setPageToken(threads, null, false, threadCount) : (threads.nextPageToken = null);
+
                 } else {
                     url = `${this.config.rootUrl}/top${this.getTopChannelFilters(options)}.json?${this.getSolvedFilters(options)}`;
                     response = await this.setUrlToken(hasUser, url, options.session.user ? options.session.accessToken.token : null);
@@ -98,6 +102,8 @@ export class ThreadProvider implements IThreadProvider {
                     currentPage = this.setPageToken(threads, paginationString, true, 30);
                     url = `${this.config.rootUrl}/latest.json?page=${currentPage}&${this.getSolvedFilters(options)}`;
                     response = await this.setUrlToken(hasUser, url, options.session.user ? options.session.accessToken.token : null);
+                    let threadCount = totalThreads(response.data); // 30 per page
+                        threadCount === 30 ? this.setPageToken(threads, null, false, threadCount) : (threads.nextPageToken = null); //
                 } else {
                     url = `${this.config.rootUrl}/latest.json?${this.getSolvedFilters(options)}`;
                     response = await this.setUrlToken(hasUser, url, options.session.user ? options.session.accessToken.token : null);
@@ -115,6 +121,8 @@ export class ThreadProvider implements IThreadProvider {
                     currentPage = this.setPageToken(threads, paginationString, true, 30);
                     url = `${this.config.rootUrl}/unread.json?page=${currentPage}`;
                     response = await this.setUrlToken(hasUser, url, options.session.accessToken.token);
+                    let threadCount = totalThreads(response.data); // 30 per page
+                        threadCount === 30 ? this.setPageToken(threads, null, false, threadCount) : (threads.nextPageToken = null); 
                 } else {
                     url = `${this.config.rootUrl}/unread.json`;
                     response = await this.setUrlToken(hasUser, url, options.session.accessToken.token);
@@ -134,6 +142,8 @@ export class ThreadProvider implements IThreadProvider {
                         options
                     )}exclude_category_ids%5B%5D=1&no_definitions=true&no_subcategories=false&page=${currentPage}${this.getSolvedFilters(options)}`;
                     response = await this.setUrlToken(hasUser, url, options.session.user ? options.session.accessToken.token : null);
+                    let threadCount = totalThreads(response.data); // 30 per page
+                        threadCount >= 30 ? this.setPageToken(threads, null, false, threadCount) : (threads.nextPageToken = null); 
                 } else {
                     url = `${this.config.rootUrl}/c/${channelId}.json?${this.getOrderChannelFilters(options)}${this.getSolvedFilters(options)}`;
                     response = await this.setUrlToken(hasUser, url, options.session.user ? options.session.accessToken.token : null);
