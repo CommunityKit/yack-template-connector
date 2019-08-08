@@ -59,7 +59,7 @@ export class ThreadProvider implements IThreadProvider {
 
         // nextPageToken
         let paginationString = options.nextPageToken;
-        let currentPage: number;
+        let currentPage: any;
         let hasPageToken: boolean = !!paginationString;
 
         // Lookup channelName by Category Id
@@ -76,14 +76,14 @@ export class ThreadProvider implements IThreadProvider {
                 // options.filters = DiscourseFilters.TOP_THREADS_FILTERS;
                 if (hasPageToken) {
                     // 50 per page - can set this in request
-                    currentPage = this.setPageToken(threads, paginationString, true, 50);
+                    // currentPage = this.setPageToken(options.nextPageToken);
                     url = `${this.config.rootUrl}/top${this.getTopChannelFilters(
                         options
-                    )}.json?page=${currentPage}&no_subcategories=false&per_page=50${this.getSolvedFilters(options)}`;
+                    )}.json?page=${options.nextPageToken}&no_subcategories=false&per_page=50${this.getSolvedFilters(options)}`;
                     response = await this.setUrlToken(hasUser, url, options.session.user ? options.session.accessToken.token : null);
                     let threadCount = totalThreads(response.data); // 50 max per page
 
-                    threadCount === 50 ? this.setPageToken(threads, null, false, threadCount) : (threads.nextPageToken = null);
+                    threadCount === 50 ? threads.nextPageToken = this.setPageToken(options.nextPageToken) : null;
 
                 } else {
                     url = `${this.config.rootUrl}/top${this.getTopChannelFilters(options)}.json?${this.getSolvedFilters(options)}`;
@@ -92,18 +92,18 @@ export class ThreadProvider implements IThreadProvider {
                         return catchErrors(response)
                     }else{
                         let threadCount = totalThreads(response.data); // 50 max per page
-                        threadCount === 50 ? this.setPageToken(threads, null, false, threadCount) : (threads.nextPageToken = null);
+                        threadCount === 50 ? threads.nextPageToken = this.setPageToken("0") : null;
                     }
                 }
                 break;
             }
             case "fixed:latest": {
                 if (hasPageToken) {
-                    currentPage = this.setPageToken(threads, paginationString, true, 30);
-                    url = `${this.config.rootUrl}/latest.json?page=${currentPage}&${this.getSolvedFilters(options)}`;
+                    // currentPage = this.setPageToken(threads, paginationString, true, 30);
+                    url = `${this.config.rootUrl}/latest.json?page=${options.nextPageToken}&${this.getSolvedFilters(options)}`;
                     response = await this.setUrlToken(hasUser, url, options.session.user ? options.session.accessToken.token : null);
                     let threadCount = totalThreads(response.data); // 30 per page
-                        threadCount === 30 ? this.setPageToken(threads, null, false, threadCount) : (threads.nextPageToken = null); //
+                    threadCount === 30 ? threads.nextPageToken = this.setPageToken(options.nextPageToken) : null; //
                 } else {
                     url = `${this.config.rootUrl}/latest.json?${this.getSolvedFilters(options)}`;
                     response = await this.setUrlToken(hasUser, url, options.session.user ? options.session.accessToken.token : null);
@@ -111,18 +111,18 @@ export class ThreadProvider implements IThreadProvider {
                         return catchErrors(response);
                     }else{
                         let threadCount = totalThreads(response.data); // 30 per page
-                        threadCount === 30 ? this.setPageToken(threads, null, false, threadCount) : (threads.nextPageToken = null); // No need for pagination if less than 30 pages
+                        threadCount === 30 ? threads.nextPageToken = this.setPageToken("0") : null; // No need for pagination if less than 30 pages
                     }
                 }
                 break;
             }
             case "unread": {
                 if (hasPageToken) {
-                    currentPage = this.setPageToken(threads, paginationString, true, 30);
-                    url = `${this.config.rootUrl}/unread.json?page=${currentPage}`;
+                    // currentPage = this.setPageToken(threads, paginationString, true, 30);
+                    url = `${this.config.rootUrl}/unread.json?page=${options.nextPageToken}`;
                     response = await this.setUrlToken(hasUser, url, options.session.accessToken.token);
                     let threadCount = totalThreads(response.data); // 30 per page
-                        threadCount === 30 ? this.setPageToken(threads, null, false, threadCount) : (threads.nextPageToken = null); 
+                        threadCount === 30 ? threads.nextPageToken = this.setPageToken(options.nextPageToken) : null; 
                 } else {
                     url = `${this.config.rootUrl}/unread.json`;
                     response = await this.setUrlToken(hasUser, url, options.session.accessToken.token);
@@ -130,20 +130,20 @@ export class ThreadProvider implements IThreadProvider {
                         return catchErrors(response)
                     }else{
                         let threadCount = totalThreads(response.data); // 30 per page
-                        threadCount === 30 ? this.setPageToken(threads, null, false, threadCount) : (threads.nextPageToken = null); // No need for pagination if less than 30 pages
+                        threadCount === 30 ? threads.nextPageToken = this.setPageToken("0") : null; // No need for pagination if less than 30 pages
                     }
                 }
                 break;
             }
             default: {
                 if (hasPageToken) {
-                    currentPage = this.setPageToken(threads, paginationString, true, 30);
+                    // currentPage = this.setPageToken(threads, paginationString, true, 30);
                     url = `${this.config.rootUrl}/c/${channelId}.json?${this.getOrderChannelFilters(
                         options
-                    )}exclude_category_ids%5B%5D=1&no_definitions=true&no_subcategories=false&page=${currentPage}${this.getSolvedFilters(options)}`;
+                    )}exclude_category_ids%5B%5D=1&no_definitions=true&no_subcategories=false&page=${options.nextPageToken}${this.getSolvedFilters(options)}`;
                     response = await this.setUrlToken(hasUser, url, options.session.user ? options.session.accessToken.token : null);
                     let threadCount = totalThreads(response.data); // 30 per page
-                        threadCount >= 30 ? this.setPageToken(threads, null, false, threadCount) : (threads.nextPageToken = null); 
+                    threadCount === 30 ? threads.nextPageToken = this.setPageToken(options.nextPageToken) : null; 
                 } else {
                     url = `${this.config.rootUrl}/c/${channelId}.json?${this.getOrderChannelFilters(options)}${this.getSolvedFilters(options)}`;
                     response = await this.setUrlToken(hasUser, url, options.session.user ? options.session.accessToken.token : null);
@@ -151,7 +151,7 @@ export class ThreadProvider implements IThreadProvider {
                         return catchErrors(response);
                     }else{
                         let threadCount = totalThreads(response.data); // 30 per page
-                        threadCount >= 30 ? this.setPageToken(threads, null, false, threadCount) : (threads.nextPageToken = null); // No need for pagination if less than 30 pages
+                        threadCount === 30 ? threads.nextPageToken = this.setPageToken("0") : null; // No need for pagination if less than 30 pages
                         this.pluginContext.logger.d(`Set PageToken = ${threads.nextPageToken}`);
                     }
                 }
@@ -391,7 +391,7 @@ export class ThreadProvider implements IThreadProvider {
         //GET order filter
         const orderByFilter = Filter.findFilter(options.filters, "order_by");
         const orderValue = orderByFilter.value.toString();
-        const partialUrl = `order=${orderValue}`;
+        const partialUrl = `order=${orderValue}&`;
 
         if (orderValue === "views") {
             return `${partialUrl}&ascending=false`;
@@ -439,25 +439,29 @@ export class ThreadProvider implements IThreadProvider {
         return `${(currentPage + 1).toString()} ${totalPages}`;
     }
 
-    private setPageToken(boundThreads: any, paginationString?: string, increment?: boolean, perPage?: number) {
-        let pageCount: number;
-        let oldPage: number;
-        let newPageString: string;
-        let nextPageNumber: number;
-        if (increment) {
-            oldPage = this.parseNextPageToken(paginationString);
-            pageCount = this.parseTotalPages(paginationString);
-            newPageString = this.incrementPageToken(oldPage, pageCount);
-            nextPageNumber = this.parseNextPageToken(newPageString);
-            boundThreads.nextPageToken = newPageString; //set nextPageToken
-            return nextPageNumber;
-        } else {
-            pageCount = Math.ceil(pageCount / perPage);
-            boundThreads.nextPageToken = `1 ${pageCount}`;
-            nextPageNumber = this.parseNextPageToken(boundThreads.nextPageToken);
-            return nextPageNumber;
-        }
+    private setPageToken(prevToken: string){
+        const newToken = parseInt(prevToken) + 1
+        return newToken.toString();
     }
+    // private setPageToken(boundThreads: any, paginationString?: string, increment?: boolean, perPage?: number) {
+    //     let pageCount: number;
+    //     let oldPage: number;
+    //     let newPageString: string;
+    //     let nextPageNumber: number;
+    //     if (increment) {
+    //         oldPage = this.parseNextPageToken(paginationString);
+    //         pageCount = this.parseTotalPages(paginationString);
+    //         newPageString = this.incrementPageToken(oldPage, pageCount);
+    //         nextPageNumber = this.parseNextPageToken(newPageString);
+    //         boundThreads.nextPageToken = newPageString; //set nextPageToken
+    //         return nextPageNumber;
+    //     } else {
+    //         pageCount = Math.ceil(pageCount / perPage);
+    //         boundThreads.nextPageToken = `1 ${pageCount}`;
+    //         nextPageNumber = this.parseNextPageToken(boundThreads.nextPageToken);
+    //         return nextPageNumber;
+    //     }
+    // }
     async getThreadsByUser(options: PluginRequestOptions, userQuery: PluginUser.Query): Promise<Result<PagedArray<Thread>>> {
         const userId = userQuery.id;
         // Pagination???
