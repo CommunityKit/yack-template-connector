@@ -50,12 +50,23 @@ export function populateUser(data: any, rootUrl: string): PluginUser {
     }
 
     let avatarUrl;
-    if ("avatar_template" in data.userInfo) {
-        avatarUrl = data.userInfo.avatar_template.includes("https://")
-            ? data.userInfo.avatar_template.replace("{size}", "200")
-            : `${rootUrl}${data.userInfo.avatar_template.replace("{size}", "200")}`;
-        console.log(avatarUrl);
+    if("userInfo" in data){
+        if ("avatar_template" in data.userInfo) {
+            avatarUrl = data.userInfo.avatar_template.includes("https://")
+                ? data.userInfo.avatar_template.replace("{size}", "200")
+                : `${rootUrl}${data.userInfo.avatar_template.replace("{size}", "200")}`;
+            console.log(avatarUrl);
+        }
+    }else if("current_user" in data){
+        data.userInfo = data.current_user;
+        if ("avatar_template" in data.current_user) {
+            avatarUrl = data.current_user.avatar_template.includes("https://")
+                ? data.current_user.avatar_template.replace("{size}", "200")
+                : `${rootUrl}${data.current_user.avatar_template.replace("{size}", "200")}`;
+            console.log(avatarUrl);
+        }
     }
+
 
     const user: PluginUser = {
         // summary badges userInfo
