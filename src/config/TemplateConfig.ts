@@ -1,7 +1,6 @@
-import { IDiscourseConfig } from "./IDiscourseConfig";
-import icon from "../assets/yack.base64";
+import icon from "../assets/icon.base64";
 
-export const YackBetaConfig: IDiscourseConfig = {
+export const TemplateConfig = {
     rootUrl: "https://community.yack.io",
     partialUrl: "community.yack.io",
     id: "yack_discourse",

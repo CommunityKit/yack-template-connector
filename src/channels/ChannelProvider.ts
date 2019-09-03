@@ -11,80 +11,80 @@ import {
     Result,
     PluginUser
 } from "yack-plugin-framework";
-import { IDiscourseConfig } from "../config/IDiscourseConfig";
-import { ChannelPopulator } from "./ChannelPopulator";
+import { populateChannel } from "./ChannelPopulator";
 import * as filter from "../search/Filters";
+
+/**
+ * SAMPLE DATA
+ * For this example we're mapping users to channels and all of said user's posts are threads
+ * Data Source Example: https://jsonplaceholder.typicode.com/posts?userId=2
+ * --------------------------------------
+ */
 
 export class ChannelProvider implements IChannelProvider {
     private pluginContext: PluginContext;
-    private config: IDiscourseConfig;
 
-    constructor(context: PluginContext, config: IDiscourseConfig) {
+    constructor(context: PluginContext) {
         this.pluginContext = context;
-        this.config = config;
     }
 
-    // setConfig(config: IDiscourseConfig) {}
 
     // TBD
     async getCategories(options: PluginRequestOptions): Promise<Result<PagedArray<Category>>> {
         return Result.success(new PagedArray());
     }
 
-    // DO THIS
+    // Read more about Fixed/Default channels in the Channel interface in the yack-connector-framework docs
     async getFixedChannels(options: PluginRequestOptions): Promise<Result<Channel[]>> {
-        let getChannelMap
-        if(options.session.user){
-            getChannelMap = await this.getChannelsByUser(options, {id: options.session.user.username, username: options.session.user.username})
-        }else{
-            getChannelMap = await this.getChannelsByUser(options, null)
-        }
-       const categoryMap = getChannelMap.result.array[0].metadata.categoryMap;
         let fixedChannels: Channel[];
+
+        
         if (!options.session.user) {
+            // Anonymous user
             fixedChannels = [
                 {
                     id: "fixed:latest",
                     icon: Channel.Icons.home,
                     name: "home",
-                    description: {type: TextContent.Types.plain, value: "The latest topics"},
-                    threadsFilters: this.getLatestChannelSortFilters(options),
-                    metadata: {categoryMap: categoryMap},
+                    description: {type: TextContent.Types.plain, value: "User id 2 as a channel"},
+
+                    // Sometimes a content source only makes thread filter details available at the channel level
+                    threadsFilters: [],
+
+                    // Read more about meatadata: https://communitykit.github.io/yack-developers-docs/about/concepts#metadata
+                    // and passing data via ObjectQueries to other providers: https://communitykit.github.io/yack-developers-docs/about/concepts#objectquery
+                    metadata: {anything: "You can put anything you need in here"},
                     channelProfileDisabled: true,
-                    canSessionUserPostNewThread: true
-                },
-                {
-                    id: "top:popular",
-                    icon: Channel.Icons.popular,
-                    name: "top",
-                    description: {type: TextContent.Types.plain, value: "All top trending topics"},
-                    threadsFilters: this.getTopChannelFilters(options),
-                    metadata: {categoryMap: categoryMap},
-                    channelProfileDisabled: true,
-                    canSessionUserPostNewThread: true
+                    canSessionUserPostNewThread: false
                 }
             ];
         } else if (!!options.session.user) {
+            // Authenticated user
             fixedChannels = [
                 {
-                    id: "fixed:latest",
+                    id: "fixed:2",
                     icon: Channel.Icons.home,
                     name: "home",
-                    description: {type: TextContent.Types.plain, value: "The latest topics"},
-                    threadsFilters: this.getLatestChannelSortFilters(options),
-                    metadata: {categoryMap: categoryMap},
-                    channelProfileDisabled: true
+                    description: {type: TextContent.Types.plain, value: "User id 2 as a channel"},
+
+                    // Sometimes a content source only makes thread filter details available at the channel level
+                    threadsFilters: [],
+
+                    // Read more about meatadata: https://communitykit.github.io/yack-developers-docs/about/concepts#metadata
+                    // and passing data via ObjectQueries to other providers: https://communitykit.github.io/yack-developers-docs/about/concepts#objectquery
+                    metadata: {anything: "You can put anything you need in here"},
+                    channelProfileDisabled: true,
+                    canSessionUserPostNewThread: false
                 },
                 {
-                    id: "top:popular",
+                    id: "top:3",
                     icon: Channel.Icons.popular,
                     name: "top",
-                    description: {type: TextContent.Types.plain, value: "All top trending topics"},
+                    description: {type: TextContent.Types.plain, value: "User 3 as the trending channel"},
                     threadsFilters: this.getTopChannelFilters(options),
-                    metadata: {categoryMap: categoryMap},
+                    metadata: {},
                     channelProfileDisabled: true
                 },
-                // { id: "unread", icon: Channel.Icons.default, name: "unread", description: {type: TextContent.Types.plain, value: "Your unread topics"}, threadsFilters: [] }
             ];
         }
         return Result.success(fixedChannels)
@@ -117,68 +117,27 @@ export class ChannelProvider implements IChannelProvider {
 
     async getChannelsByUser(options: PluginRequestOptions, userQuery: PluginUser.Query): Promise<Result<PagedArray<Channel>>> {
         const channels = new PagedArray<Channel>();
-        if (!!options.session.user) {
-            const userId = userQuery.id;
+        // Getting all users to set them as channels
+        const response = await this.pluginContext.axios.get('https://jsonplaceholder.typicode.com/users')
 
-            let url: string;
-            url = `${this.config.rootUrl}/site.json`;
-    
-            const channelsResponse = await this.pluginContext.axios.get(url, {
-                responseType: "json",
-                    // "user-api-key": options.session.accessToken.token
-                    // "Api-Key": options.session.accessToken.token
-                    // "Api-Key": "ce83dc44d6722de95a183ef3ff8eda23b80f181ed64991d2df788e865de1948d"
-                    headers: {
-                        [this.config.yackManagedSession ? "Api-Key" : "user-api-key"]: options.session.accessToken.token
-                    }
-            });
-            const categoryList = channelsResponse.data.categories;
-            // create object on all channels' metadata to map category ids to names
-            const categoryMap = {}
-            for(const cate of categoryList){
-                categoryMap[cate.id] = cate.name
-            }
-
-            let categoryId;
-            for (const channelItem of categoryList) {
-                // parent_category_id
-                
-                if("parent_category_id" in channelItem){
-                    const parentSlug = categoryList.filter(elem => elem.id === channelItem.parent_category_id)[0]
-                    channelItem.slug = `${parentSlug.slug}/${channelItem.slug}`
-                }
-
-                // HIDE channels if they don't have any topics
-                // if(channelItem.topic_count > 0){
-                const channel = ChannelPopulator.populateChannel(channelItem, options.session.user);
-                channel.metadata = {categoryId: channelItem.id, categoryMap: categoryMap};
-                channels.array.push(channel)
-                // channel.name != "Uncategorized" ? channels.array.push(channel) : null;
-                // }
-            }
-
-        }else{
-            const url = `${this.config.rootUrl}/categories.json`;
-        const response = await this.pluginContext.axios.get(url);
-
-        const categoriesList = response.data.category_list.categories;
-
-        // create object on all channels' metadata to map category ids to names
-        const categoryMap = {}
-        for(const cate of categoriesList){
-            categoryMap[cate.id] = cate.name
+        let userChannels;
+        
+        if (!options.session.user) {
+            // Anonymous user
+            
+            // Limiting channels b/c mock anonymous user
+            userChannels = response.data.slice(0,3);
+        } else if (!!options.session.user) {
+            // Authenticated user
+            userChannels = response.data;
         }
 
-        for (const channelItem of categoriesList) {
-            const channel = ChannelPopulator.populateChannel(channelItem, options.session.user);
-            channel.canSessionUserPostNewThread = true;
-            channel.metadata = {categoryId: channelItem.id, categoryMap: categoryMap}
-            channels.array.push(channel);
+        for(const channelData of userChannels){
+            const populated = populateChannel(channelData);
+            channels.array.push(populated);
         }
 
-        }
         return Result.success(channels)
-        // return channels;
     }
 
     async getChannel(options: PluginRequestOptions, channelQuery: Channel.Query): Promise<Result<Channel>> {
@@ -190,7 +149,8 @@ export class ChannelProvider implements IChannelProvider {
         if(channelQuery.id.includes("channel_by_thread_id_")){
             const threadId = channelQuery.id.replace("channel_by_thread_id_", "");
             const hasUser = !!options.session.user;
-            let url = `${this.config.rootUrl}/t/${threadId}.json`;
+            let url ;
+            // = `${this.config.rootUrl}/t/${threadId}.json`;
             let response
             if (hasUser) {
                 response = await this.pluginContext.axios.get(url, {
@@ -198,9 +158,9 @@ export class ChannelProvider implements IChannelProvider {
                     // headers: {
                     //     "user-api-key": options.session.accessToken.token
                     // }
-                    headers: {
-                        [this.config.yackManagedSession ? "Api-Key" : "user-api-key"]: options.session.accessToken.token
-                    }
+                    // headers: {
+                    //     [this.config.yackManagedSession ? "Api-Key" : "user-api-key"]: options.session.accessToken.token
+                    // }
                 });
             } else {
                 response = await this.pluginContext.axios.get(url);
@@ -210,8 +170,8 @@ export class ChannelProvider implements IChannelProvider {
             channelId = typeof parseInt(channelQuery.id) === "number" ? parseInt(channelQuery.id) : channelQuery.id;
         }
 
-
-        const url = `${this.config.rootUrl}/site.json`;
+        let url;
+        // const url = `${this.config.rootUrl}/site.json`;
         let resp, channel, channelSlug, parentChannelSlug;
 
         if(typeof channelId !== "number"){
@@ -226,9 +186,9 @@ export class ChannelProvider implements IChannelProvider {
         if(options.session.user){
             resp = await this.pluginContext.axios.get(url, {
                 responseType: "json",
-                headers: {
-                    [this.config.yackManagedSession ? "Api-Key" : "user-api-key"]: options.session.accessToken.token
-                }
+                // headers: {
+                //     [this.config.yackManagedSession ? "Api-Key" : "user-api-key"]: options.session.accessToken.token
+                // }
             });
         }else{
             resp = await this.pluginContext.axios.get(url)
@@ -239,11 +199,11 @@ export class ChannelProvider implements IChannelProvider {
         if(typeof channelId !== "number"){
             if(parentChannelSlug){
                 const channelItem = categoryList.filter(elem => elem.slug === channelId)[0]
-                channel = ChannelPopulator.populateChannel(channelItem, options.session.user);
+                channel = populateChannel(channelItem);
                 channel.id = channelId;
             }else{
                 const channelItem = categoryList.filter(elem => elem.slug === channelId)[0]
-                channel = ChannelPopulator.populateChannel(channelItem, options.session.user);
+                channel = populateChannel(channelItem);
                 channel.id = channelId
                 channel.metadata = {...channel.metadata, categoryId: channelItem.id}
 
@@ -256,7 +216,7 @@ export class ChannelProvider implements IChannelProvider {
                 const parentSlug = categoryList.filter(elem => elem.id === channelItem.parent_category_id)[0]
                 channelItem.slug = `${parentSlug.slug}/${channelItem.slug}`
             }
-            channel = ChannelPopulator.populateChannel(channelItem, options.session.user);
+            channel = populateChannel(channelItem);
             channel.metadata = {categoryId: channelItem.id}
             // channel.id = channelId
 
