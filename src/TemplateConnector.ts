@@ -11,13 +11,12 @@ import {
 } from "yack-plugin-framework";
 import { OAuthClient } from "./authentication/OAuthClient";
 import { ChannelProvider } from "./channels/ChannelProvider";
-import { ThreadProvider } from "./threads/ThreadProvider";
-import { CommentProvider } from "./comments/CommentProvider";
+// import { ThreadProvider } from "./threads/ThreadProvider";
+// import { CommentProvider } from "./comments/CommentProvider";
 import { UserProvider } from "./users/UserProvider";
-import { IDiscourseConfig } from "./config/IDiscourseConfig";
 // import { SearchProvider } from "./search/SearchProvider";
-import { ReactionProvider } from "./actions/ReactionProvider";
-import icon from "./assets/icon.base64";
+// import { ReactionProvider } from "./actions/ReactionProvider";
+import icon from "./config/icon.base64";
 
 
 export class TemplateConnector implements IPlugin {

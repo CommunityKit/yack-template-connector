@@ -1,5 +1,5 @@
 {
-    "name": "yack-discourse-plugin",
+    "name": "yack-template-connector",
     "version": "1.0.0",
     "description": "",
     "main": "index.js",
@@ -10,14 +10,14 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/maxgedikli/yack-discourse-plugin.git"
+        "url": "git+https://github.com/CommunityKit/yack-template-connector.git"
     },
     "author": "",
     "license": "ISC",
     "bugs": {
-        "url": "https://github.com/maxgedikli/yack-discourse-plugin/issues"
+        "url": "https://github.com/CommunityKit/yack-template-connector/issues"
     },
-    "homepage": "https://github.com/maxgedikli/yack-discourse-plugin#readme",
+    "homepage": "https://github.com/CommunityKit/yack-template-connector#readme",
     "dependencies": {
         "form-data": "^2.5.0",
         "node-forge": "^0.8.2",

@@ -1,8 +1,5 @@
 import { IPlugin, OAuthConfig } from "yack-plugin-framework";
 import { TemplateConnector } from "./TemplateConnector";
-import { TemplateConfig } from "./config/TemplateConfig";
-import { CartalkConfig } from "./config/CartalkConfig";
-import { EnvatoConfig } from "./config/EnvatoConfig";
 
 
 let templateConnector = new TemplateConnector();

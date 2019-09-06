@@ -137,7 +137,7 @@ export class ChannelProvider implements IChannelProvider {
             channels.array.push(populated);
         }
 
-        return Result.success(channels)
+        return Result.success(null)
     }
 
     async getChannel(options: PluginRequestOptions, channelQuery: Channel.Query): Promise<Result<Channel>> {

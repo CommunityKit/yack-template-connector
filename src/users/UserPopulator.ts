@@ -1,5 +1,5 @@
 import { PluginUser } from "yack-plugin-framework";
-import { setDateFormat as format, kFormatter } from "../utils/PluginUtils";
+import { setDateFormat as format, kFormatter } from "../utils/ConnectorUtils";
 import { userInfo } from "os";
 import { stat } from "fs";
 

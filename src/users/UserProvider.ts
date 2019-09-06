@@ -1,7 +1,5 @@
 import { PluginRequestOptions, PluginUser, objectUtils, PluginContext, Result } from "yack-plugin-framework";
 import * as URLAssembler from "url-assembler";
-// import DiscoursePluginConfig from "../PluginConfig";
-import { IDiscourseConfig } from "../config/IDiscourseConfig";
 import { populateUser } from "./UserPopulator"
 import { getUserStats, getUserData } from "./UserRequests";
 

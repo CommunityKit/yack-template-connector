@@ -7,7 +7,7 @@ import {
 // import * as Remarkable from "remarkable";
 import * as htmlEncoderDecoder from "html-encoder-decoder";
 import {populateAttachments} from "../threads/AttachmentPopulator"
-import { populateReaction } from "../actions/ReactionPopulator"
+// import { populateReaction } from "../actions/ReactionPopulator"
 
     export async function populateThread(data: any, options: PluginRequestOptions, rootUrl: string): Promise<Thread> {
         let reactionsConfig
@@ -91,14 +91,13 @@ import { populateReaction } from "../actions/ReactionPopulator"
             // http://community.yack.io/user_avatar/community.yack.io/katrpilar/200/4_2.png
             ...data.avatar_template && {profileImageUrl: avatarUrl},
         // ...data.custom_avatar_upload_id && {
-        // profileImageUrl: `https://discourse-cdn-sjc1.com/${data.communityName}/user_avatar/${data.partialUrl}/${data.creator_username.toLowerCase()}/240/4_2.png`},
         
         },
         ...options.session.user && data.username === options.session.user.username && {sessionUserReactionDisabled: true},
         ...!hasUser && {sessionUserReactionDisabled: true},
 
         userReactions: [],
-        ...data.actions_summary && data.actions_summary[0] && "acted" in data.actions_summary[0] && { userReactions: populateReaction(options)},
+        // ...data.actions_summary && data.actions_summary[0] && "acted" in data.actions_summary[0] && { userReactions: populateReaction(options)},
 
         // ...data.link_counts && {attachments: await populateAttachments(data.link_counts)},
 

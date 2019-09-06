@@ -13,19 +13,16 @@
 // import { populateThread } from "../threads/ThreadPopulator";
 // import { populateComment } from "../comments/CommentPopulator";
 // import { populateUser } from "../sessions/UserPopulator";
-// import { IDiscourseConfig } from "../config/IDiscourseConfig";
 // import * as filter from "./Filters";
 
 // export class SearchProvider implements ISearchProvider {
 //     private pluginContext: PluginContext;
-//     private config: IDiscourseConfig;
 //     private allThreadIds: Array<any>;
 //     private allCommentIds: Array<any>;
 //     private allUserIds: Array<any>;
     
-//     constructor(context: PluginContext, config: IDiscourseConfig) {
+//     constructor(context: PluginContext) {
 //         this.pluginContext = context;
-//         this.config = config;
 //         this.allCommentIds = [];
 //         this.allThreadIds = [];
 //         this.allUserIds = []
@@ -184,7 +181,7 @@
 //                     : (url = `${this.config.rootUrl}/search.json?${serializeQueryStr}${nextPageNumber}`);
 //                 response = await this.setUrlToken(hasUser, url, options.session.user ? options.session.accessToken.token : null);
 //                 const threadsData = response.topics;
-//                 // const thread = DiscourseThreadPopulator.populateThread(data);
+//                 // const thread = ThreadPopulator.populateThread(data);
 //                 // searchItem.item = thread;
 //                 // searchItem.itemType = SearchResultItemType.Thread;
 //                 if(threadsData){
@@ -251,7 +248,7 @@
 //             //             channel.threadId = channel.topic_id;
 //             //             channel.score = channel.like_count;
 
-//             //             const channelPopulated = DiscourseChannelPopulator.populateChannel(channel, options.session.user);
+//             //             const channelPopulated = ChannelPopulator.populateChannel(channel, options.session.user);
 //             //             channel.item = channelPopulated;
 //             //             channel.itemType = SearchResultItemType.Channel;
 //             //             const searchResultItem = this.populateSearchResultItem(channel);
@@ -278,7 +275,6 @@
 //                         user.threadId = user.topic_id;
 //                         user.score = user.like_count;
 //                         user.partialUrl = this.config.partialUrl
-//                         user.communityName = this.config.id.replace("_discourse","")
 //                         user.userInfo = user;
 //                         const userPopulated = populateUser(user, this.config.rootUrl);
 //                         const pluginUserItem: SearchResultItem.PluginUserItem = { user: userPopulated };

@@ -5,7 +5,7 @@ import {
 } from "yack-plugin-framework";
 import { threadId } from "worker_threads";
 import * as htmlEncoderDecoder from "html-encoder-decoder";
-import { populateReaction } from "../actions/ReactionPopulator"
+// import { populateReaction } from "../actions/ReactionPopulator"
 
 
     export function populateComment(data: any, options: any, rootUrl:string): Comment {
@@ -43,7 +43,7 @@ import { populateReaction } from "../actions/ReactionPopulator"
                 ...data.cooked && {value: data.cooked}
             },
             userReactions: [],
-            ...data.actions_summary && data.actions_summary[0] && "acted" in data.actions_summary[0] && { userReactions: populateReaction(options)},
+            // ...data.actions_summary && data.actions_summary[0] && "acted" in data.actions_summary[0] && { userReactions: populateReaction(options)},
             
 
             shareProps: {
