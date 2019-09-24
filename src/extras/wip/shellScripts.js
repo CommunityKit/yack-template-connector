@@ -1,3 +1,25 @@
+// Proposals to add to Shell.js scripts to automatically clear app cache from terminal build commands
+
+/**
+ * Related Files
+ * https://github.com/CommunityKit/yack-connector-builder/blob/master/webpack.config.js
+ * https://github.com/CommunityKit/yack-connector-builder/blob/5776c29881a2dd0be46bb0813ab14df053f067a0/src/index.ts
+ * 
+ * Libraries
+ * https://github.com/shelljs/shelljs
+ * 
+ * Docs
+ * https://www.npmjs.com/package/shelljs
+ * https://documentup.com/shelljs/shelljs#testexpression
+ * https://devhints.io/shelljs
+ * 
+ * Runkit
+ * https://npm.runkit.com/shelljs
+ * 
+ * Example Setting Shell Issue: https://github.com/shelljs/shelljs/issues/767
+ */
+
+
 
 // Windows: C:\Users\<user>\AppData\Roaming\<yourAppName>\Cache
 // Linux: /home/<user>/.config/<yourAppName>/Cache
