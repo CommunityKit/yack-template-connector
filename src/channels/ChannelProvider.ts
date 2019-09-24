@@ -128,7 +128,7 @@ export class ChannelProvider implements IChannelProvider {
             
             // Limiting channels b/c mock anonymous user
 
-            // userChannels = response.data.slice(0,3);
+            // userChannels = response.data.slice(0,5);
             userChannels = response.data;
 
         } else if (!!options.session.user) {

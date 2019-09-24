@@ -1,6 +1,12 @@
 ### Mock Api
 [Postman Collection](https://www.getpostman.com/collections/68efb62c754637b30978)
 
+#### Todo
+- [ ] Add getThreadById endpoint to mock server
+- [ ] Ensure faked object ids don't have duplicates
+- [ ] Set smaller thumbnail image urls for thread attachments
+- [ ] Debug duplicating (buggy) images
+
 ### Postman
 
 [Postman Echo Docs](https://docs.postman-echo.com/?version=latest#37368024-f6a8-0f70-85fc-7e876cde9e33)

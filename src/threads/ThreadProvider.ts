@@ -137,54 +137,12 @@ export class ThreadProvider implements IThreadProvider {
     }
 
     async getThread(options: PluginRequestOptions, threadQuery: Thread.Query): Promise<Result<Thread>> {
-        // const tId = threadId.split(" ")[0]
-        // const postId = threadId.split(" ")[1]
+
         const threadId = threadQuery.id;
-
-        const hasUser = !!options.session.user;
-        let url = `${ROOT_URL}/t/${threadId}.json`; // only using first element so don't need pagination
-        const response = await this.setUrlToken(hasUser, url, options.session.user ? options.session.accessToken.token : null);
-        // if(catchErrors(response)){
-        //     return catchErrors(response);
-        // }else{
-            const posts = response.data.post_stream.posts;
-            const postId = response.data.post_stream.posts[0].id;
-
-            const firstPostInThread = posts[0];
-            // if(postId === true){
-            //     return firstPostInThread.id;
-            // }
-
-            // firstPostInThread.channelId = channelId;
-            // firstPostInThread.channelName = channelId;
-
-            // Set Topic Creator User Info
-            firstPostInThread.creator_id = firstPostInThread.user_id;
-            firstPostInThread.creator_full_name = firstPostInThread.name;
-            firstPostInThread.creator_username = firstPostInThread.username;
-            // firstPostInThread.cooked = firstPostInThread.cooked
-            firstPostInThread.id = threadId;
-
-            // firstPostInThread.id = `${threadId} ${firstPostInThread.id}`;
-            // console.warn(`TESTING NEW THREAD ID: ${firstPostInThread.id}`)
-            firstPostInThread.title = response.data.fancy_title ? response.data.fancy_title : null;
-            firstPostInThread.totalScore = firstPostInThread.score ? firstPostInThread.score : null;
-            firstPostInThread.views = response.data.views ? response.data.views : null;
-            firstPostInThread.created_at = firstPostInThread.created_at;
-            firstPostInThread.last_posted_at = firstPostInThread.last_posted_at;
-            firstPostInThread.pinned = response.data.pinned ? response.data.pinned : null;
-            firstPostInThread.channelId = response.data.category_id;
-            firstPostInThread.totalComments = posts.length - 1;
-
-            const thread = await populateThread(firstPostInThread);
-
-            thread.metadata = { postId: postId };
-            // thread.channelId = threadQuery.channelId;
-            thread.channelName = threadQuery.channelName;
-            // thread.detailsPrepopulated = true;
-            // return thread;
-            return Result.success(thread);
-        // }
+        let url = `${MOCK_SERVER_URL}/threads/${threadId}.json`; // only using first element so don't need pagination
+        const response = await this.pluginContext.axios.get(url)
+        const thread = await populateThread(response);
+        return Result.success(thread);
     }
 
     async saveThread(options: PluginRequestOptions, channelId: string, thread: Thread): Promise<Thread> {
@@ -264,137 +222,6 @@ export class ThreadProvider implements IThreadProvider {
         // }
     }
 
-    // private async getTopicStream() {
-    //     return null;
-    // }
-
-    // private async createCategoryDictionary(options: PluginRequestOptions) {
-    //     let categoryDictionary: object = {};
-    //     const hasUser = !!options.session.user;
-    //     let url = `${ROOT_URL}/site.json`;
-    //     const allData = await this.setUrlToken(hasUser, url, options.session.user ? options.session.accessToken.token : null);
-    //     // this.pluginContext.logger.d(`createCategoryDictionary Response = ${JSON.stringify(allData.categories)}`);
-    //     const categories = allData.categories;
-    //     categories.forEach(category => (categoryDictionary[category.id.toString()] = category.name));
-    //     // this.pluginContext.logger.d(`Completed Dictionary: ${JSON.stringify(categoryDictionary)}`);
-    //     return categoryDictionary;
-    // }
-
-    // private getLatestChannelFilters(options: PluginRequestOptions): string {
-    //     //Get Order Filter
-    //     const orderByFilter = Filter.findFilter(options.filters, "sort_by_category");
-    //     const sortValue = orderByFilter.value.toString();
-    //     if(sortValue !== "null"){
-    //         let bool: string;
-    //         sortValue === "ascending_true" ? bool = `true` : bool = `false`;
-    //         return `order=category&ascending=${bool}`;
-    //     }else{
-    //         return '';
-    //     }
-    // }
-
-    private getTopChannelFilters(options: PluginRequestOptions): string {
-        const sortByFilter = Filter.findFilter(options.filters, "sort_interval");
-        const sortId = sortByFilter.value.toString();
-        if (sortId === "default") {
-            return "";
-        } else {
-            const partialUrl = `/${sortId}`;
-            // const topThreadsFilters = objectUtils.clone(DiscourseFilters.TOP_THREADS_FILTERS);
-            return partialUrl;
-        }
-    }
-
-    private getSolvedFilters(options: PluginRequestOptions): string {
-        //GET Solved filter
-        const solvedByFilter = Filter.findFilter(options.filters, "solved?");
-        const solvedId = solvedByFilter.value.toString();
-
-        if (solvedId !== "all") {
-            let solvedVal: string;
-            solvedId === "solved_yes" ? (solvedVal = "yes") : (solvedVal = "unsolved");
-            const solvedPartialUrl = `&solved=${solvedVal}`;
-            return solvedPartialUrl;
-        } else {
-            return "";
-        }
-    }
-
-    private getOrderChannelFilters(options: PluginRequestOptions): string {
-        //GET order filter
-        const orderByFilter = Filter.findFilter(options.filters, "order_by");
-        const orderValue = orderByFilter.value.toString();
-        const partialUrl = `order=${orderValue}&`;
-
-        if (orderValue === "views") {
-            return `${partialUrl}&ascending=false`;
-        } else {
-            return partialUrl;
-        }
-    }
-
-    private async setUrlToken(hasUser: boolean, url: string, key?: string) {
-        let response: any;
-        if (key) {
-            response = await this.pluginContext.axios.get(url, {
-                responseType: "json",
-                headers: {
-                    "user-api-key": key
-                }
-            });
-        } else {
-            response = await this.pluginContext.axios.get(url);
-        }
-        return response;
-        // if(response.success){
-        //     return response.data;
-        // }else{
-        //     console.log('FAILED RESPONSE'+response)
-        //     console.log(response)
-        //     console.log(url)
-
-        // }
-    }
-
-    private parseNextPageToken(pageToken: string) {
-        let ary = pageToken.split(" ");
-        let nextPage = parseInt(ary[0]);
-        return nextPage;
-    }
-
-    private parseTotalPages(pageToken: string) {
-        let ary = pageToken.split(" ");
-        let totalPages = parseInt(ary[1]);
-        return totalPages;
-    }
-
-    private incrementPageToken(currentPage: number, totalPages: number) {
-        return `${(currentPage + 1).toString()} ${totalPages}`;
-    }
-
-    private setPageToken(prevToken: string){
-        const newToken = parseInt(prevToken) + 1
-        return newToken.toString();
-    }
-    // private setPageToken(boundThreads: any, paginationString?: string, increment?: boolean, perPage?: number) {
-    //     let pageCount: number;
-    //     let oldPage: number;
-    //     let newPageString: string;
-    //     let nextPageNumber: number;
-    //     if (increment) {
-    //         oldPage = this.parseNextPageToken(paginationString);
-    //         pageCount = this.parseTotalPages(paginationString);
-    //         newPageString = this.incrementPageToken(oldPage, pageCount);
-    //         nextPageNumber = this.parseNextPageToken(newPageString);
-    //         boundThreads.nextPageToken = newPageString; //set nextPageToken
-    //         return nextPageNumber;
-    //     } else {
-    //         pageCount = Math.ceil(pageCount / perPage);
-    //         boundThreads.nextPageToken = `1 ${pageCount}`;
-    //         nextPageNumber = this.parseNextPageToken(boundThreads.nextPageToken);
-    //         return nextPageNumber;
-    //     }
-    // }
     async getThreadsByUser(options: PluginRequestOptions, userQuery: PluginUser.Query): Promise<Result<PagedArray<Thread>>> {
         const userId = userQuery.id;
         // Pagination???
