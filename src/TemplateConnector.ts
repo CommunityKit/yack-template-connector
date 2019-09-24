@@ -11,7 +11,7 @@ import {
 } from "yack-plugin-framework";
 import { OAuthClient } from "./authentication/OAuthClient";
 import { ChannelProvider } from "./channels/ChannelProvider";
-// import { ThreadProvider } from "./threads/ThreadProvider";
+import { ThreadProvider } from "./threads/ThreadProvider";
 // import { CommentProvider } from "./comments/CommentProvider";
 import { UserProvider } from "./users/UserProvider";
 // import { SearchProvider } from "./search/SearchProvider";
@@ -76,6 +76,7 @@ export class TemplateConnector implements IPlugin {
      oauthClient: IPluginOAuthClient;
      userProvider?: IUserProvider;
      channelProvider?: IChannelProvider;
+     threadProvider?: IThreadProvider;
 
      /**
       * NEED TO PASS ADDITIONAL DATA TO CERTAIN PROVIDERS?
@@ -97,7 +98,7 @@ export class TemplateConnector implements IPlugin {
         this.oauthClient = new OAuthClient(context);
         this.userProvider = new UserProvider(context);
         this.channelProvider = new ChannelProvider(context);
-        // this.threadProvider = new ThreadProvider(context, this.channelProvider);
+        this.threadProvider = new ThreadProvider(context, this.channelProvider);
         // this.commentProvider = new CommentProvider(context);
         // this.searchProvider = new SearchProvider(context);
         // this.reactionProvider = new ReactionProvider(context);

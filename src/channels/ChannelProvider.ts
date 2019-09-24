@@ -118,15 +118,19 @@ export class ChannelProvider implements IChannelProvider {
     async getChannelsByUser(options: PluginRequestOptions, userQuery: PluginUser.Query): Promise<Result<PagedArray<Channel>>> {
         const channels = new PagedArray<Channel>();
         // Getting all users to set them as channels
-        const response = await this.pluginContext.axios.get('https://jsonplaceholder.typicode.com/users')
-
+        // const response = await this.pluginContext.axios.get('https://jsonplaceholder.typicode.com/users')
+        // TBD dynamically populate mock server url
+        const response = await this.pluginContext.axios.get(`https://d899d168-2db1-49a0-b15f-d1bae097dc5d.mock.pstmn.io/channels`)
         let userChannels;
         
         if (!options.session.user) {
             // Anonymous user
             
             // Limiting channels b/c mock anonymous user
-            userChannels = response.data.slice(0,3);
+
+            // userChannels = response.data.slice(0,3);
+            userChannels = response.data;
+
         } else if (!!options.session.user) {
             // Authenticated user
             userChannels = response.data;
@@ -137,7 +141,7 @@ export class ChannelProvider implements IChannelProvider {
             channels.array.push(populated);
         }
 
-        return Result.success(null)
+        return Result.success(channels)
     }
 
     async getChannel(options: PluginRequestOptions, channelQuery: Channel.Query): Promise<Result<Channel>> {

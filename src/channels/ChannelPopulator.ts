@@ -9,9 +9,12 @@ import {
     const channel: Channel = {
     id: data.id.toString(),
     icon: Channel.Icons.default,
-    name: data.username,
-    description: data.name,
-     nsfw:false,    
+    iconUrl: data.profile_photo,
+    name: data.name,
+    description: data.description,
+     nsfw: data.nsfw,    
+     subscriptionCount: data.subscriptions,
+     subscriberCount: data.subscribers
     }
     return channel;
 
